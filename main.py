@@ -15,9 +15,9 @@ from filebrowsergui import FileBrowserGUI
 import watcher
 							
 			
-class MainWindow(QtGui.QWidget):
+class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
-		super(MainWindow, self).__init__(parent)
+		super(Main, self).__init__(parent)
 		self.style = style.KissyncStyle()
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
@@ -88,5 +88,5 @@ class MainWindow(QtGui.QWidget):
 if __name__ == "__main__":
 	
 	app = QtGui.QApplication(sys.argv)
-	mainwindow = MainWindow()
+	mainwindow = Main()
 	sys.exit(app.exec_())

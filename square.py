@@ -57,6 +57,9 @@ class ItemObject(QtGui.QWidget):
 		blue = "1BA1E2"
 		self.qcolorblue = QtGui.QColor(int(blue[:2], 16), int(blue[2:4], 16), int(blue[4:], 16), 255)
 		
+		lime = "8CBF26"
+		self.qcolorlime = QtGui.QColor(int(lime[:2], 16), int(lime[2:4], 16), int(lime[4:], 16), 255)
+		
 		#Item Properties
 		self.fileName = fileName
 		self.filePath = filePath
@@ -103,7 +106,7 @@ class ItemObject(QtGui.QWidget):
 		
 		
 		#File Name Label
-		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Bold, False)
+		font = QtGui.QFont("Roboto", 11, QtGui.QFont.Bold, False)
 		self.lbFileName = QtGui.QLabel(self.fileName)
 		self.lbFileName.setFont(font)
 		self.lbFileName.setStyleSheet('QLabel {color: White}')
@@ -154,7 +157,10 @@ class ItemObject(QtGui.QWidget):
 
 		painter.setPen(penblank)
 		
-		painter.setBrush(self.qcolorblue)
+		if(self.isActive):
+			painter.setBrush(self.qcolorlime)
+		else:
+			painter.setBrush(self.qcolorblue)
 		painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())	
 		
 		
