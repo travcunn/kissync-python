@@ -11,7 +11,30 @@ def main():
 		print client_token
 		client_verification = raw_input("What was the verification? :")
 		api.get_access_token(None, client_verification)
-		pprint.pprint(api.get('/path/info', '/'))
+		#pprint.pprint(api.get('/path/info', children = True))
+		
+		#Get JSON for root
+		tree = api.get('/path/info', children = True)
+		if 'children' not in tree:
+			return []
+		# Returns all directories and files in root!
+		pprint.pprint([i['path'].encode("utf-8") for i in tree['children']])
+		'''
+		************ OUTPUT *********************
+		['/Test',
+		 '/Test Folder',
+		 '/logs',
+		 '/newhome',
+		 '/Chapter 1 Response.docx',
+		 '/Ordinary Men.docx',
+		 '/build_linux.sh',
+		 '/configuration.cfg',
+		 '/globe.txt',
+		 '/hello.txt',
+		 '/move-test.py',
+		 '/traytest.py']
+		
+		'''
 	except:
 		print "There was an error connecting with OAuth"
 		raise
