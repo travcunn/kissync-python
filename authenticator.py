@@ -38,7 +38,7 @@ class Authenticator(object):
 		#Successfully logged in
 		if(self.parent.config.get('LocalSettings', 'first-run') == "True"):
 			self.parent.setupwizard.show()
-			self.parent.tray.notification("Welcome to Kissync", "Please complete the setup to start using Kissync")
+			self.parent.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
 		else:
-			print "starting the watcher thread"
+			print "SmartFile: Logged in!"
 			self.parent.filewatcher.start()
