@@ -212,7 +212,7 @@ class Main(QtGui.QWidget):
 		#self.setStyleSheet("#MainWindow {background-color: #222222; }") 
 		self.setGeometry(400, 500, 500, 325)
 
-		self.breadcrumb = BreadCrumb()	
+		self.breadcrumb = BreadCrumb()
 		
 		grid = QtGui.QGridLayout()
 		grid.addWidget(self.breadcrumb)

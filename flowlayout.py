@@ -26,6 +26,7 @@ class FlowLayout(QtGui.QLayout):
         return None
 
     def takeAt(self, index):
+		#Removes a square.
         if index >= 0 and index < len(self.itemList):
             return self.itemList.pop(index)
 
