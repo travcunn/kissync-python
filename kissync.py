@@ -75,7 +75,7 @@ class MainWindow(QtGui.QWidget):
 		palette = QtGui.QPalette()
 		#palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 		
-		topText = QtGui.QLabel('Kissync')
+		topText = QtGui.QLabel('Kissync Enterprise')
 		#http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
 		font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
 		topText.setFont(font)
