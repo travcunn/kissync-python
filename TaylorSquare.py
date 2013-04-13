@@ -1,5 +1,6 @@
 import os, platform, sys, time, urllib2
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+import math
 
 import style
 
@@ -66,6 +67,7 @@ class ItemObject(QtGui.QWidget):
 		
 		#get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
+		self.setMinimumSize(200,90)
 		self.setMaximumSize(200, 90)
 		self.setGeometry(0,0,self.frameSize().width() - 50,self.frameSize().height() - 50)
 		
@@ -107,7 +109,19 @@ class ItemObject(QtGui.QWidget):
 		self.gridlayout.addWidget(self.lbFileName, 2, 2, QtCore.Qt.AlignLeft)
 		
 		#File Size Label
-		self.lbFileSize = QtGui.QLabel(self.fileSize)
+		thissize = self.fileSize
+		if(thissize < 1024):
+			measurement = "bytes"
+		elif(thissize < int(math.pow(1024, 2))):
+			thissize = thissize/1024
+			measurement = "kB"
+		elif(thissize < int(math.pow(1024, 3))):
+			thissize = thissize/int(math.pow(1024, 2))
+			measurement = "mB"
+		else:
+			thissize = thissize/int(math.pow(1024, 3))
+			measurement = "gb"
+		self.lbFileSize = QtGui.QLabel(str(thissize) + " " + measurement)
 		self.lbFileSize.setStyleSheet('QLabel {color: #222222}')
 		self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
 		self.gridlayout.addWidget(self.lbFileSize, 3, 2, QtCore.Qt.AlignLeft)

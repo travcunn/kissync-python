@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 from TaylorSquare import ItemObject
 
-import style, flowlayout
+import style, flowlayout, pprint
 
 
 class FileView(QtGui.QWidget):
@@ -47,4 +47,15 @@ class FileView(QtGui.QWidget):
 
 	def addWidget(self):
 		#self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
-		self.flowLayout.addWidget(ItemObject(self, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True))
+		
+		#Get JSON for root
+		tree = self.parent.smartfile.get('/path/info', children = True)
+		if 'children' not in tree:
+			return []
+		# Returns all directories and files in root!
+		rootD = [i['path'].encode("utf-8") for i in tree['children']]
+		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
+		
+		for i in tree['children']:
+			print i['path']
+			self.flowLayout.addWidget(ItemObject(self, i['path'][1:len(i['path'])], "I am Path", i['size'] , "text/application", i['isdir']))
