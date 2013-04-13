@@ -3,7 +3,7 @@ from smartfile import OAuthClient
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 from bs4 import BeautifulSoup
 
-import breadcrumb, flowlayout, loadingwidget, style, TaylorSquare
+import breadcrumb, flowlayout, loadingwidget, style, square
 from authenticator import Authenticator
 from filedatabase import FileDatabase
 from loginwindow import LoginWindow
