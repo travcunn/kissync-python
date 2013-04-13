@@ -30,7 +30,7 @@ class MainWindow(QtGui.QWidget):
 			self.config.set('Login', 'password', None)
 			self.config.add_section('LocalSettings')
 			self.config.set('LocalSettings', 'first-run', True)
-			self.config.set('LocalSettings', 'network-timeout', 15)
+			self.config.set('LocalSettings', 'network-timeout', 20)
 			self.config.set('LocalSettings', 'notifications', True)
 			self.config.set('LocalSettings', 'sync-offline', False)
 			self.config.set('LocalSettings', 'sync-dir', None)
@@ -50,7 +50,6 @@ class MainWindow(QtGui.QWidget):
 		self.tray.show()
 		#setup window for initial user configuration
 		self.setupwizard = SetupWizard(self)
-		self.setupwizard.show()
 		#file database
 		self.database = FileDatabase(self)
 		#file system watcher
