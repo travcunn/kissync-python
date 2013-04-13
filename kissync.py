@@ -376,78 +376,7 @@ class LoginWindow(QtGui.QWidget):
 		#if the user closes the login window, close the entire app...
 		sys.exit()
 		
-
-class SquareObject(QtGui.QWidget):
-	def __init__(self, parent, color = None):
-		QtGui.QWidget.__init__(self)
-		self.parent = parent
-		
-		self.squareWidth = 180
-		self.squareHeight = 90
-
-
-		self.icon = QtGui.QImage()
-		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/x-office-presentation.svg")
-		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
-		
-		self.closebutton = QtGui.QImage()
-		self.closebutton.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/bwpx-icns/icons/symbol_multiplication.gif")
-		self.closebuttontarget = QtCore.QRectF((self.squareWidth - 18), 0, 18, 18)
-		
-		if(color == None):
-			self.color = parent.style.BLUE
-		else:
-			self.color = color
-		self.color = parent.style.hexToQColor(self.color)
-		self.initUI()
-        
-	def initUI(self):      
-		print "Creating a square..."
-		self.setFixedSize(self.squareWidth, self.squareHeight)
-		self.opacity = 0.0
-		self.timeline = QtCore.QTimeLine()
-		self.timeline.valueChanged.connect(self.animate)
-		self.timeline.setDuration(500)
-		self.timeline.start()
-
-
-	#this is called every time something needs to be repainted
-	def paintEvent(self, e):
-		painter = QtGui.QPainter()
-		painter.begin(self)
-		painter.setOpacity(self.opacity)
-		self.drawSquare(painter)
-		painter.drawImage(self.icontarget, self.icon)
-		painter.drawImage(self.closebuttontarget, self.closebutton)
-		painter.end()
-        
-	def drawSquare(self, painter):
-		#get rid of the pen... gets rid of outline on drawing
-		painter.setPen(QtCore.Qt.NoPen)
-		#windows 8 colors are pretty http://www.creepyed.com/2012/09/windows-8-colors-hex-code/
-		painter.setBrush(self.color)
-		#from docs: drawRect (self, int x, int y, int w, int h)
-		painter.drawRect(0, 0, self.squareWidth, self.squareHeight)
-	
-	def animate(self, value):
-		self.opacity = value * self.parent.style.SQUAREOPACITY
-		self.repaint()
-		
-	def enterEvent(self,event): 
-		print("Enter") 
-		self.opacity = 1.0
-		self.repaint()
-	
-	def leaveEvent(self,event): 
-		print("Leave") 
-		self.opacity = self.parent.style.SQUAREOPACITY
-		self.repaint()
-	
-	def mousePressEvent(self,event): 
-		print("Widget clicked event") 
-		self.repaint()
-	
-	
+			
 class FileView(QtGui.QWidget):
 	def __init__(self, parent):
 		QtGui.QWidget.__init__(self)
