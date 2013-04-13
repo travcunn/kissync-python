@@ -567,7 +567,6 @@ class SetupWizard(QtGui.QWidget):
 		self.centerOnScreen()
 		
 	def saveSettings(self):
-		print self.checkboxOfflineMode.isChecked()
 		if(self.checkboxOfflineMode.isChecked()):
 			self.parent.config.set('LocalSettings', 'sync-offline', True)
 		else:
