@@ -7,7 +7,7 @@ class FileDatabase(object):
 		object.__init__(self)
 		self.parent = parent
 		self.createDatabase()
-		self.indexFiles()
+		#self.indexFiles()
 	
 	#####################################################
 	############ Database Connect/Disconnect ############

@@ -190,7 +190,7 @@ class BreadCrumb(QtGui.QWidget):
 				self.gridlayout.removeWidget(self.breadcrumbItems[i])
 				self.breadcrumbItems[i].close()
 				self.path.pop()
-				print self.path
+				#print self.path
 				elementsToRemove = elementsToRemove + 1
 		for i in range(elementsToRemove):
 			self.breadcrumbItems.pop(indexToStart + 1)
@@ -212,7 +212,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.breadcrumbItems[indexToMakeActive].makeActive()
 		
 	def setPath(self):
-		print self.path
+		#print self.path
 		for item in self.path:
 			self.__add(item)
 
