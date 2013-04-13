@@ -50,7 +50,7 @@ class IconWidget(QtGui.QWidget):
 		painter.end()
 
 class ItemObject(QtGui.QWidget):
-	def __init__(self, parent = None, filePath = None, fileSize = None, fileType = None, isFolder = False):
+	def __init__(self, parent = None, filePath = None, fileName = None, fileSize = None, fileType = None, isFolder = False):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
@@ -62,6 +62,7 @@ class ItemObject(QtGui.QWidget):
 		
 		#Item Properties
 		self.filePath = filePath
+		self.fileName = fileName
 		self.fileSize = fileSize
 		self.fileType = fileType
 		self.isActive = False
@@ -79,12 +80,12 @@ class ItemObject(QtGui.QWidget):
 		self.cols = 2
 		
 		#Get file extension and type
-		if (self.filePath.rfind('.') != -1):
-			dotIndex = self.filePath.rfind('.')
+		if (self.fileName.rfind('.') != -1):
+			dotIndex = self.fileName.rfind('.')
 			print dotIndex
-			filePathLength = len(self.filePath)
-			print filePathLength
-			extension = self.filePath[dotIndex:filePathLength]
+			fileNameLength = len(self.fileName)
+			print fileNameLength
+			extension = self.fileName[dotIndex:fileNameLength]
 		else:
 			extension = None
 			
@@ -106,9 +107,9 @@ class ItemObject(QtGui.QWidget):
 		
 		#File Name Label
 		font = QtGui.QFont("Roboto", 11, QtGui.QFont.Bold, False)
-		tempSlashIndex = self.filePath.rfind('/')
-		tempFileName = self.filePath[tempSlashIndex + 1:len(self.filePath)]
-		self.lbFileName = QtGui.QLabel(tempFileName)
+		#tempSlashIndex = self.filePath.rfind('/')
+		#tempFileName = self.filePath[tempSlashIndex + 1:len(self.filePath)]
+		self.lbFileName = QtGui.QLabel(self.fileName)
 		self.lbFileName.setFont(font)
 		self.lbFileName.setStyleSheet('QLabel {color: White}')
 		self.lbFileName.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
@@ -127,6 +128,7 @@ class ItemObject(QtGui.QWidget):
 		else:
 			thissize = thissize/int(math.pow(1024, 3))
 			measurement = "gb"
+			
 		self.lbFileSize = QtGui.QLabel(str(thissize) + " " + measurement)
 		self.lbFileSize.setStyleSheet('QLabel {color: #222222}')
 		self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
@@ -177,13 +179,33 @@ class ItemObject(QtGui.QWidget):
 		else:
 			self.isActive = False
 			self.opacity = 0.66
+		
+		if(self.isFolder):
+			#Item clicked on is a folder.
 			
+			#Show sidebar info for folder.
+			
+			pass
+		else:
+			#item clicked on is a file.
+			
+			#Show sidebar info for a file.
+	
+			pass
 		self.repaint()
 	def mouseDoubleClickEvent(self, event):
 		#Go Deeper into directory, or download and open if file.
-		print self.filePath
-		
-		self.parent.parent.changePath(self.filePath)
+		#print self.filePath
+		if(self.isFolder):
+			print "You double clicked a folder"
+			#Item double clicked upon is a Folder. 
+			#Change the breadcrumb path.
+			self.parent.parent.changePath(self.filePath) 
+			#Change Sidebar to show directory properties.
+		else:
+			#Item double clicked upon.
+			print "You double clicked a file."
+			pass
 	
 	def enterEvent(self,event): 
 		print("Enter") 

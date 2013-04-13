@@ -213,10 +213,14 @@ class BreadCrumb(QtGui.QWidget):
 		self.breadcrumbItems[indexToMakeActive].makeActive()
 		
 	def setPath(self, p):
+		#self.__removeAfter("Home")
+		
 		#print self.path
 		self.path = str(p)
 		self.pathArray = self.path.split("/")
+		self.pathArray[0] = "Home"
 		for item in self.pathArray:
+			#if not(item == "Home"):
 			self.__add(item)
 
 class Main(QtGui.QWidget):
