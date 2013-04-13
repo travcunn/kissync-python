@@ -44,8 +44,11 @@ class FileView(QtGui.QWidget):
 		
 		self.setLayout(self.mainLayout)
 		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		
+		self.squareArray = []
 
 	def addWidget(self):
+		
 		#self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
 		
 		#Get JSON for root
@@ -57,5 +60,40 @@ class FileView(QtGui.QWidget):
 		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
 		
 		for i in tree['children']:
-			print i['path']
-			self.flowLayout.addWidget(ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir']))
+			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'])
+			self.squareArray.append(item)
+			self.flowLayout.addWidget(item)
+			
+	def setPath(self, path):
+		#clear current files...
+		self.clearAll()
+		print "Cleared all breadcrumbs"
+		############set new path
+		
+		#Get JSON for root
+		tree = self.parent.parent.smartfile.get('/path/info' + path, children = True)
+		if 'children' not in tree:
+			return []
+		# Returns all directories and files in directory!
+		for i in tree['children']:
+			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'])
+			self.squareArray.append(item)
+			self.flowLayout.addWidget(item)
+		
+		
+	def clearAll(self):
+		
+		#print self.squareArray
+		#print len(self.squareArray)
+		for item in self.squareArray:
+			#print item
+			self.flowLayout.removeWidget(item)
+			item.close()
+		for i in range(len(self.squareArray)):
+			#print "Deleting: " + str(i)
+			self.squareArray.pop()
+		#print self.squareArray
+		#print len(self.squareArray)
+			
+		
+		
