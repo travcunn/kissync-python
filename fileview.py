@@ -58,4 +58,4 @@ class FileView(QtGui.QWidget):
 		
 		for i in tree['children']:
 			print i['path']
-			self.flowLayout.addWidget(ItemObject(self, i['path'][1:len(i['path'])], "I am Path", i['size'] , "text/application", i['isdir']))
+			self.flowLayout.addWidget(ItemObject(self, i['path'][0:len(i['path'])], i['size'] , "text/application", i['isdir']))

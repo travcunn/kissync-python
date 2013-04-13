@@ -123,6 +123,7 @@ class BreadCrumb(QtGui.QWidget):
 	def __init__(self, parent = None, path = None):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
+		self.path = path
 
 		self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
@@ -168,8 +169,8 @@ class BreadCrumb(QtGui.QWidget):
 		self.__add("Bubble Sort")
 		'''
 		#path = "root/something/anotherone/asdfa/asdfasdfasdfasdf/asdhirjfaldsgaalsdgjaskdjlkjlfajkf"
-		self.path = path.split("/")
-		self.setPath()
+		
+		self.setPath(self.path)
 		
 	def __add(self, name):
 		if(len(self.breadcrumbItems) == 0):
@@ -189,7 +190,7 @@ class BreadCrumb(QtGui.QWidget):
 			if(i > indexToStart):
 				self.gridlayout.removeWidget(self.breadcrumbItems[i])
 				self.breadcrumbItems[i].close()
-				self.path.pop()
+				self.pathArray.pop()
 				#print self.path
 				elementsToRemove = elementsToRemove + 1
 		for i in range(elementsToRemove):
@@ -211,9 +212,11 @@ class BreadCrumb(QtGui.QWidget):
 		self.clearActive()
 		self.breadcrumbItems[indexToMakeActive].makeActive()
 		
-	def setPath(self):
+	def setPath(self, p):
 		#print self.path
-		for item in self.path:
+		self.path = str(p)
+		self.pathArray = self.path.split("/")
+		for item in self.pathArray:
 			self.__add(item)
 
 class Main(QtGui.QWidget):
