@@ -120,7 +120,7 @@ class Crumb(QtGui.QWidget):
 	
 	
 class BreadCrumb(QtGui.QWidget):
-	def __init__(self, parent = None):
+	def __init__(self, parent = None, path = None):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 
@@ -167,7 +167,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.__add("CS 240")
 		self.__add("Bubble Sort")
 		'''
-		path = "root/something/anotherone/asdfa/asdfasdfasdfasdf/asdhirjfaldsgaalsdgjaskdjlkjlfajkf"
+		#path = "root/something/anotherone/asdfa/asdfasdfasdfasdf/asdhirjfaldsgaalsdgjaskdjlkjlfajkf"
 		self.path = path.split("/")
 		self.setPath()
 		
