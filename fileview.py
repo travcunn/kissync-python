@@ -1,6 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
-from TaylorSquare import ItemObject
+from square import ItemObject
 
 import style, flowlayout, pprint
 
