@@ -19,7 +19,6 @@ class Authenticator(object):
 		except:
 			self.networkerror()
 		else:
-			print "getting token"
 			self.parent.smartfile.get_request_token()
 			self.htmlView.load(QtCore.QUrl(self.parent.smartfile.get_authorization_url()))
 	
@@ -42,5 +41,5 @@ class Authenticator(object):
 			self.parent.setupwizard.show()
 			self.parent.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
 		else:
-			print "SmartFile: Logged in!"
+			self.parent.show()
 			#self.parent.filewatcher.start()
