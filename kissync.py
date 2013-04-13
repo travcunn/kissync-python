@@ -539,17 +539,18 @@ class SetupWizard(QtGui.QWidget):
 		formgrid = QtGui.QFormLayout()
 		formwidget.setLayout(formgrid)
 		
-		checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
-		checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
+		self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
+		self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
-		checkboxOfflineMode.setFont(font)
-		checkboxNotifications.setFont(font)
+		self.checkboxOfflineMode.setFont(font)
+		self.checkboxNotifications.setFont(font)
+		self.checkboxNotifications.toggle()
 		
 		finishButton = QtGui.QPushButton('Finish Setup')
 		finishButton.clicked.connect(self.saveSettings)
 		
-		formgrid.addRow(checkboxOfflineMode)
-		formgrid.addRow(checkboxNotifications)
+		formgrid.addRow(self.checkboxOfflineMode)
+		formgrid.addRow(self.checkboxNotifications)
 		formgrid.addRow(spacer)
 		formgrid.addRow(finishButton)
 		
@@ -566,7 +567,22 @@ class SetupWizard(QtGui.QWidget):
 		self.centerOnScreen()
 		
 	def saveSettings(self):
-		pass
+		print self.checkboxOfflineMode.isChecked()
+		if(self.checkboxOfflineMode.isChecked()):
+			self.parent.config.set('LocalSettings', 'sync-offline', True)
+		else:
+			self.parent.config.set('LocalSettings', 'sync-offline', False)
+		if(self.checkboxNotifications.isChecked()):
+			self.parent.config.set('LocalSettings', 'notifications', True)
+		else:
+			self.parent.config.set('LocalSettings', 'notifications', False)
+		
+		self.parent.config.set('LocalSettings', 'first-run', False)
+		
+		with open('configuration.cfg', 'wb') as configfile:
+				self.parent.config.write(configfile)
+		self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
+		self.hide()
 		
 	def centerOnScreen (self):
 		resolution = QtGui.QDesktopWidget().screenGeometry()
@@ -639,6 +655,7 @@ class MainWindow(QtGui.QWidget):
 			self.config.set('LocalSettings', 'first-run', True)
 			self.config.set('LocalSettings', 'network-timeout', 15)
 			self.config.set('LocalSettings', 'notifications', True)
+			self.config.set('LocalSettings', 'sync-offline', False)
 			self.config.set('LocalSettings', 'sync-dir', None)
 			with open('configuration.cfg', 'wb') as configfile:
 				self.config.write(configfile)

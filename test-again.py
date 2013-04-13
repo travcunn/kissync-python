@@ -4,7 +4,7 @@ from smartfile import OAuthClient
 
 def main():
 	print "Testing the Smartfile API..."
-	api = OAuthClient("EB3fi5lGguM5ktBQetjSLz8cE5LEIQ", "qrf1V2HkoBxUWeARwFfNzPRqoeqCdV")
+	api = OAuthClient("zGSJpILRq2889Ne2bPBdEmEZLsRHpe", "KOb97irJG84PJ8dtEkoYt2Kqwz3VJa")
 	try:
 		api.get_request_token()
 		client_token = api.get_authorization_url()
