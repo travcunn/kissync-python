@@ -462,7 +462,7 @@ class FileView(QtGui.QWidget):
 		self.addButton.clicked.connect(self.addWidget)
 		
 		# flow layout, which will be inside the scroll area called scrollArea
-		self.flowLayout = flowlayout.FlowLayout(None, 10)
+		self.flowLayout = flowlayout.FlowLayout(self, 0, 10)
 
 		# make a widget called
 		self.scrollWidget = QtGui.QWidget()
