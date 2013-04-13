@@ -5,14 +5,14 @@ import style
 
 class Crumb(QtGui.QWidget):
     
-	def __init__(self, parent, color = None, name = None, arrow = 1, indexnumber = 0):
+	def __init__(self, parent, color = None, crumbpath = None, arrow = 1):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
-		self.name = name
+		self.crumbpath = crumbpath
+		
 		self.arrow = arrow
 		self.squareWidth = 100
 		self.squareHeight = 38
-		self.indexnumber = indexnumber
 		
 		self.setMaxSize()
 	
@@ -24,7 +24,7 @@ class Crumb(QtGui.QWidget):
 		fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
 		os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
 		
-		self.text = name
+		self.text = crumbpath
 		self.font = QtGui.QFont("Roboto", 12, QtGui.QFont.Bold, False)
 		
 		self.isfirst = False
@@ -43,20 +43,20 @@ class Crumb(QtGui.QWidget):
 		
 	def textCondense(self):    
 		self.displayText = self.text
-		if(len(self.name) > 10):
+		if(len(self.text) > 10):
 			if(self.isactive == False):
-				if(len(self.name) <= 18):
-					ratio = len(self.name) - 10
+				if(len(self.text) <= 18):
+					ratio = len(self.text) - 10
 					self.squareWidth = 100 + ratio * 10
 					self.setMaxSize()
 				else:
-					cut = len(self.name) - 18
-					self.displayText = self.name.replace(self.name[-cut:], '.....')
+					cut = len(self.text) - 18
+					self.displayText = self.text.replace(self.text[-cut:], '.....')
 						
 					self.squareWidth = 100 + 5 * 14
 					self.setMaxSize()
 			else:
-				ratio = len(self.name) - 10
+				ratio = len(self.text) - 10
 				self.squareWidth = 100 + ratio * 14
 				self.setMaxSize()
 				
@@ -116,7 +116,7 @@ class Crumb(QtGui.QWidget):
 		self.repaint()
 		
 	def mousePressEvent(self,event): 
-		self.parent.clicked(self.indexnumber)
+		self.parent.clicked(self)
 	
 	
 class BreadCrumb(QtGui.QWidget):
@@ -158,70 +158,41 @@ class BreadCrumb(QtGui.QWidget):
 		self.setLayout(self.mainLayout)
 		self.mainLayout.setContentsMargins(0, 0, 0, 0)
 		
-		self.breadcrumbItemNames = []
 		self.breadcrumbItems = []
-		self.index = 0
-		'''
-		self.__add("Long Folder Namesdfsdfsdfsdfsdfsdf")
-		self.__add("This One Is Long Too")
-		self.__add("School")
-		self.__add("CS 240")
-		self.__add("Bubble Sort")
-		'''
-		#path = "root/something/anotherone/asdfa/asdfasdfasdfasdf/asdhirjfaldsgaalsdgjaskdjlkjlfajkf"
 		
-		self.setPath(self.path)
+		self.setPath("/home/travis/Dropbox")
 		
-	def __add(self, name):
+	def __add(self, path):
 		if(len(self.breadcrumbItems) == 0):
-			item = Crumb(self, self.style.BLUE, name, 0, self.index)
+			item = Crumb(self, self.style.BLUE, path, 0)
 		else:
-			item = Crumb(self, self.style.BLUE, name, 1, self.index)
-		self.breadcrumbItemNames.append(name)
+			item = Crumb(self, self.style.BLUE, path, 1)
 		self.breadcrumbItems.append(item)
 		self.gridlayout.addWidget(item)
-		self.__makeActive(name)
-		self.index = self.index + 1
-		
-	def __removeAfter(self, name):
-		elementsToRemove = 0
-		indexToStart = self.breadcrumbItemNames.index(name)
-		for i in range(len(self.breadcrumbItemNames)):
-			if(i > indexToStart):
-				self.gridlayout.removeWidget(self.breadcrumbItems[i])
-				self.breadcrumbItems[i].close()
-				self.pathArray.pop()
-				#print self.path
-				elementsToRemove = elementsToRemove + 1
-		for i in range(elementsToRemove):
-			self.breadcrumbItems.pop(indexToStart + 1)
-			self.breadcrumbItemNames.pop(indexToStart + 1)
-			self.index = self.index - 1
-	
-	def clicked(self, index):
-		self.__removeAfter(self.breadcrumbItemNames[index])
-		self.__makeActive(self.breadcrumbItemNames[index])
-		
+		self.makeActive(item)
 	
 	def clearActive(self):
-		for i in range(len(self.breadcrumbItemNames)):
+		for i in range(len(self.breadcrumbItems)):
 			self.breadcrumbItems[i].makeInactive()
 	
-	def __makeActive(self, name):
-		indexToMakeActive = self.breadcrumbItemNames.index(name)
+	def makeActive(self, item):
 		self.clearActive()
-		self.breadcrumbItems[indexToMakeActive].makeActive()
+		self.breadcrumbItems[self.breadcrumbItems.index(item)].makeActive()
 		
-	def setPath(self, p):
-		#self.__removeAfter("Home")
+	def setPath(self, newpath):
+		for i in range(len(self.breadcrumbItems)):
+			self.gridlayout.removeWidget(self.breadcrumbItems[i])
+			self.breadcrumbItems[i].close()
+		self.breadcrumbItems = []
+		print newpath
+		pathArray = newpath.split("/")
 		
-		#print self.path
-		self.path = str(p)
-		self.pathArray = self.path.split("/")
-		self.pathArray[0] = "Home"
-		for item in self.pathArray:
-			#if not(item == "Home"):
-			self.__add(item)
+		for folder in pathArray:
+			if not(folder == ""):
+				self.__add(newpath.split(folder)[0] + folder)
+			
+	def clicked(self, item):
+		self.setPath(item.crumbpath)
 
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
