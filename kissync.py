@@ -534,16 +534,38 @@ class SetupWizard(QtGui.QWidget):
 		spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 		#file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
 		
+		formwidget =  QtGui.QWidget()
+		formgrid = QtGui.QFormLayout()
+		formwidget.setLayout(formgrid)
+		
+		checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
+		checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
+		checkboxOfflineMode.setFont(font)
+		checkboxNotifications.setFont(font)
+		
+		finishButton = QtGui.QPushButton('Finish Setup')
+		finishButton.clicked.connect(self.saveSettings)
+		
+		formgrid.addRow(checkboxOfflineMode)
+		formgrid.addRow(checkboxNotifications)
+		formgrid.addRow(spacer)
+		formgrid.addRow(finishButton)
+		
 		#add the objects to the grid
 		grid.addWidget(spacer, 0, 0)
 		grid.addWidget(spacer, 0, 2)
 		grid.addWidget(topText, 0, 1)
+		grid.addWidget(formwidget, 2, 1)
 		if not (sys.platform == 'win32'):
-			grid.addWidget(loading, 1, 1)
-		grid.addWidget(spacer, 2, 1)
+			grid.addWidget(loading, 4, 1)
+		grid.addWidget(spacer, 5, 1)
 		#set the layout to grid layout
 		self.setLayout(grid)
 		self.centerOnScreen()
+		
+	def saveSettings(self):
+		pass
 		
 	def centerOnScreen (self):
 		resolution = QtGui.QDesktopWidget().screenGeometry()
@@ -632,10 +654,11 @@ class MainWindow(QtGui.QWidget):
 		self.loginwindow = LoginWindow(self)
 		#setup window for initial user configuration
 		self.setupwizard = SetupWizard(self)
+		self.setupwizard.show()
 		#file database
 		self.database = FileDatabase(self)
 		#file system watcher
-		self.filewatcher = watcher.Watcher(self)
+		#self.filewatcher = watcher.Watcher(self)
 		
 		
 		
