@@ -160,13 +160,17 @@ class BreadCrumb(QtGui.QWidget):
 		self.breadcrumbItemNames = []
 		self.breadcrumbItems = []
 		self.index = 0
-		
+		'''
 		self.__add("Long Folder Namesdfsdfsdfsdfsdfsdf")
 		self.__add("This One Is Long Too")
 		self.__add("School")
 		self.__add("CS 240")
 		self.__add("Bubble Sort")
-
+		'''
+		path = "root/something/anotherone/asdfa/asdfasdfasdfasdf/asdhirjfaldsgaalsdgjaskdjlkjlfajkf"
+		self.path = path.split("/")
+		self.setPath()
+		
 	def __add(self, name):
 		if(len(self.breadcrumbItems) == 0):
 			item = Crumb(self, self.style.BLUE, name, 0, self.index)
@@ -185,6 +189,8 @@ class BreadCrumb(QtGui.QWidget):
 			if(i > indexToStart):
 				self.gridlayout.removeWidget(self.breadcrumbItems[i])
 				self.breadcrumbItems[i].close()
+				self.path.pop()
+				print self.path
 				elementsToRemove = elementsToRemove + 1
 		for i in range(elementsToRemove):
 			self.breadcrumbItems.pop(indexToStart + 1)
@@ -194,6 +200,7 @@ class BreadCrumb(QtGui.QWidget):
 	def clicked(self, index):
 		self.__removeAfter(self.breadcrumbItemNames[index])
 		self.__makeActive(self.breadcrumbItemNames[index])
+		
 	
 	def clearActive(self):
 		for i in range(len(self.breadcrumbItemNames)):
@@ -203,6 +210,11 @@ class BreadCrumb(QtGui.QWidget):
 		indexToMakeActive = self.breadcrumbItemNames.index(name)
 		self.clearActive()
 		self.breadcrumbItems[indexToMakeActive].makeActive()
+		
+	def setPath(self):
+		print self.path
+		for item in self.path:
+			self.__add(item)
 
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):

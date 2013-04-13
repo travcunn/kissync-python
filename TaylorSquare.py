@@ -5,9 +5,12 @@ import style
 
 class IconWidget(QtGui.QWidget):
 	
-	def __init__(self, parent = None):
+	def __init__(self, parent = None, extension = None):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
+		self.extension = extension
+		self.isFolder = self.parent.isFolder
+		
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
@@ -18,11 +21,19 @@ class IconWidget(QtGui.QWidget):
 		self.gridlayout = QtGui.QGridLayout()
 		
 		self.setLayout(self.gridlayout)
-		self.addIcon()
+		self.addIcon(self.extension)
 
-	def addIcon(self):
+	def addIcon(self, extension):
 		self.icon = QtGui.QImage()
-		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/x-office-presentation.svg")
+		if(self.isFolder == True):
+			extension = "folder"
+		elif(extension == None):
+			extension = "unknown"
+		else:
+			extension = extension[1:]
+		print extension
+		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
+		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
         
 	#this is called every time something needs to be repainted
@@ -38,7 +49,7 @@ class IconWidget(QtGui.QWidget):
 		painter.end()
 
 class ItemObject(QtGui.QWidget):
-	def __init__(self, parent = None, fileName = None, filePath = None, fileSize = None, fileType = None):
+	def __init__(self, parent = None, fileName = None, filePath = None, fileSize = None, fileType = None, isFolder = False):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
@@ -48,8 +59,9 @@ class ItemObject(QtGui.QWidget):
 		self.fileSize = fileSize
 		self.fileType = fileType
 		self.isActive = False
+		self.isFolder = isFolder
 		
-		##get rid of the widget border
+		#get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
 		self.setMaximumSize(200, 90)
@@ -60,8 +72,20 @@ class ItemObject(QtGui.QWidget):
 		self.rows = 3
 		self.cols = 2
 		
+		#Get file extension and type
+		if (self.fileName.rfind('.') != -1):
+			dotIndex = self.fileName.rfind('.')
+			print dotIndex
+			fileNameLength = len(self.fileName)
+			print fileNameLength
+			extension = self.fileName[dotIndex:fileNameLength]
+		else:
+			extension = None
+			
+		print extension
+		
 		#Icon
-		self.icon = IconWidget()
+		self.icon = IconWidget(self, extension)
 		self.gridlayout.addWidget(self.icon, 1 , 1, 3, 1 , QtCore.Qt.AlignLeft)
 		
 		#Delete Button
@@ -151,8 +175,8 @@ class Main(QtGui.QWidget):
 		self.setGeometry(400, 200, 300, 325)
 		
 		self.style = style.KissyncStyle()
-		self.loadingwidget = ItemObject(self, "IAmAFileNameBecauseIAmCool.txt", "I am Path", "400.0kB" , "text/application")
-		
+		self.loadingwidget = ItemObject(self, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True)
+
 		self.grid = QtGui.QGridLayout()
 		
 		self.loginButton = QtGui.QPushButton('Add Square')
