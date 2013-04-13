@@ -490,7 +490,7 @@ class FileView(QtGui.QWidget):
 
 	def addWidget(self):
 		#self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
-		self.flowLayout.addWidget(TaylorSquare.ItemObject(self.parent, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True))
+		self.flowLayout.addWidget(TaylorSquare.ItemObject(self, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True))
 		
 
 class SetupWizard(QtGui.QWidget):
@@ -625,6 +625,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 class MainWindow(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(MainWindow, self).__init__(parent)
+		self.style = style.KissyncStyle()
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		

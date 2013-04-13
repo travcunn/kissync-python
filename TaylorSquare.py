@@ -53,6 +53,9 @@ class ItemObject(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
+		blue = "1BA1E2"
+		self.qcolorblue = QtGui.QColor(int(blue[:2], 16), int(blue[2:4], 16), int(blue[4:], 16), 255)
+		
 		#Item Properties
 		self.fileName = fileName
 		self.filePath = filePath
@@ -63,7 +66,6 @@ class ItemObject(QtGui.QWidget):
 		
 		#get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
-		self.style = self.parent.style
 		self.setMaximumSize(200, 90)
 		self.setGeometry(0,0,self.frameSize().width() - 50,self.frameSize().height() - 50)
 		
@@ -130,11 +132,12 @@ class ItemObject(QtGui.QWidget):
 
 		painter.setPen(penblank)
 		
-		painter.setBrush(self.style.hexToQColor(self.style.BLUE))
+		painter.setBrush(self.qcolorblue)
 		painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())	
 		
+		
 	def animate(self, value):
-		self.opacity = value * self.style.SQUAREOPACITY
+		self.opacity = value * 0.5
 		self.repaint()
 		
 	def mousePressEvent(self, event):
@@ -144,7 +147,7 @@ class ItemObject(QtGui.QWidget):
 			self.opacity = 1.0
 		else:
 			self.isActive = False
-			self.opacity = self.parent.style.SQUAREOPACITY
+			self.opacity = 0.5
 			
 		self.repaint()
 	
@@ -156,7 +159,7 @@ class ItemObject(QtGui.QWidget):
 	def leaveEvent(self,event): 
 		print("Leave") 
 		if not(self.isActive == True):
-			self.opacity = self.parent.style.SQUAREOPACITY
+			self.opacity = 0.5
 			
 		self.repaint()
 	
@@ -175,7 +178,7 @@ class Main(QtGui.QWidget):
 		self.setGeometry(400, 200, 300, 325)
 		
 		self.style = style.KissyncStyle()
-		self.loadingwidget = ItemObject(self, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True)
+		self.loadingwidget = ItemObject(self, "index.html", "I am Path", "400.0kB" , "text/application", True)
 
 		self.grid = QtGui.QGridLayout()
 		
