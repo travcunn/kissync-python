@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 from authbrowser import AuthBrowser
+from smartfile import OAuthClient
 
 
 class Authenticator(object):
