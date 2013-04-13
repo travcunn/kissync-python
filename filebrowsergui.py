@@ -9,7 +9,7 @@ class FileBrowserGUI(QtGui.QWidget):
 		self.parent = parent
 		
 		self.breadcrumb = breadcrumb.BreadCrumb(self.parent, "root/something")	
-		self.fileview = FileView(self.parent)	
+		self.fileview = FileView(self)	
 
 		self.layoutgrid = QtGui.QGridLayout()
 		self.layoutgrid.addWidget(self.breadcrumb)

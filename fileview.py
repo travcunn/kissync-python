@@ -49,7 +49,7 @@ class FileView(QtGui.QWidget):
 		#self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
 		
 		#Get JSON for root
-		tree = self.parent.smartfile.get('/path/info', children = True)
+		tree = self.parent.parent.smartfile.get('/path/info', children = True)
 		if 'children' not in tree:
 			return []
 		# Returns all directories and files in root!
