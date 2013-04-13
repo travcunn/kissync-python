@@ -103,7 +103,9 @@ class ItemObject(QtGui.QWidget):
 		
 		
 		#File Name Label
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Bold, False)
 		self.lbFileName = QtGui.QLabel(self.fileName)
+		self.lbFileName.setFont(font)
 		self.lbFileName.setStyleSheet('QLabel {color: White}')
 		self.lbFileName.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
 		self.gridlayout.addWidget(self.lbFileName, 2, 2, QtCore.Qt.AlignLeft)
@@ -167,7 +169,7 @@ class ItemObject(QtGui.QWidget):
 			self.opacity = 1.0
 		else:
 			self.isActive = False
-			self.opacity = 0.5
+			self.opacity = 0.66
 			
 		self.repaint()
 	def mouseDoubleClickEvent(self, event):
@@ -182,7 +184,7 @@ class ItemObject(QtGui.QWidget):
 	def leaveEvent(self,event): 
 		print("Leave") 
 		if not(self.isActive == True):
-			self.opacity = 0.5
+			self.opacity = 0.66
 			
 		self.repaint()
 	
