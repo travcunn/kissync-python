@@ -50,7 +50,7 @@ class IconWidget(QtGui.QWidget):
 		painter.end()
 
 class ItemObject(QtGui.QWidget):
-	def __init__(self, parent = None, fileName = None, filePath = None, fileSize = None, fileType = None, isFolder = False):
+	def __init__(self, parent = None, filePath = None, fileSize = None, fileType = None, isFolder = False):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
@@ -61,7 +61,6 @@ class ItemObject(QtGui.QWidget):
 		self.qcolorlime = QtGui.QColor(int(lime[:2], 16), int(lime[2:4], 16), int(lime[4:], 16), 255)
 		
 		#Item Properties
-		self.fileName = fileName
 		self.filePath = filePath
 		self.fileSize = fileSize
 		self.fileType = fileType
@@ -80,12 +79,12 @@ class ItemObject(QtGui.QWidget):
 		self.cols = 2
 		
 		#Get file extension and type
-		if (self.fileName.rfind('.') != -1):
-			dotIndex = self.fileName.rfind('.')
+		if (self.filePath.rfind('.') != -1):
+			dotIndex = self.filePath.rfind('.')
 			print dotIndex
-			fileNameLength = len(self.fileName)
-			print fileNameLength
-			extension = self.fileName[dotIndex:fileNameLength]
+			filePathLength = len(self.filePath)
+			print filePathLength
+			extension = self.filePath[dotIndex:filePathLength]
 		else:
 			extension = None
 			
@@ -107,7 +106,9 @@ class ItemObject(QtGui.QWidget):
 		
 		#File Name Label
 		font = QtGui.QFont("Roboto", 11, QtGui.QFont.Bold, False)
-		self.lbFileName = QtGui.QLabel(self.fileName)
+		tempSlashIndex = self.filePath.rfind('/')
+		tempFileName = self.filePath[tempSlashIndex + 1:len(self.filePath)]
+		self.lbFileName = QtGui.QLabel(tempFileName)
 		self.lbFileName.setFont(font)
 		self.lbFileName.setStyleSheet('QLabel {color: White}')
 		self.lbFileName.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
@@ -180,7 +181,9 @@ class ItemObject(QtGui.QWidget):
 		self.repaint()
 	def mouseDoubleClickEvent(self, event):
 		#Go Deeper into directory, or download and open if file.
-		pass
+		print self.filePath
+		
+		self.parent.changePath(self.path)
 	
 	def enterEvent(self,event): 
 		print("Enter") 
