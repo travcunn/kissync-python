@@ -94,16 +94,22 @@ class ItemObject(QtGui.QWidget):
 		self.deleteMeButton = QtGui.QPushButton('X')
 		self.deleteMeButton.setStyleSheet('QPushButton {color: White}')
 		self.deleteMeButton.clicked.connect(self.deleteMe)
+		self.deleteMeButton.setStyleSheet("QPushButton {background-color: transparent;} ")  
+		self.deleteMeButton.setMinimumSize(10,10)
+		
 		self.gridlayout.addWidget(self.deleteMeButton, 1, 2, QtCore.Qt.AlignRight)
+		
 		
 		#File Name Label
 		self.lbFileName = QtGui.QLabel(self.fileName)
 		self.lbFileName.setStyleSheet('QLabel {color: White}')
+		self.lbFileName.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
 		self.gridlayout.addWidget(self.lbFileName, 2, 2, QtCore.Qt.AlignLeft)
 		
 		#File Size Label
 		self.lbFileSize = QtGui.QLabel(self.fileSize)
 		self.lbFileSize.setStyleSheet('QLabel {color: #222222}')
+		self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
 		self.gridlayout.addWidget(self.lbFileSize, 3, 2, QtCore.Qt.AlignLeft)
 		
 		self.setLayout(self.gridlayout)
