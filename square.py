@@ -183,7 +183,7 @@ class ItemObject(QtGui.QWidget):
 		#Go Deeper into directory, or download and open if file.
 		print self.filePath
 		
-		self.parent.parent.changePath(self.path)
+		self.parent.parent.changePath(self.filePath)
 	
 	def enterEvent(self,event): 
 		print("Enter") 
