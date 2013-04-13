@@ -53,7 +53,7 @@ class FileView(QtGui.QWidget):
 		if 'children' not in tree:
 			return []
 		# Returns all directories and files in root!
-		rootD = [i['path'].encode("utf-8") for i in tree['children']]
+		self.rootD = [i['path'].encode("utf-8") for i in tree['children']]
 		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
 		
 		for i in tree['children']:
