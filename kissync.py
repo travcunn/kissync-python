@@ -3,7 +3,7 @@ from smartfile import OAuthClient
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 from bs4 import BeautifulSoup
 
-import breadcrumb, flowlayout, loadingwidget, style
+import breadcrumb, flowlayout, loadingwidget, style, TaylorSquare
 
 import watcher
 
@@ -489,7 +489,8 @@ class FileView(QtGui.QWidget):
 		self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
 	def addWidget(self):
-		self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
+		#self.flowLayout.addWidget(SquareObject(self, self.style.PINK))
+		self.flowLayout.addWidget(TaylorSquare.ItemObject(self.parent, "IAmAFileNameBecauseIAmCool.html", "I am Path", "400.0kB" , "text/application", True))
 		
 
 class SetupWizard(QtGui.QWidget):

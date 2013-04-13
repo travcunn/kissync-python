@@ -13,7 +13,7 @@ class IconWidget(QtGui.QWidget):
 		
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
-		self.style = style.KissyncStyle()
+		
 		self.setMinimumSize(64, 64)
 		self.setMaximumSize(64, 64)
 		
@@ -63,7 +63,7 @@ class ItemObject(QtGui.QWidget):
 		
 		#get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
-		self.style = style.KissyncStyle()
+		self.style = self.parent.style
 		self.setMaximumSize(200, 90)
 		self.setGeometry(0,0,self.frameSize().width() - 50,self.frameSize().height() - 50)
 		
