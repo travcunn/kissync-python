@@ -87,7 +87,6 @@ class MainWindow(QtGui.QWidget):
 		grid.addWidget(self.breadcrumb)
 		grid.addWidget(self.fileview)
 		self.setLayout(grid)
-		self.show()
 
 
 if __name__ == "__main__":
