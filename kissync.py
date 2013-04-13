@@ -10,10 +10,10 @@ from loginwindow import LoginWindow
 from fileview import FileView
 from setupwizard import SetupWizard
 from tray import TrayMenu, SystemTrayIcon
+from filebrowsergui import FileBrowserGUI
 
 import watcher
-						
-		
+							
 			
 class MainWindow(QtGui.QWidget):
 	def __init__(self, parent = None):
@@ -56,11 +56,8 @@ class MainWindow(QtGui.QWidget):
 		#self.filewatcher = watcher.Watcher(self)
 		
 		
-		
 		#################MAIN WINDOW GUI#####################
-		self.breadcrumb = breadcrumb.BreadCrumb(self)	
-		self.fileview = FileView(self)	
-		#initialize all neccessary objects that will talk to MainWindow and each other
+		self.filebrowsergui = FileBrowserGUI(self)
 		
 		self.setWindowTitle('Keep It Simple Sync')  
 		self.displayFont = QtGui.QFont()
@@ -84,8 +81,7 @@ class MainWindow(QtGui.QWidget):
 		grid = QtGui.QGridLayout()
 		grid.setContentsMargins(0, 0, 0, 0)
 		grid.addWidget(topText)
-		grid.addWidget(self.breadcrumb)
-		grid.addWidget(self.fileview)
+		grid.addWidget(self.filebrowsergui)
 		self.setLayout(grid)
 
 
