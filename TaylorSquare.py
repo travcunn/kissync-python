@@ -170,6 +170,9 @@ class ItemObject(QtGui.QWidget):
 			self.opacity = 0.5
 			
 		self.repaint()
+	def mouseDoubleClickEvent(self, event):
+		#Go Deeper into directory, or download and open if file.
+		pass
 	
 	def enterEvent(self,event): 
 		print("Enter") 
