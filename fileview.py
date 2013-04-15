@@ -46,6 +46,7 @@ class FileView(QtGui.QWidget):
 		self.mainLayout.setContentsMargins(0, 0, 0, 0)
 		
 		self.squareArray = []
+		self.activeSquares = []
 
 	def addWidget(self):
 		
@@ -94,6 +95,17 @@ class FileView(QtGui.QWidget):
 			self.squareArray.pop()
 		#print self.squareArray
 		#print len(self.squareArray)
+	
+	def iterateActive(self):
+		for item in self.squareArray:
+			if(item.isActive):
+				self.activeSquares.append(item)
 			
+	def getActive(self):
+		self.activeSquares = []
+		self.iterateActive()
+		return self.activeSquares
+		
+	
 		
 		

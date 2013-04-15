@@ -50,7 +50,7 @@ class IconWidget(QtGui.QWidget):
 		painter.end()
 
 class ItemObject(QtGui.QWidget):
-	def __init__(self, parent = None, filePath = None, fileName = None, fileSize = None, fileType = None, isFolder = False):
+	def __init__(self, parent = None, filePath = None, fileName = None, fileSize = None, fileType = None, isFolder = False, panelView = False):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
@@ -67,6 +67,7 @@ class ItemObject(QtGui.QWidget):
 		self.fileType = fileType
 		self.isActive = False
 		self.isFolder = isFolder
+		self.panelView = panelView
 		
 		#get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
@@ -96,13 +97,14 @@ class ItemObject(QtGui.QWidget):
 		self.gridlayout.addWidget(self.icon, 1 , 1, 3, 1 , QtCore.Qt.AlignLeft)
 		
 		#Delete Button
-		self.deleteMeButton = QtGui.QPushButton('X')
-		self.deleteMeButton.setStyleSheet('QPushButton {color: White}')
-		self.deleteMeButton.clicked.connect(self.deleteMe)
-		self.deleteMeButton.setStyleSheet("QPushButton {background-color: transparent;} ")  
-		self.deleteMeButton.setMinimumSize(10,10)
-		
-		self.gridlayout.addWidget(self.deleteMeButton, 1, 2, QtCore.Qt.AlignRight)
+		if not(self.panelView):
+			self.deleteMeButton = QtGui.QPushButton('X')
+			self.deleteMeButton.setStyleSheet('QPushButton {color: White}')
+			self.deleteMeButton.clicked.connect(self.deleteMe)
+			self.deleteMeButton.setStyleSheet("QPushButton {background-color: transparent;} ")  
+			self.deleteMeButton.setMinimumSize(10,10)
+			
+			self.gridlayout.addWidget(self.deleteMeButton, 1, 2, QtCore.Qt.AlignRight)
 		
 		
 		#File Name Label
@@ -136,11 +138,14 @@ class ItemObject(QtGui.QWidget):
 		
 		self.setLayout(self.gridlayout)
 		
-		self.opacity = 0.0
-		self.timeline = QtCore.QTimeLine()
-		self.timeline.valueChanged.connect(self.animate)
-		self.timeline.setDuration(500)
-		self.timeline.start()
+		if not(self.panelView):
+			self.opacity = 0.0
+			self.timeline = QtCore.QTimeLine()
+			self.timeline.valueChanged.connect(self.animate)
+			self.timeline.setDuration(500)
+			self.timeline.start()
+		else:
+			self.opacity = 1.0
 		
 	#this is called every time something needs to be repainted
 	def paintEvent(self, e):
@@ -172,52 +177,50 @@ class ItemObject(QtGui.QWidget):
 		self.repaint()
 		
 	def mousePressEvent(self, event):
-		print("Clicked")
-		if not(self.isActive == True):
-			self.isActive = True
-			self.opacity = 1.0
-		else:
-			self.isActive = False
-			self.opacity = 0.66
+		if not(self.panelView):
+			print("Clicked")
+			if not(self.isActive):
+				self.isActive = True
+				self.opacity = 1.0
+			else:
+				self.parent.parent.sidepanel.deactivate()
+				self.isActive = False
+				self.opacity = 0.66
+			
+			if(len(self.parent.parent.fileview.getActive()) > 0):
+				self.parent.parent.sidepanel.activate()
+
+			self.repaint()
 		
-		if(self.isFolder):
-			#Item clicked on is a folder.
-			
-			#Show sidebar info for folder.
-			
-			pass
-		else:
-			#item clicked on is a file.
-			
-			#Show sidebar info for a file.
-	
-			pass
-		self.repaint()
 	def mouseDoubleClickEvent(self, event):
-		#Go Deeper into directory, or download and open if file.
-		#print self.filePath
-		if(self.isFolder):
-			print "You double clicked a folder"
-			#Item double clicked upon is a Folder. 
-			#Change the breadcrumb path.
-			self.parent.parent.changePath(self.filePath) 
-			#Change Sidebar to show directory properties.
-		else:
-			#Item double clicked upon.
-			print "You double clicked a file."
-			pass
+		if not(self.panelView):
+			#Go Deeper into directory, or download and open if file.
+			#print self.filePath
+			self.parent.parent.sidepanel.deactivate()
+			if(self.isFolder):
+				print "You double clicked a folder"
+				#Item double clicked upon is a Folder. 
+				#Change the breadcrumb path.
+				self.parent.parent.changePath(self.filePath) 
+				#Change Sidebar to show directory properties.
+			else:
+				#Item double clicked upon.
+				print "You double clicked a file."
+				pass
 	
 	def enterEvent(self,event): 
-		print("Enter") 
-		self.opacity = 1.0
-		self.repaint()
+		if not(self.panelView):
+			print("Enter") 
+			self.opacity = 1.0
+			self.repaint()
 	
 	def leaveEvent(self,event): 
-		print("Leave") 
-		if not(self.isActive == True):
-			self.opacity = 0.66
-			
-		self.repaint()
+		if not(self.panelView):
+			print("Leave") 
+			if not(self.isActive == True):
+				self.opacity = 0.66
+				
+			self.repaint()
 	
 	def deleteMe(self):
 		#This will delete it's self.
