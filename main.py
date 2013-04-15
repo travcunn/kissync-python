@@ -63,6 +63,7 @@ class Main(QtGui.QWidget):
 		self.displayFont = QtGui.QFont()
 		#self.setStyleSheet("background-color: #222222; ") 
 		self.setGeometry(400, 200, 1000, 500)
+		self.setMinimumSize(580, 600)
 		
 		fontDatabase = QtGui.QFontDatabase()
 		#fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")

@@ -50,7 +50,7 @@ class IconWidget(QtGui.QWidget):
 		painter.end()
 
 class ItemObject(QtGui.QWidget):
-	def __init__(self, parent = None, filePath = None, fileName = None, fileSize = None, fileType = None, isFolder = False, panelView = False):
+	def __init__(self, parent = None, filePath = None, fileName = None, fileSize = None, fileType = None, isFolder = False, modified = None, panelView = False):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
@@ -67,6 +67,7 @@ class ItemObject(QtGui.QWidget):
 		self.fileType = fileType
 		self.isActive = False
 		self.isFolder = isFolder
+		self.lastModified = modified
 		self.panelView = panelView
 		
 		#get rid of the widget border

@@ -44,7 +44,7 @@ class FileView(QtGui.QWidget):
 		self.mainLayout.addWidget(self.scrollArea)
 		
 		self.setLayout(self.mainLayout)
-		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		self.mainLayout.setContentsMargins(10, 0, 0, 0)
 		
 		self.squareArray = []
 		self.activeSquares = []
@@ -63,7 +63,7 @@ class FileView(QtGui.QWidget):
 		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
 		
 		for i in tree['children']:
-			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'])
+			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
 			
@@ -79,7 +79,7 @@ class FileView(QtGui.QWidget):
 			return []
 		# Returns all directories and files in directory!
 		for i in tree['children']:
-			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'])
+			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
 		

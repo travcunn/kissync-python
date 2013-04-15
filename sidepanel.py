@@ -8,32 +8,80 @@ class SidePanel(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		self.setStyleSheet("QWidget { background: #FFFFFF; }")
-		self.gridLayout = QtGui.QGridLayout()
 		
 		font = QtGui.QFont("Roboto", 24, QtGui.QFont.Normal, False)
 		fontsmall = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
-		
-		self.topText = QtGui.QLabel('Information')
-		self.topText.setFont(font)
-		self.topText.setAlignment(QtCore.Qt.AlignHCenter)
+		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
+		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		
 		self.numberSelected = QtGui.QLabel()
 		self.numberSelected.setFont(fontsmall)
 		self.numberSelected.setAlignment(QtCore.Qt.AlignHCenter)
 		
+		self.actionsText = QtGui.QLabel('Actions')
+		self.actionsText.setFont(font)
+		self.actionsText.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.topText = QtGui.QLabel('Information')
+		self.topText.setFont(font)
+		self.topText.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		
+		self.fileNameTitle = QtGui.QLabel()
+		self.fileNameTitle.setText("Filename:")
+		self.fileNameTitle.setFont(fontsmallbold)
+		self.fileNameTitle.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.fileNameText = QtGui.QLabel()
+		self.fileNameText.setFont(fontsmall)
+		self.fileNameText.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.fileTypeTitle = QtGui.QLabel()
+		self.fileTypeTitle.setText("Type:")
+		self.fileTypeTitle.setFont(fontsmallbold)
+		self.fileTypeTitle.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.fileTypeText = QtGui.QLabel()
+		self.fileTypeText.setFont(fontsmall)
+		self.fileTypeText.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.lastModifiedTitle = QtGui.QLabel()
+		self.lastModifiedTitle.setText("Last Modified:")
+		self.lastModifiedTitle.setFont(fontsmallbold)
+		self.lastModifiedTitle.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.lastModifiedText = QtGui.QLabel()
+		self.lastModifiedText.setFont(fontsmall)
+		self.lastModifiedText.setAlignment(QtCore.Qt.AlignHCenter)
+		
+		self.sizeSelectedTitle = QtGui.QLabel()
+		self.sizeSelectedTitle.setFont(fontsmallbold)
+		self.sizeSelectedTitle.setAlignment(QtCore.Qt.AlignHCenter)
+		
 		self.sizeSelected = QtGui.QLabel()
 		self.sizeSelected.setFont(fontsmall)
 		self.sizeSelected.setAlignment(QtCore.Qt.AlignHCenter)
 		
-		self.panelTextWidget = QtGui.QWidget()
-		self.panelLayout = QtGui.QFormLayout()
-		self.panelLayout.addRow(self.topText)
-		self.panelLayout.addRow(self.numberSelected)
-		self.panelLayout.addRow(self.sizeSelected)
-		self.panelTextWidget.setLayout(self.panelLayout)
-		self.panelTextWidget.setContentsMargins(20, 0, 20, 20)
+		#Information section
+		self.infoTextWidget = QtGui.QWidget()
+		self.infoLayout = QtGui.QGridLayout()
+		self.infoLayout.addWidget(self.topText, 0, 0, 1, 0, QtCore.Qt.AlignHCenter)
+		self.infoLayout.addWidget(self.numberSelected, 1, 0, 1, 0, QtCore.Qt.AlignHCenter)
+		self.infoLayout.addWidget(self.fileNameTitle, 2, 0)
+		self.infoLayout.addWidget(self.fileNameText, 2, 1)
+		self.infoLayout.addWidget(self.fileTypeTitle, 3, 0)
+		self.infoLayout.addWidget(self.fileTypeText, 3, 1)
+		self.infoLayout.addWidget(self.sizeSelectedTitle, 4, 0)
+		self.infoLayout.addWidget(self.sizeSelected, 4, 1)
+		self.infoLayout.addWidget(self.lastModifiedTitle, 5, 0)
+		self.infoLayout.addWidget(self.lastModifiedText, 5, 1)
+		self.infoTextWidget.setLayout(self.infoLayout)
+		self.infoTextWidget.setContentsMargins(20, 0, 20, 20)
 
-		self.gridLayout.addWidget(self.panelTextWidget, 0, 0)
+		self.gridLayout = QtGui.QGridLayout()
+		
+		self.gridLayout.addWidget(self.infoTextWidget, 0, 0)
+		self.gridLayout.addWidget(self.actionsText, 1, 0)
 		
 		self.gridLayout.setContentsMargins(0, 0, 0, 0)
 		self.setLayout(self.gridLayout)
@@ -48,17 +96,49 @@ class SidePanel(QtGui.QWidget):
 			numberOfItems = numberOfItems + 1
 			
 		if(numberOfItems > 1):
-			self.panelLayout.removeWidget(item)
+			#set the max size with less info in the info panel
+			self.infoTextWidget.setMaximumHeight(130)
+			self.infoLayout.removeWidget(item)
 			self.item.close()
 			self.numberSelected.setText(str(numberOfItems) + " items selected.")
+			self.sizeSelectedTitle.setText("Size of Selection: ")
+			self.hideSingle()
 		else:
+			#set the max size on one object
+			self.infoTextWidget.setMaximumHeight(300)
 			#self.parent.fileview.squareArray[0]
-			self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, True)
-			self.panelLayout.addWidget(self.item)
+			self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
+			self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
 			self.numberSelected.setText("1 item selected.")
+			self.sizeSelectedTitle.setText("Size: ")
 			
-		#update the size total
-		self.updateSizes()
+			#only details for only single files
+			filetype = self.parent.fileview.activeSquares[0].fileType
+			if not (len(filetype) <= 24):
+				cut = len(filetype) - 24
+				filetype = filetype.replace(filetype[-cut:], '...')
+			
+			self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
+			self.fileTypeText.setText(filetype)
+			self.lastModifiedText.setText(self.item.lastModified.replace("T", " "))
+			self.showSingle()
+			
+	def hideSingle(self):
+		self.fileNameTitle.hide()
+		self.fileNameText.hide()
+		self.fileTypeTitle.hide()
+		self.fileTypeText.hide()
+		self.lastModifiedTitle.hide()
+		self.lastModifiedText.hide()
+	
+	def showSingle(self):
+		self.fileNameTitle.show()
+		self.fileNameText.show()
+		self.fileTypeTitle.show()
+		self.fileTypeText.show()
+		self.lastModifiedTitle.show()
+		self.lastModifiedText.show()
+			
 	
 	def updateSizes(self):
 		totalsize = 0
@@ -81,12 +161,18 @@ class SidePanel(QtGui.QWidget):
 		self.sizeSelected.setText(str(totalsize) + " " + measurement)
 	
 	def activate(self):
+		#update selection count
 		self.updateView()
+		
+		#update the size total
+		self.updateSizes()
+		
+		#show the widget
 		self.show()
 		
 	def deactivate(self):
 		if not(self.item == None):
-			self.panelLayout.removeWidget(self.item)
+			self.infoLayout.removeWidget(self.item)
 			self.sizeSelected.setText("")
 			self.numberSelected.setText("")
 			self.item.close()
