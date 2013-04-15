@@ -79,7 +79,7 @@ class Main(QtGui.QWidget):
 		#topText.setStyleSheet("color: #FFFFFF;")
 		
 		grid = QtGui.QGridLayout()
-		#grid.setContentsMargins(0, 0, 0, 0)
+		grid.setContentsMargins(0, 0, 0, 0)
 		grid.addWidget(topText)
 		grid.addWidget(self.filebrowsergui)
 		self.setLayout(grid)

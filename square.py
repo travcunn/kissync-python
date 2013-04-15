@@ -233,8 +233,8 @@ class Main(QtGui.QWidget):
 		#self.setStyleSheet("#MainWindow {background-color: #222222; }") 
 		self.setGeometry(400, 200, 300, 325)
 		
-		self.style = style.KissyncStyle()
-		self.loadingwidget = ItemObject(self, "index.html", "I am Path", "400.0kB" , "text/application", True)
+		#this is broken here
+		self.loadingwidget = ItemObject(self, "index.html", "I am Path", "4000" , "text/application", True)
 
 		self.grid = QtGui.QGridLayout()
 		
