@@ -77,10 +77,14 @@ class Main(QtGui.QWidget):
 		topText.setFont(font)
 		topText.setPalette(palette)
 		#topText.setStyleSheet("color: #FFFFFF;")
+		self.titlewidget = QtGui.QWidget()
+		self.titlelayout = QtGui.QGridLayout()
+		self.titlelayout.addWidget(topText)
+		self.titlewidget.setLayout(self.titlelayout)
 		
 		grid = QtGui.QGridLayout()
 		grid.setContentsMargins(0, 0, 0, 0)
-		grid.addWidget(topText)
+		grid.addWidget(self.titlewidget)
 		grid.addWidget(self.filebrowsergui)
 		self.setLayout(grid)
 

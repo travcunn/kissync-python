@@ -10,7 +10,7 @@ class FileView(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		##get rid of the widget border
-		#self.setStyleSheet("border: 0px")
+		#self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
 		
 		topText = QtGui.QLabel('Kissync File View Widget Test')
@@ -31,6 +31,7 @@ class FileView(QtGui.QWidget):
 		self.scrollArea = QtGui.QScrollArea()
 		self.scrollArea.setWidgetResizable(True)
 		self.scrollArea.setWidget(self.scrollWidget)
+		self.scrollArea.setStyleSheet("QScrollArea { border: 0px; }")
 		
 		self.scrollArea.setContentsMargins(0, 0, 0, 0)
 		self.scrollWidget.setContentsMargins(0, 0, 0, 0)
@@ -39,7 +40,7 @@ class FileView(QtGui.QWidget):
 		self.mainLayout = QtGui.QVBoxLayout()
 
 		# add all main to the main vLayout
-		self.mainLayout.addWidget(self.addButton)
+		#self.mainLayout.addWidget(self.addButton)
 		self.mainLayout.addWidget(self.scrollArea)
 		
 		self.setLayout(self.mainLayout)
@@ -47,6 +48,7 @@ class FileView(QtGui.QWidget):
 		
 		self.squareArray = []
 		self.activeSquares = []
+		
 
 	def addWidget(self):
 		
