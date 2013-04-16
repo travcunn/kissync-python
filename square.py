@@ -238,6 +238,7 @@ class ItemObject(QtGui.QWidget):
 		pathArray.pop(0)
 		pathArray.pop(len(pathArray) - 1)
 		pathToAdd = ""
+		#A BUG EXISTS IN THIS, PLEASE TEST THIS
 		for directory in pathArray:
 			if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
 				os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
