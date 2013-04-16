@@ -234,6 +234,16 @@ class ItemObject(QtGui.QWidget):
 		pass
 		
 	def downloadFile(self, filepath):
+		pathArray = filepath.split("/")
+		pathArray.pop(0)
+		pathArray.pop(len(pathArray) - 1)
+		pathToAdd = ""
+		for directory in pathArray:
+			if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
+				os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+				pathToAdd = pathToAdd + directory + "/"
+				print pathToAdd
+				
 		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
 		with file(realPath, 'wb') as o:
