@@ -185,10 +185,12 @@ class ItemObject(QtGui.QWidget):
 				self.opacity = 1.0
 			else:
 				self.parent.parent.sidepanel.deactivate()
+				self.parent.parent.folderpanel.show()
 				self.isActive = False
 				self.opacity = 0.66
 			
 			if(len(self.parent.parent.fileview.getActive()) > 0):
+				self.parent.parent.folderpanel.hide()
 				self.parent.parent.sidepanel.activate()
 
 			self.repaint()
@@ -198,6 +200,7 @@ class ItemObject(QtGui.QWidget):
 			#Go Deeper into directory, or download and open if file.
 			#print self.filePath
 			self.parent.parent.sidepanel.deactivate()
+			self.parent.parent.folderpanel.show()
 			if(self.isFolder):
 				print "You double clicked a folder"
 				#Item double clicked upon is a Folder. 
