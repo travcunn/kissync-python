@@ -1,4 +1,4 @@
-import os, platform, sys, time, urllib2
+import os, platform, shutil, subprocess, sys, time, urllib2
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import math
 
@@ -18,11 +18,11 @@ class IconWidget(QtGui.QWidget):
 		self.setMinimumSize(64, 64)
 		self.setMaximumSize(64, 64)
 		
-		
 		self.gridlayout = QtGui.QGridLayout()
 		
 		self.setLayout(self.gridlayout)
 		self.addIcon(self.extension)
+		
 
 	def addIcon(self, extension):
 		self.icon = QtGui.QImage()
@@ -199,6 +199,7 @@ class ItemObject(QtGui.QWidget):
 		if not(self.panelView):
 			#Go Deeper into directory, or download and open if file.
 			#print self.filePath
+			self.isActive = False
 			self.parent.parent.sidepanel.deactivate()
 			self.parent.parent.folderpanel.show()
 			if(self.isFolder):
@@ -210,7 +211,7 @@ class ItemObject(QtGui.QWidget):
 			else:
 				#Item double clicked upon.
 				print "You double clicked a file."
-				pass
+				self.openFile(self.filePath)
 	
 	def enterEvent(self,event): 
 		if not(self.panelView):
@@ -231,6 +232,23 @@ class ItemObject(QtGui.QWidget):
 		print "Delete button clicked!"
 	
 		pass
+		
+	def downloadFile(self, filepath):
+		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
+		realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+		with file(realPath, 'wb') as o:
+			shutil.copyfileobj(f, o)
+		return realPath
+		
+	def openFile(self, filepath):
+		openPath = self.downloadFile(filepath)
+		if sys.platform.startswith('darwin'):
+			subprocess.call(('open', openPath))
+		elif os.name == 'nt':
+			os.startfile(openPath)
+		elif os.name == 'posix':
+			subprocess.call(('xdg-open', openPath))
+			
 
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):

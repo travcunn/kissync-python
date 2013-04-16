@@ -87,6 +87,12 @@ class SetupWizard(QtGui.QWidget):
 		else:
 			self.parent.config.set('LocalSettings', 'notifications', False)
 		
+		directory = os.path.expanduser("~") + "/Kissync"
+		if not os.path.exists(directory):
+			os.makedirs(directory)
+			
+		self.parent.config.set('LocalSettings', 'sync-dir', directory)
+		
 		self.parent.config.set('LocalSettings', 'first-run', False)
 		
 		with open('configuration.cfg', 'wb') as configfile:

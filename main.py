@@ -1,7 +1,5 @@
-import ConfigParser, datetime, os, platform, sqlite3, sys, time, urllib2
-from smartfile import OAuthClient
+import ConfigParser, sys
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-from bs4 import BeautifulSoup
 
 import breadcrumb, flowlayout, loadingwidget, style, square
 from authenticator import Authenticator
