@@ -8,12 +8,12 @@ class FileBrowserGUI(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		
-		self.breadcrumb = BreadCrumb(self.parent, "root/something")	
+		self.breadcrumb = BreadCrumb(self)	
 		self.fileview = FileView(self)	
 		self.sidepanel = SidePanel(self)
 
 		self.layoutgrid = QtGui.QGridLayout()
-		self.layoutgrid.addWidget(self.breadcrumb, 0, 0, 1, 0, QtCore.Qt.AlignLeft)
+		self.layoutgrid.addWidget(self.breadcrumb, 0, 0, 1, 2, QtCore.Qt.AlignLeft)
 		self.layoutgrid.addWidget(self.fileview, 1, 0)
 		self.layoutgrid.addWidget(self.sidepanel, 1, 1)
 		

@@ -99,7 +99,7 @@ class Crumb(QtGui.QWidget):
 	def drawText(self, event, painter):
 		painter.setPen(QtGui.QColor(255, 255, 255))
 		painter.setFont(self.font)
-		painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self.displayText)  
+		painter.drawText(event.rect(), QtCore.Qt.AlignCenter, os.path.basename(self.displayText))  
 	
 	def setToFirst(self):
 		self.isfirst = True
@@ -129,6 +129,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.style = style.KissyncStyle()
 		
 		self.setMaximumHeight(89)
+		self.setMinimumWidth(self.parent.width())
 		
 		self.gridlayout = QtGui.QHBoxLayout()
 		self.gridlayout.setAlignment(QtCore.Qt.AlignLeft)
@@ -160,7 +161,7 @@ class BreadCrumb(QtGui.QWidget):
 		
 		self.breadcrumbItems = []
 		
-		self.setPath("/home/travis/Dropbox")
+		self.setPath("/")
 		
 	def __add(self, path):
 		if(len(self.breadcrumbItems) == 0):
@@ -187,12 +188,17 @@ class BreadCrumb(QtGui.QWidget):
 		print newpath
 		pathArray = newpath.split("/")
 		
+		self.__add("/Home")
+		
 		for folder in pathArray:
 			if not(folder == ""):
 				self.__add(newpath.split(folder)[0] + folder)
 			
 	def clicked(self, item):
-		self.setPath(item.crumbpath)
+		if(item.crumbpath == "/Home"):
+			self.parent.changePath("/")
+		else:
+			self.parent.changePath(item.crumbpath)
 
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
