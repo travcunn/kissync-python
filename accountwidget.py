@@ -6,15 +6,61 @@ from authenticator import Authenticator
 # import code for encoding urls and generating md5 hashes
 import urllib, hashlib, Image, cStringIO
 
-
 import style
 
+#topText.setStyleSheet("color: #FFFFFF;")
+
+class SettingsLabel(QtGui.QLabel):
+	def __init__(self, parent = None):
+		QtGui.QLabel.__init__(self)
+		self.parent = parent
+		self.setText("Settings")
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		self.setFont(font)
+		
+	def mousePressEvent(self, event):
+		print "Logout button pressed"
+		
+	def mouseDoubleClickEvent(self, event):
+		pass
+		
+	def enterEvent(self,event): 
+		self.repaint()
+	
+	def leaveEvent(self,event): 				
+		self.repaint()
+		
+		
 class LogoutLabel(QtGui.QLabel):
 	def __init__(self, parent = None):
 		QtGui.QLabel.__init__(self)
 		self.parent = parent
 		self.setText("Logout")
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		self.setFont(font)
+		
+	def mousePressEvent(self, event):
+		print "Logout button pressed"
+		
+	def mouseDoubleClickEvent(self, event):
+		pass
+		
+	def enterEvent(self,event): 
+		self.repaint()
+	
+	def leaveEvent(self,event): 				
+		self.repaint()
+		
+		
+class UsernameLabel(QtGui.QLabel):
+	def __init__(self, parent = None, fullname = ""):
+		QtGui.QLabel.__init__(self)
+		self.parent = parent
+		self.setText(fullname)
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		self.setFont(font)
 
+		
 class IconWidget(QtGui.QWidget):
 	
 	def __init__(self, parent = None, email = None):
@@ -85,19 +131,15 @@ class AccountWidget(QtGui.QWidget):
 		
 		self.gridlayout = QtGui.QGridLayout()
 		
-		#Setup Fonts. 
-		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
-		smallfont = QtGui.QFont("Roboto", 12, QtGui.QFont.Light, False)
-		
-		self.lbFullName = QtGui.QLabel(self.fullname)
-		self.lbFullName.setFont(font)
-		
+		self.lbFullName = UsernameLabel(self, self.fullname)
+		self.lbsettings = SettingsLabel(self)
 		self.lblogout = LogoutLabel(self)
 		
 		#self.loadGravatar()
 		
-		self.gridlayout.addWidget(self.lbFullName,0,0,1,1, QtCore.Qt.AlignRight)
-		self.gridlayout.addWidget(self.lblogout)
+		self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.lbsettings, 0, 1, 1, 1, QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.lblogout, 0, 2, 1, 1, QtCore.Qt.AlignCenter)
 		
 		#Icon stuff
 		self.newicon = IconWidget(self, self.email)

@@ -58,8 +58,8 @@ class Main(QtGui.QWidget):
 		#################MAIN WINDOW GUI#####################
 		self.setWindowTitle('Keep It Simple Sync')  
 		self.displayFont = QtGui.QFont()
-		self.setGeometry(400, 200, 1000, 500)
-		self.setMinimumSize(580, 600)
+		self.setGeometry(200, 200, 870, 600)
+		self.setMinimumSize(870, 600)
 		
 		#Load font for the title text
 		fontDatabase = QtGui.QFontDatabase()
@@ -94,18 +94,16 @@ class Main(QtGui.QWidget):
 		self.filebrowsergui = FileBrowserGUI(self)
 		self.accountwidget = AccountWidget(self)
 		self.grid.addWidget(self.titlewidget, 0, 0)
-		self.grid.addWidget(self.accountwidget, 0 , 1)
+		self.grid.addWidget(self.accountwidget, 0 , 1, 1, 1, QtCore.Qt.AlignRight)
 		self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
 		
 		#self.setStyleSheet("QWidget { background-color: #222222; }") 
-		
-	def onResize(event):
-		print self.width
 	
 
 
 if __name__ == "__main__":
-	
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	sys.exit(app.exec_())
+	
+	

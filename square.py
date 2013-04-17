@@ -204,25 +204,25 @@ class ItemObject(QtGui.QWidget):
 			self.parent.parent.bottompanel.deactivate()
 			self.parent.parent.folderpanel.show()
 			if(self.isFolder):
-				print "You double clicked a folder"
+				#print "You double clicked a folder"
 				#Item double clicked upon is a Folder. 
 				#Change the breadcrumb path.
 				self.parent.parent.changePath(self.filePath) 
 				#Change Sidebar to show directory properties.
 			else:
 				#Item double clicked upon.
-				print "You double clicked a file."
+				#print "You double clicked a file."
 				self.openFile(self.filePath)
 	
 	def enterEvent(self,event): 
 		if not(self.panelView):
-			print("Enter") 
+			#print("Enter") 
 			self.opacity = 1.0
 			self.repaint()
 	
 	def leaveEvent(self,event): 
 		if not(self.panelView):
-			print("Leave") 
+			#print("Leave") 
 			if not(self.isActive == True):
 				self.opacity = 0.66
 				
