@@ -1,4 +1,4 @@
-import ConfigParser, sys
+import ConfigParser, os, sys
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 import breadcrumb, flowlayout, loadingwidget, style, square
@@ -56,41 +56,47 @@ class Main(QtGui.QWidget):
 		
 		
 		#################MAIN WINDOW GUI#####################
-		self.filebrowsergui = FileBrowserGUI(self)
-		
 		self.setWindowTitle('Keep It Simple Sync')  
 		self.displayFont = QtGui.QFont()
-		#self.setStyleSheet("background-color: #222222; ") 
 		self.setGeometry(400, 200, 1000, 500)
 		self.setMinimumSize(580, 600)
 		
+		#Load font for the title text
 		fontDatabase = QtGui.QFontDatabase()
-		#fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-		#fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
+		fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
+		fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
 		#os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
 		palette = QtGui.QPalette()
 		#palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 		
+		
+		#Title Text Font
 		topText = QtGui.QLabel('Kissync Enterprise')
 		#http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
 		font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
 		topText.setFont(font)
 		topText.setPalette(palette)
 		#topText.setStyleSheet("color: #FFFFFF;")
+		
+		#Title Text Widget
 		self.titlewidget = QtGui.QWidget()
 		self.titlelayout = QtGui.QGridLayout()
 		self.titlelayout.addWidget(topText)
 		self.titlewidget.setLayout(self.titlelayout)
 		self.titlewidget.setMaximumHeight(70)
-		
-		self.accountwidget = AccountWidget(self)
-		
+	
 		grid = QtGui.QGridLayout()
 		grid.setContentsMargins(0, 0, 0, 0)
+		self.setLayout(grid)
+		
+	def start():
+		#this method is called on login success
+		self.filebrowsergui = FileBrowserGUI(self)
+		self.accountwidget = AccountWidget(self)
 		grid.addWidget(self.titlewidget, 0, 0)
 		grid.addWidget(self.accountwidget, 0 , 1)
 		grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
-		self.setLayout(grid)
+		self.setStyleSheet("QWidget { background-color: #222222; }") 
 
 
 if __name__ == "__main__":

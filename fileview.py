@@ -49,6 +49,7 @@ class FileView(QtGui.QWidget):
 		self.squareArray = []
 		self.activeSquares = []
 		
+		self.addWidget()
 
 	def addWidget(self):
 		
@@ -82,8 +83,7 @@ class FileView(QtGui.QWidget):
 			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
-		
-		
+
 	def clearAll(self):
 		
 		#print self.squareArray

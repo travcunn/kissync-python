@@ -102,7 +102,7 @@ class BottomPanel(QtGui.QWidget):
 		self.buttonsLayout.addWidget(self.generateLinkButton)
 	
 		
-		#self.gridLayout.addWidget(self.infoTextWidget, 0, 0)
+		self.gridLayout.addWidget(self.infoTextWidget, 0, 0)
 		self.gridLayout.addWidget(self.buttonsWidget, 0, 1)
 		#self.gridLayout.addWidget(self.actionsText, 1, 0)
 		
