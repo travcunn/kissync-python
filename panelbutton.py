@@ -42,20 +42,20 @@ class PanelButton(QtGui.QWidget):
 		blue = "FFFFFF"
 		self.qcolorblue = QtGui.QColor(int(blue[:2], 16), int(blue[2:4], 16), int(blue[4:], 16), 255)
 		
-		lime = "8CBF26"
+		lime = "222222"
 		self.qcolorlime = QtGui.QColor(int(lime[:2], 16), int(lime[2:4], 16), int(lime[4:], 16), 255)
 		
 		self.setStyleSheet("QWidget { border: 0px; }")
 		
-		self.setMinimumSize(100, 48)
-		self.setMaximumSize(100, 64)
+		self.setMinimumSize(90, 48)
+		self.setMaximumSize(90, 64)
 		self.setContentsMargins(0, 0, 0, 0)
 		
 		self.gridlayout = QtGui.QGridLayout()
 		self.gridlayout.addWidget(PanelIcon(self, self.buttonType))
 		self.setLayout(self.gridlayout)
 		
-		self.opacity = .6
+		self.opacity = .07
 		self.hover = False
 		self.setStatusTip('Exit application')
 	

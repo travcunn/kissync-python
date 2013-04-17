@@ -98,6 +98,10 @@ class Main(QtGui.QWidget):
 		self.grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
 		
 		#self.setStyleSheet("QWidget { background-color: #222222; }") 
+		
+	def onResize(event):
+		print self.width
+	
 
 
 if __name__ == "__main__":

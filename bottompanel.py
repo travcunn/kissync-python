@@ -13,9 +13,10 @@ class BottomPanel(QtGui.QWidget):
 		self.parent = parent
 		self.setStyleSheet("QWidget { background: #FFFFFF; }")
 		
-		self.setMinimumSize(100, 64)
+		self.setMinimumSize(50, 64)
+		self.setMaximumHeight(68)
 		
-		font = QtGui.QFont("Roboto", 24, QtGui.QFont.Normal, False)
+		font = QtGui.QFont("Roboto", 18, QtGui.QFont.Normal, False)
 		fontsmall = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
 		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
@@ -70,19 +71,15 @@ class BottomPanel(QtGui.QWidget):
 		
 		#Information section
 		self.infoTextWidget = QtGui.QWidget()
+		self.infoTextWidget.setMaximumWidth(300)
 		self.infoLayout = QtGui.QGridLayout()
-		self.infoLayout.addWidget(self.topText, 0, 0, 1, 0, QtCore.Qt.AlignHCenter)
-		self.infoLayout.addWidget(self.numberSelected, 1, 0, 1, 0, QtCore.Qt.AlignHCenter)
-		self.infoLayout.addWidget(self.fileNameTitle, 2, 0)
-		self.infoLayout.addWidget(self.fileNameText, 2, 1)
-		self.infoLayout.addWidget(self.fileTypeTitle, 3, 0)
-		self.infoLayout.addWidget(self.fileTypeText, 3, 1)
-		self.infoLayout.addWidget(self.sizeSelectedTitle, 4, 0)
-		self.infoLayout.addWidget(self.sizeSelected, 4, 1)
-		self.infoLayout.addWidget(self.lastModifiedTitle, 5, 0)
-		self.infoLayout.addWidget(self.lastModifiedText, 5, 1)
+		self.infoLayout.addWidget(self.topText, 0, 0, QtCore.Qt.AlignHCenter)
+		self.infoLayout.addWidget(self.numberSelected, 1, 0, QtCore.Qt.AlignHCenter)
+		#self.infoLayout.addWidget(self.fileTypeText, 0, 1)
+		#self.infoLayout.addWidget(self.sizeSelected, 1, 1)
+		self.infoLayout.addWidget(self.lastModifiedText, 1, 0)
 		self.infoTextWidget.setLayout(self.infoLayout)
-		self.infoTextWidget.setContentsMargins(20, 0, 20, 20)
+		self.infoTextWidget.setContentsMargins(0, 0, 0, 0)
 
 		self.gridLayout = QtGui.QGridLayout()
 		
@@ -92,18 +89,16 @@ class BottomPanel(QtGui.QWidget):
 		self.buttonsWidget.setLayout(self.buttonsLayout)
 		#self.buttonsWidget.setContentsMargins(10, 10, 10, 10)
 		#buttons add to layout
-		self.homeButton = PanelButton(self, "home")
 		self.addButton = PanelButton(self, "add")
 		self.deleteButton = PanelButton(self, "delete")
 		self.generateLinkButton = PanelButton(self, "generate_link")
-		self.buttonsLayout.addWidget(self.homeButton)
 		self.buttonsLayout.addWidget(self.addButton)
 		self.buttonsLayout.addWidget(self.deleteButton)
 		self.buttonsLayout.addWidget(self.generateLinkButton)
 	
 		
-		self.gridLayout.addWidget(self.infoTextWidget, 0, 0)
-		self.gridLayout.addWidget(self.buttonsWidget, 0, 1)
+		self.gridLayout.addWidget(self.infoTextWidget, 0, 1)
+		self.gridLayout.addWidget(self.buttonsWidget, 0, 0)
 		#self.gridLayout.addWidget(self.actionsText, 1, 0)
 		
 		self.gridLayout.setContentsMargins(0, 0, 0, 0)
@@ -123,6 +118,7 @@ class BottomPanel(QtGui.QWidget):
 			self.infoTextWidget.setMaximumHeight(130)
 			self.infoLayout.removeWidget(item)
 			self.item.close()
+			self.topText.setText("Multiple Files")
 			self.numberSelected.setText(str(numberOfItems) + " items selected.")
 			self.sizeSelectedTitle.setText("Size of Selection: ")
 			self.hideSingle()
@@ -142,6 +138,7 @@ class BottomPanel(QtGui.QWidget):
 				filetype = filetype.replace(filetype[-cut:], '...')
 			
 			self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
+			self.topText.setText(self.parent.fileview.activeSquares[0].fileName)
 			self.fileTypeText.setText(filetype)
 			self.lastModifiedText.setText(self.item.lastModified.replace("T", " "))
 			self.showSingle()
@@ -153,6 +150,7 @@ class BottomPanel(QtGui.QWidget):
 		self.fileTypeText.hide()
 		self.lastModifiedTitle.hide()
 		self.lastModifiedText.hide()
+		self.numberSelected.show()
 	
 	def showSingle(self):
 		self.fileNameTitle.show()
@@ -161,6 +159,7 @@ class BottomPanel(QtGui.QWidget):
 		self.fileTypeText.show()
 		self.lastModifiedTitle.show()
 		self.lastModifiedText.show()
+		self.numberSelected.hide()
 			
 	
 	def updateSizes(self):

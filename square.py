@@ -134,8 +134,9 @@ class ItemObject(QtGui.QWidget):
 			
 		self.lbFileSize = QtGui.QLabel(str(thissize) + " " + measurement)
 		self.lbFileSize.setStyleSheet('QLabel {color: #222222}')
-		self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground)  
-		self.gridlayout.addWidget(self.lbFileSize, 3, 2, QtCore.Qt.AlignLeft)
+		self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground) 
+		if not(self.isFolder): 
+			self.gridlayout.addWidget(self.lbFileSize, 3, 2, QtCore.Qt.AlignLeft)
 		
 		self.setLayout(self.gridlayout)
 		
