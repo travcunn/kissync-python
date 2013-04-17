@@ -14,11 +14,12 @@ def main():
 		#pprint.pprint(api.get('/path/info', children = True))
 		
 		#Get JSON for root
-		tree = api.get('/path/info', children = True)
-		if 'children' not in tree:
+		tree = api.get('/whoami')
+		if 'user' not in tree:
 			return []
 		# Returns all directories and files in root!
-		pprint.pprint([i['path'].encode("utf-8") for i in tree['children']])
+		#pprint.pprint(tree['site'])
+		pprint.pprint(tree['user']['name'].encode("utf-8"))
 		'''
 		************ OUTPUT *********************
 		['/Test',

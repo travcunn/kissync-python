@@ -5,7 +5,6 @@ import math
 import style
 
 class IconWidget(QtGui.QWidget):
-	
 	def __init__(self, parent = None, extension = None):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
@@ -184,14 +183,14 @@ class ItemObject(QtGui.QWidget):
 				self.isActive = True
 				self.opacity = 1.0
 			else:
-				self.parent.parent.sidepanel.deactivate()
+				self.parent.parent.bottompanel.deactivate()
 				self.parent.parent.folderpanel.show()
 				self.isActive = False
 				self.opacity = 0.66
 			
 			if(len(self.parent.parent.fileview.getActive()) > 0):
 				self.parent.parent.folderpanel.hide()
-				self.parent.parent.sidepanel.activate()
+				self.parent.parent.bottompanel.activate()
 
 			self.repaint()
 		
@@ -200,7 +199,7 @@ class ItemObject(QtGui.QWidget):
 			#Go Deeper into directory, or download and open if file.
 			#print self.filePath
 			self.isActive = False
-			self.parent.parent.sidepanel.deactivate()
+			self.parent.parent.bottompanel.deactivate()
 			self.parent.parent.folderpanel.show()
 			if(self.isFolder):
 				print "You double clicked a folder"

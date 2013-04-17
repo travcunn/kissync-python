@@ -1,4 +1,4 @@
-import math, sys
+import math, os, sys
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 from square import ItemObject
@@ -80,8 +80,12 @@ class SidePanel(QtGui.QWidget):
 
 		self.gridLayout = QtGui.QGridLayout()
 		
+		#buttons
+		self.addButton = PanelButton(self, "add")
+		
 		self.gridLayout.addWidget(self.infoTextWidget, 0, 0)
-		self.gridLayout.addWidget(self.actionsText, 1, 0)
+		self.gridLayout.addWidget(self.addButton, 0, 1)
+		#self.gridLayout.addWidget(self.actionsText, 1, 0)
 		
 		self.gridLayout.setContentsMargins(0, 0, 0, 0)
 		self.setLayout(self.gridLayout)
@@ -105,10 +109,10 @@ class SidePanel(QtGui.QWidget):
 			self.hideSingle()
 		else:
 			#set the max size on one object
-			self.infoTextWidget.setMaximumHeight(300)
+			self.infoTextWidget.setMaximumHeight(185)
 			#self.parent.fileview.squareArray[0]
 			self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
-			self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
+			#self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
 			self.numberSelected.setText("1 item selected.")
 			self.sizeSelectedTitle.setText("Size: ")
 			
@@ -177,6 +181,42 @@ class SidePanel(QtGui.QWidget):
 			self.numberSelected.setText("")
 			self.item.close()
 		self.hide()
+		
+		
+class PanelButton(QtGui.QWidget):
+	def __init__(self, parent = None, buttonType = None):
+		QtGui.QWidget.__init__(self)
+		self.parent = parent
+		self.buttonType = buttonType
+		
+		##get rid of the widget border
+		self.setStyleSheet("QWidget { border: 0px; }")
+		
+		self.setMinimumSize(48, 48)
+		self.setMaximumSize(48, 48)
+		
+		self.gridlayout = QtGui.QGridLayout()
+		
+		self.setLayout(self.gridlayout)
+		self.addIcon(self.buttonType)
+		
+
+	def addIcon(self, buttonType):
+		self.icon = QtGui.QImage()
+		print buttonType
+		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/simplicio/icons48/" + buttonType + ".png")
+		
+		self.icontarget = QtCore.QRectF(0, 0, 48, 48)
+        
+	def paintEvent(self, e):
+		painter = QtGui.QPainter()
+		painter.begin(self)
+				
+		# Draw Item Thumbnail.
+		painter.drawImage(self.icontarget, self.icon)
+		
+		#End Painter
+		painter.end()
 		
 
 class Main(QtGui.QWidget):
