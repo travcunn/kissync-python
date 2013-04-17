@@ -92,10 +92,10 @@ class Main(QtGui.QWidget):
 	def start(self):
 		#this method is called on login success
 		self.filebrowsergui = FileBrowserGUI(self)
-		#self.accountwidget = AccountWidget(self)
+		self.accountwidget = AccountWidget(self)
 		self.grid.addWidget(self.titlewidget, 0, 0)
-		#grid.addWidget(self.accountwidget, 0 , 1)
-		self.grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
+		self.grid.addWidget(self.accountwidget, 0 , 1)
+		self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
 		
 		#self.setStyleSheet("QWidget { background-color: #222222; }") 
 		
