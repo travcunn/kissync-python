@@ -9,6 +9,7 @@ from fileview import FileView
 from setupwizard import SetupWizard
 from tray import TrayMenu, SystemTrayIcon
 from filebrowsergui import FileBrowserGUI
+from accountwidget import AccountWidget
 
 import watcher
 							
@@ -80,11 +81,15 @@ class Main(QtGui.QWidget):
 		self.titlelayout = QtGui.QGridLayout()
 		self.titlelayout.addWidget(topText)
 		self.titlewidget.setLayout(self.titlelayout)
+		self.titlewidget.setMaximumHeight(70)
+		
+		self.accountwidget = AccountWidget(self)
 		
 		grid = QtGui.QGridLayout()
 		grid.setContentsMargins(0, 0, 0, 0)
-		grid.addWidget(self.titlewidget)
-		grid.addWidget(self.filebrowsergui)
+		grid.addWidget(self.titlewidget, 0, 0)
+		grid.addWidget(self.accountwidget, 0 , 1)
+		grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
 		self.setLayout(grid)
 
 
