@@ -15,11 +15,11 @@ class SettingsLabel(QtGui.QLabel):
 		QtGui.QLabel.__init__(self)
 		self.parent = parent
 		self.setText("Settings")
-		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		font = QtGui.QFont("Roboto", 18, QtGui.QFont.Light, False)
 		self.setFont(font)
 		
 	def mousePressEvent(self, event):
-		print "Logout button pressed"
+		print "Settings button pressed"
 		
 	def mouseDoubleClickEvent(self, event):
 		pass
@@ -36,7 +36,7 @@ class LogoutLabel(QtGui.QLabel):
 		QtGui.QLabel.__init__(self)
 		self.parent = parent
 		self.setText("Logout")
-		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		font = QtGui.QFont("Roboto", 18, QtGui.QFont.Light, False)
 		self.setFont(font)
 		
 	def mousePressEvent(self, event):
@@ -77,7 +77,7 @@ class IconWidget(QtGui.QWidget):
 		self.gridlayout = QtGui.QGridLayout()
 		
 		#self.setLayout(self.gridlayout)
-		#self.addIcon(self.email)
+		self.addIcon(self.email)
 		
 
 	def addIcon(self, email):
@@ -92,8 +92,8 @@ class IconWidget(QtGui.QWidget):
 		
 		print(gravatar_url)
 		
-		#img_file = cStringIO.StringIO(urllib.urlopen(gravatar_url).read())
-		#self.icon.loadFromData(img_file, "JPG")
+		img_file = urllib.urlopen(gravatar_url).read()
+		self.icon.loadFromData(img_file, "JPG")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
         
@@ -116,18 +116,24 @@ class AccountWidget(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		#Call API to get full name and email address.
-		tree = self.parent.smartfile.get('/whoami', '/')
-		if 'user' not in tree:
-			return []
+		try:
+			tree = self.parent.smartfile.get('/whoami', '/')
+			if 'user' not in tree:
+				return []
+				
+			self.fullname = tree['user']['name'].encode("utf-8")
+			self.email = tree['user']['email'].encode("utf-8")
+		except:
+			self.fullname = "Paradox Duo"
+			self.email = "travcunn@umail.iu.edu"
 		
-		self.fullname = tree['user']['name'].encode("utf-8")
-		self.email = tree['user']['email'].encode("utf-8")
 		
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
 		
 		self.setMinimumSize(64, 64)
-		self.setMaximumSize(300, 64)
+		if __name__ != "__main__":
+			self.setMaximumSize(300, 64)
 		
 		self.gridlayout = QtGui.QGridLayout()
 		
@@ -137,13 +143,13 @@ class AccountWidget(QtGui.QWidget):
 		
 		#self.loadGravatar()
 		
-		self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
-		self.gridlayout.addWidget(self.lbsettings, 0, 1, 1, 1, QtCore.Qt.AlignCenter)
-		self.gridlayout.addWidget(self.lblogout, 0, 2, 1, 1, QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.lbFullName, 0, 1, 1, 1, QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.lbsettings, 0, 2, 1, 1, QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.lblogout, 0, 3, 1, 1, QtCore.Qt.AlignCenter)
 		
 		#Icon stuff
 		self.newicon = IconWidget(self, self.email)
-		#self.gridlayout.addWidget(self.newicon, 0, 1, 1, 1 , QtCore.Qt.AlignLeft)
+		self.gridlayout.addWidget(self.newicon, 0, 0, 1, 1 , QtCore.Qt.AlignCenter)
 		
 		self.setLayout(self.gridlayout)
 		
