@@ -85,18 +85,19 @@ class Main(QtGui.QWidget):
 		self.titlewidget.setLayout(self.titlelayout)
 		self.titlewidget.setMaximumHeight(70)
 	
-		grid = QtGui.QGridLayout()
-		grid.setContentsMargins(0, 0, 0, 0)
-		self.setLayout(grid)
+		self.grid = QtGui.QGridLayout()
+		self.grid.setContentsMargins(0, 0, 0, 0)
+		self.setLayout(self.grid)
 		
-	def start():
+	def start(self):
 		#this method is called on login success
 		self.filebrowsergui = FileBrowserGUI(self)
-		self.accountwidget = AccountWidget(self)
-		grid.addWidget(self.titlewidget, 0, 0)
-		grid.addWidget(self.accountwidget, 0 , 1)
-		grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
-		self.setStyleSheet("QWidget { background-color: #222222; }") 
+		#self.accountwidget = AccountWidget(self)
+		self.grid.addWidget(self.titlewidget, 0, 0)
+		#grid.addWidget(self.accountwidget, 0 , 1)
+		self.grid.addWidget(self.filebrowsergui, 1, 0, 2, 1)
+		
+		#self.setStyleSheet("QWidget { background-color: #222222; }") 
 
 
 if __name__ == "__main__":

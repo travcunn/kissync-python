@@ -13,6 +13,7 @@ class IconWidget(QtGui.QWidget):
 		
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
+		#self.setStyleSheet("QWidget { background-color: #FFFFFF; }") 
 		
 		self.setMinimumSize(64, 64)
 		self.setMaximumSize(64, 64)
