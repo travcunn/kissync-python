@@ -59,7 +59,7 @@ class Main(QtGui.QWidget):
 		self.setWindowTitle('Keep It Simple Sync')  
 		self.displayFont = QtGui.QFont()
 		self.setGeometry(200, 200, 870, 600)
-		self.setMinimumSize(870, 600)
+		self.setMinimumSize(900, 600)
 		
 		#Load font for the title text
 		fontDatabase = QtGui.QFontDatabase()
@@ -86,18 +86,16 @@ class Main(QtGui.QWidget):
 		self.titlewidget.setMaximumHeight(70)
 	
 		self.grid = QtGui.QGridLayout()
-		self.grid.setContentsMargins(0, 0, 0, 0)
+		self.grid.setContentsMargins(0, 10, 10, 0)
 		self.setLayout(self.grid)
 		
 	def start(self):
 		#this method is called on login success
-		self.filebrowsergui = FileBrowserGUI(self)
+		self.filebrowsergui = FileBrowserGUI(self)		
 		self.accountwidget = AccountWidget(self)
 		self.grid.addWidget(self.titlewidget, 0, 0)
 		self.grid.addWidget(self.accountwidget, 0 , 1, 1, 1, QtCore.Qt.AlignRight)
 		self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
-		
-		#self.setStyleSheet("QWidget { background-color: #222222; }") 
 	
 
 

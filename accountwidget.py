@@ -88,14 +88,10 @@ class IconWidget(QtGui.QWidget):
 
 	def addIcon(self, email):
 		self.icon = QtGui.QImage()
-		# Set your variables here
-		default = "http://i170.photobucket.com/albums/u260/Link5045/XC%20Avatar%20Tutorial/spongebob.jpg"
-		size = 60
-		 
-		# construct the url
-		gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-		gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+		size = 64
 		
+		gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?s=" + str(size)
+
 		img_file = urllib.urlopen(gravatar_url).read()
 		self.icon.loadFromData(img_file, "JPG")
 		
@@ -135,9 +131,9 @@ class AccountWidget(QtGui.QWidget):
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
 		
-		self.setMinimumSize(300, 80)
+		self.setMinimumSize(300, 85)
 	
-		self.setMaximumSize(300, 80)
+		self.setMaximumSize(300, 85)
 		
 		self.gridlayout = QtGui.QGridLayout()
 		

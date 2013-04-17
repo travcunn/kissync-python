@@ -136,12 +136,10 @@ class BreadCrumb(QtGui.QWidget):
 		
 		#print self.frameSize().width()
 		self.gridlayout.setSpacing(0)
-		self.gridlayout.setContentsMargins(0, 0, 0, 0)
 		
 		# make a widget called
 		self.scrollWidget = QtGui.QWidget()
 		self.scrollWidget.setLayout(self.gridlayout)
-
 		# scroll area
 		self.scrollArea = QtGui.QScrollArea()
 		self.scrollArea.setWidgetResizable(True)

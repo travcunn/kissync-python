@@ -33,7 +33,7 @@ class BottomPanel(QtGui.QWidget):
 		self.topText.setFont(font)
 		self.topText.setAlignment(QtCore.Qt.AlignHCenter)
 		
-		
+		"""
 		self.fileNameTitle = QtGui.QLabel()
 		self.fileNameTitle.setText("Filename:")
 		self.fileNameTitle.setFont(fontsmallbold)
@@ -47,15 +47,17 @@ class BottomPanel(QtGui.QWidget):
 		self.fileTypeTitle.setText("Type:")
 		self.fileTypeTitle.setFont(fontsmallbold)
 		self.fileTypeTitle.setAlignment(QtCore.Qt.AlignHCenter)
-		
+		"""
 		self.fileTypeText = QtGui.QLabel()
 		self.fileTypeText.setFont(fontsmall)
 		self.fileTypeText.setAlignment(QtCore.Qt.AlignHCenter)
 		
+		"""
 		self.lastModifiedTitle = QtGui.QLabel()
 		self.lastModifiedTitle.setText("Last Modified:")
 		self.lastModifiedTitle.setFont(fontsmallbold)
 		self.lastModifiedTitle.setAlignment(QtCore.Qt.AlignHCenter)
+		"""
 		
 		self.lastModifiedText = QtGui.QLabel()
 		self.lastModifiedText.setFont(fontsmall)
@@ -64,10 +66,11 @@ class BottomPanel(QtGui.QWidget):
 		self.sizeSelectedTitle = QtGui.QLabel()
 		self.sizeSelectedTitle.setFont(fontsmallbold)
 		self.sizeSelectedTitle.setAlignment(QtCore.Qt.AlignHCenter)
-		
+
 		self.sizeSelected = QtGui.QLabel()
 		self.sizeSelected.setFont(fontsmall)
 		self.sizeSelected.setAlignment(QtCore.Qt.AlignHCenter)
+
 		
 		#Information section
 		self.infoTextWidget = QtGui.QWidget()
@@ -129,7 +132,7 @@ class BottomPanel(QtGui.QWidget):
 			self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
 			#self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
 			self.numberSelected.setText("1 item selected.")
-			self.sizeSelectedTitle.setText("Size: ")
+			#self.sizeSelectedTitle.setText("Size: ")
 			
 			#only details for only single files
 			filetype = self.parent.fileview.activeSquares[0].fileType
@@ -137,27 +140,27 @@ class BottomPanel(QtGui.QWidget):
 				cut = len(filetype) - 24
 				filetype = filetype.replace(filetype[-cut:], '...')
 			
-			self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
+			#self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
 			self.topText.setText(self.parent.fileview.activeSquares[0].fileName)
-			self.fileTypeText.setText(filetype)
+			#self.fileTypeText.setText(filetype)
 			self.lastModifiedText.setText(self.item.lastModified.replace("T", " "))
 			self.showSingle()
 			
 	def hideSingle(self):
-		self.fileNameTitle.hide()
-		self.fileNameText.hide()
-		self.fileTypeTitle.hide()
+		#self.fileNameTitle.hide()
+		#self.fileNameText.hide()
+		#self.fileTypeTitle.hide()
 		self.fileTypeText.hide()
-		self.lastModifiedTitle.hide()
+		#self.lastModifiedTitle.hide()
 		self.lastModifiedText.hide()
 		self.numberSelected.show()
 	
 	def showSingle(self):
-		self.fileNameTitle.show()
-		self.fileNameText.show()
-		self.fileTypeTitle.show()
+		#self.fileNameTitle.show()
+		#self.fileNameText.show()
+		#self.fileTypeTitle.show()
 		self.fileTypeText.show()
-		self.lastModifiedTitle.show()
+		#self.lastModifiedTitle.show()
 		self.lastModifiedText.show()
 		self.numberSelected.hide()
 			
@@ -195,7 +198,7 @@ class BottomPanel(QtGui.QWidget):
 	def deactivate(self):
 		if not(self.item == None):
 			self.infoLayout.removeWidget(self.item)
-			self.sizeSelected.setText("")
+			#self.sizeSelected.setText("")
 			self.numberSelected.setText("")
 			self.item.close()
 		self.hide()
