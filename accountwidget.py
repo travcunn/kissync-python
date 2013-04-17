@@ -9,6 +9,12 @@ import urllib, hashlib, Image, cStringIO
 
 import style
 
+class LogoutLabel(QtGui.QLabel):
+	def __init__(self, parent = None):
+		QtGui.QLabel.__init__(self)
+		self.parent = parent
+		self.setText("Logout")
+
 class IconWidget(QtGui.QWidget):
 	
 	def __init__(self, parent = None, email = None):
@@ -24,8 +30,8 @@ class IconWidget(QtGui.QWidget):
 		
 		self.gridlayout = QtGui.QGridLayout()
 		
-		self.setLayout(self.gridlayout)
-		self.addIcon(self.email)
+		#self.setLayout(self.gridlayout)
+		#self.addIcon(self.email)
 		
 
 	def addIcon(self, email):
@@ -40,8 +46,8 @@ class IconWidget(QtGui.QWidget):
 		
 		print(gravatar_url)
 		
-		img_file = cStringIO.StringIO(urllib.urlopen(gravatar_url).read())
-		self.icon.loadFromData(img_file, "JPG")
+		#img_file = cStringIO.StringIO(urllib.urlopen(gravatar_url).read())
+		#self.icon.loadFromData(img_file, "JPG")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
         
@@ -63,7 +69,6 @@ class AccountWidget(QtGui.QWidget):
 	def __init__(self, parent = None):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
-		
 		#Call API to get full name and email address.
 		tree = self.parent.smartfile.get('/whoami', '/')
 		if 'user' not in tree:
@@ -80,17 +85,26 @@ class AccountWidget(QtGui.QWidget):
 		
 		self.gridlayout = QtGui.QGridLayout()
 		
+		#Setup Fonts. 
+		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+		smallfont = QtGui.QFont("Roboto", 12, QtGui.QFont.Light, False)
+		
 		self.lbFullName = QtGui.QLabel(self.fullname)
+		self.lbFullName.setFont(font)
+		
+		self.lblogout = LogoutLabel(self)
 		
 		#self.loadGravatar()
 		
-		self.gridlayout.addWidget(self.lbFullName, 0, 0)
+		self.gridlayout.addWidget(self.lbFullName,0,0,1,1, QtCore.Qt.AlignRight)
+		self.gridlayout.addWidget(self.lblogout)
 		
 		#Icon stuff
 		self.newicon = IconWidget(self, self.email)
-		self.gridlayout.addWidget(self.newicon, 0, 1, 1, 1 , QtCore.Qt.AlignLeft)
+		#self.gridlayout.addWidget(self.newicon, 0, 1, 1, 1 , QtCore.Qt.AlignLeft)
 		
 		self.setLayout(self.gridlayout)
+		
 		
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
