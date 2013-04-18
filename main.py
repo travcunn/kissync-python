@@ -117,6 +117,9 @@ class Main(QtGui.QWidget):
 		self.grid.addWidget(self.accountwidget, 0 , 1, 1, 1, QtCore.Qt.AlignRight)
 		self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
 	
+	def closeEvent(self, event):
+		event.ignore()
+		self.hide()
 
 
 if __name__ == "__main__":
