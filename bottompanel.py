@@ -5,7 +5,7 @@ import webbrowser
 
 from panelbutton import PanelButton
 
-import flowlayout
+import flowlayout, shutil
 
 #Copy and paste library.. platform independent.
 import pyperclip
@@ -213,8 +213,41 @@ class BottomPanel(QtGui.QWidget):
 		button = buttonType.lower()
 		if (button == "add"):
 			print "Add pressed."
+			##Open Dialog
+			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
+			## Print File Name
+			#print str(source_file)
+			destination_folder = os.path.expanduser("~") + "/Kissync" + self.parent.breadcrumb.currentPath
+			print "Source: " + source_file
+			print "Dest: " + destination_folder
+			#if not os.path.exists(destination_folder):
+				#os.makedirs(destination_folder)
+			if not (str(source_file) == "" or str(source_file) == None):
+				shutil.move(str(source_file),str(destination_folder))
+			else:
+				print "User canceled upload dialog"
+			
+			#deleteFileName = self.parent.fileview.squareArray[0].filePath
+			#print deleteFileName
+			#print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
+			#self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1])
+			
+			#### NEED TO ADD REFRESH FILEVIEW #########
+			
+			
 		elif (button == "delete"):
 			print "Delete pressed."
+			#Create the file path to delete.
+			deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			##Delete the file from the system.
+			os.remove(deleteMeFilePath)
+			
+			##Instead of deleting a specific square.. just re-update the fileview.
+			deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
+			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
 			print self.parent.fileview.activeSquares[0].filePath
