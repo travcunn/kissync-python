@@ -4,6 +4,8 @@ import cPickle as pickle
 
 from StringIO import StringIO
 
+from ftplib import FTP
+
 class FileDatabase(object):
 	def __init__(self, parent = None):
 		object.__init__(self)
@@ -120,9 +122,11 @@ class Synchronizer(object):
 		
 		self.filesToDownload = []
 		self.filesToUpload = []
+		self.filesToCheckChanges = []
 		
 		self.downloadQueue = Queue.Queue()
 		self.uploadQueue = Queue.Queue()
+		self.checkChangesQueue = Queue.Queue()
 		
 	def start(self):
 		#Compare what files server has against local files
@@ -135,23 +139,28 @@ class Synchronizer(object):
 		for i in self.dictDiffer.added():
 			self.filesToDownload.append(i)
 			self.downloadQueue.put(i)
-			
-		#files that are different on the server, that the client needs	
-		for i in self.dictDiffer.changed():
-			self.filesToDownload.append(i)
-			self.downloadQueue.put(i)
 		
 		#local files that smartfile needs
 		for i in self.dictDiffer.removed():
 			self.filesToUpload.append(i)
 			self.uploadQueue.put(i)
-		
+			
+		#files that are different on the server, that the client needs	
+		for i in self.dictDiffer.changed():
+			self.filesToCheckChanges.append(i)
+			self.checkChangesQueue.put(i)
 		
 		print "Files to download:"
 		print self.filesToDownload
 		print "Files to upload:"
 		print self.filesToUpload	
+		print "Files to check for changes:"
+		print self.filesToCheckChanges
 
+		comparethread = CheckChanges(self, self.checkChangesQueue)
+		comparethread.setDaemon(True)
+		comparethread.start()
+		
 		downthread = Downloader(self, self.downloadQueue)
 		downthread.setDaemon(True)
 		downthread.start()
@@ -160,10 +169,47 @@ class Synchronizer(object):
 		upthread.setDaemon(True)
 		upthread.start()
 		
+		self.checkChangesQueue.join()
+		print "changes queue joined"
 		self.downloadQueue.join()
+		print "dl queue joined"
 		self.uploadQueue.join()
+		print "ul queue joined"
+		
+		print "done joining"
+		
 		self.parent.database.generateRemoteListing()
-		#self.parent.database.generateRemoteListing()
+		
+		print "done generating remote listing"
+		
+		self.parent.filewatcher.start()
+
+
+class CheckChanges(threading.Thread):
+ 
+	def __init__(self, parent, queue):
+		threading.Thread.__init__(self)
+		self.parent = parent
+		self.queue = queue
+ 
+	def run(self):
+		while True:
+			print "running comparison..."
+			path = self.queue.get()
+			print path
+			self.checkFile(path)
+			self.queue.task_done()
+				
+	def checkFile(self, filepath):
+		print "checking " + filepath
+		localpath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+		localModifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(localpath))
+		if(self.parent.parent.database.remoteFilesDictionaryTime[filepath] > self.parent.parent.database.localFilesDictionaryTime[filepath]):
+			print "Newer on the server: " + filepath
+		elif(self.parent.parent.database.remoteFilesDictionaryTime[filepath] < self.parent.parent.database.localFilesDictionaryTime[filepath]):
+			print "Newer on the client: " + filepath
+		else:
+			print "Equal on server and client: " + filepath
 
 		
 class Downloader(threading.Thread):
@@ -175,11 +221,11 @@ class Downloader(threading.Thread):
  
 	def run(self):
 		while True:
-			print "running downloader..."
 			path = self.queue.get()
-			print path
+			print "Downloading: " + path
 			self.downloadFile(path)
 			self.queue.task_done()
+			print self.queue.qsize()
 				
 	def downloadFile(self, filepath):
 		pathArray = filepath.split("/")
@@ -211,15 +257,32 @@ class Uploader(threading.Thread):
 	def run(self):
 		while True:
 			path = self.queue.get()
-			print path
+			print "Uploading: " + path
 			self.uploadFile(path)
 			self.queue.task_done()
+			print "Done uploading " + path
+			print self.queue.qsize()
 				
 	def uploadFile(self, filepath):
+		localpath = filepath
 		filepath = self.syncdirPath + filepath
 		if not (os.path.isdir(filepath)):
 			fileToUpload = file(filepath, 'rb')
-			self.parent.parent.smartfile.post('/path/data/', file=(filepath.replace(self.syncdirPath,''), StringIO(fileToUpload)))
+			try:
+				self.parent.parent.smartfile.post('/path/data/', file=(filepath.replace(self.syncdirPath,''), StringIO(fileToUpload.read())))
+			except:
+				print "Could not convert into utf-8, so make FTP connection"
+				tree = self.parent.parent.smartfile.get('/whoami', '/')
+				if 'site' in tree:
+					self.sitename = tree['site']['name'].encode("utf-8")
+					print self.sitename
+					
+					username = self.parent.parent.config.get('Login', 'username')
+					password = self.parent.parent.config.get('Login', 'password')
+					
+					ftpaddress = self.sitename + ".smartfile.com"
+					ftp = FTP(ftpaddress, username, password)
+					ftp.storbinary('STOR ' + localpath, open(filepath, 'rb'))
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))
 			

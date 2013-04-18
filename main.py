@@ -102,12 +102,14 @@ class Main(QtGui.QWidget):
 		self.database.indexLocalFiles()
 		self.database.loadRemoteListingFile()
 		
+		self.filewatcher = watcher.Watcher(self)
+		
 		print "done with hashing"
 		self.synchronizer = Synchronizer(self)
 		self.synchronizer.start()
+		print "done syncing totally!"
 		
-		#self.filewatcher = watcher.Watcher(self)
-		#self.filewatcher.start()
+		
 		
 		self.filebrowsergui = FileBrowserGUI(self)		
 		self.accountwidget = AccountWidget(self)
