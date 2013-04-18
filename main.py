@@ -35,7 +35,7 @@ class Main(QtGui.QWidget):
 			self.config.set('Login', 'password', None)
 			self.config.add_section('LocalSettings')
 			self.config.set('LocalSettings', 'first-run', True)
-			self.config.set('LocalSettings', 'network-timeout', 20)
+			self.config.set('LocalSettings', 'network-timeout', 30)
 			self.config.set('LocalSettings', 'notifications', True)
 			self.config.set('LocalSettings', 'sync-offline', False)
 			self.config.set('LocalSettings', 'sync-dir', None)

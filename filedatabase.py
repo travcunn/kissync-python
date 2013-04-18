@@ -40,6 +40,9 @@ class FileDatabase(object):
 		try:
 			openPath = self.getServerListingFile()
 			openPathTime = self.getServerListingFileTime()
+			print "OPEN PATHS SHOULD CONTAIN A FILENAME"
+			print openPath
+			print openPathTime
 		except:
 			print "Remote listing does not exist..."
 			openPath = None
@@ -85,7 +88,7 @@ class FileDatabase(object):
 		try:
 			fileToUpload = file(tmpLocalPath)
 			print "Uploading files to the server"
-			print fileToUpload
+			print fileToUpload.read()
 			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBserver', fileToUpload))
 			
 			fileToUpload = file(tmpLocalPathTime)
@@ -96,6 +99,11 @@ class FileDatabase(object):
 				
 	def getServerListingFile(self):
 		filepath = "/.kissyncDBserver"
+		fullpath = self.parent.workingDirectory + filepath
+		try:
+			os.remove(fullpath)
+		except:
+			pass
 		f = self.parent.smartfile.get('/path/data', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
@@ -105,6 +113,11 @@ class FileDatabase(object):
 		
 	def getServerListingFileTime(self):
 		filepath = "/.kissyncDBtimeserver"
+		fullpath = self.parent.workingDirectory + filepath
+		try:
+			os.remove(fullpath)
+		except:
+			pass
 		f = self.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
