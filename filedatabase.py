@@ -311,7 +311,7 @@ class Uploader(threading.Thread):
 					
 					ftpaddress = self.sitename + ".smartfile.com"
 					ftp = FTP(ftpaddress, username, password)
-					ftp.storbinary('STOR ' + localpath, open(filepath, 'rb'))
+					ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))
 			

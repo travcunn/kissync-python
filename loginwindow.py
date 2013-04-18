@@ -93,13 +93,13 @@ class LoginWindow(QtGui.QWidget):
 		self.centerOnScreen()
 	
 	def tryLogin(self):
+		self.hide()
 		self.parent.config.set('Login', 'username', str(self.usernameField.text()))
 		self.parent.config.set('Login', 'password', str(self.passwordField.text()))
 		with open(self.parent.settingsFile, 'wb') as configfile:
 			self.parent.config.write(configfile)
 		
 		self.parent.authenticator.go()
-		self.hide()
 		
 	def networkerror(self):
 		self.neterrorText.show()
