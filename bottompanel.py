@@ -229,7 +229,7 @@ class BottomPanel(QtGui.QWidget):
 				#os.makedirs(destination_folder)
 			
 			#Call Move File Function.
-			self.moveFile(str(souce_file),str(destination_folder))
+			self.moveFile(str(source_file),str(destination_folder))
 			
 			#deleteFileName = self.parent.fileview.squareArray[0].filePath
 			#print deleteFileName
@@ -237,7 +237,7 @@ class BottomPanel(QtGui.QWidget):
 			#self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1])
 			
 			#### NEED TO ADD REFRESH FILEVIEW #########
-			
+			self.parent.parent.tray.notification("Kissync", "New File(s) Added!")
 			
 		elif (button == "delete"):
 			print "Delete pressed."
@@ -251,6 +251,8 @@ class BottomPanel(QtGui.QWidget):
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
+			
+			self.parent.parent.tray.notification("Kissync", "Deleted")
 		
 		elif (button == "move"):
 			#Move File...
@@ -269,15 +271,21 @@ class BottomPanel(QtGui.QWidget):
 				extension = None
 			'''
 			
-			print str(source_file)
+			'''
 			inputter = InputDialog(self, title="Move:", label="Folder:", text="/")
 			inputter.exec_()
 			comment = inputter.text.text()
-			print comment
+			'''
+			
+			comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", os.path.expanduser("~") + "/Kissync"))
 			
 			destination_folder = comment
+			print str(source_file)
+			print str(destination_folder)
 			
 			self.moveFile(str(source_file),str(destination_folder))
+			
+			self.parent.parent.tray.notification("Kissync", "Moved")
 			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"

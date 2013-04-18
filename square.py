@@ -212,7 +212,9 @@ class ItemObject(QtGui.QWidget):
 			else:
 				#Item double clicked upon.
 				#print "You double clicked a file."
+				self.parent.parent.parent.tray.notification("Kissync", "Downloading and Opening...")
 				self.openFile(self.filePath)
+				
 	
 	def enterEvent(self,event): 
 		if not(self.panelView):
