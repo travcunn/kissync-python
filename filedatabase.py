@@ -48,41 +48,54 @@ class FileDatabase(object):
 			self.remoteFilesDictionaryTime = {}
 			#self.generateRemoteListing()
 		else:
+			print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
+			print self.remoteFilesDictionary
+			print self.remoteFilesDictionaryTime
 			picklefile = open(openPath, 'rb')
 			self.remoteFilesDictionary = pickle.load(picklefile)
 			picklefile.close()
 			
-			picklefile = open(openPathTime, 'rb')
-			self.remoteFilesDictionaryTime = pickle.load(picklefile)
-			picklefile.close()
+			picklefiletime = open(openPathTime, 'rb')
+			self.remoteFilesDictionaryTime = pickle.load(picklefiletime)
+			picklefiletime.close()
 			
 			#subprocess.call(('xdg-open', openPath))
 			#subprocess.call(('xdg-open', openPathTime))
 			
 	def generateRemoteListing(self):
 		tmpLocalPath = self.parent.workingDirectory + "/.kissyncDBtmp"
+		try:
+			os.remove(tmpLocalPath)
+		except:
+			pass
 		output = open(tmpLocalPath, 'wb')
 		pickle.dump(self.localFilesDictionary, output)
 		output.close()
 		
 		tmpLocalPathTime = self.parent.workingDirectory + "/.kissyncDBtmptime"
-		output = open(tmpLocalPathTime, 'wb')
-		pickle.dump(self.localFilesDictionaryTime, output)
-		output.close()
+		try:
+			os.remove(tmpLocalPathTime)
+		except:
+			pass
+		outputtime = open(tmpLocalPathTime, 'wb')
+		pickle.dump(self.localFilesDictionaryTime, outputtime)
+		outputtime.close()
 		
 		#now upload the pickled files to the server
 		try:
 			fileToUpload = file(tmpLocalPath)
-			self.parent.smartfile.post('/path/data/', file=('/.kissyncDB', fileToUpload))
+			print "Uploading files to the server"
+			print fileToUpload
+			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBserver', fileToUpload))
 			
 			fileToUpload = file(tmpLocalPathTime)
-			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBtime', fileToUpload))
+			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBtimeserver', fileToUpload))
 		except:
 			raise
 			self.generateRemoteListing()
 				
 	def getServerListingFile(self):
-		filepath = "/.kissyncDB"
+		filepath = "/.kissyncDBserver"
 		f = self.parent.smartfile.get('/path/data', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
@@ -91,7 +104,7 @@ class FileDatabase(object):
 		return realPath
 		
 	def getServerListingFileTime(self):
-		filepath = "/.kissyncDBtime"
+		filepath = "/.kissyncDBtimeserver"
 		f = self.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
@@ -118,7 +131,6 @@ class Synchronizer(object):
 	def __init__(self, parent = None):
 		object.__init__(self)
 		self.parent = parent
-		self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
 		
 		self.filesToDownload = []
 		self.filesToUpload = []
@@ -133,8 +145,10 @@ class Synchronizer(object):
 		#print self.parent.database.remoteFilesDictionary
 		#print self.parent.database.localFilesDictionary
 		#print "Compare what files server has against local files:"
+		self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
 		
 		#files the server that client needs
+		print "FILES THAT WERE ADDED:"
 		print self.dictDiffer.added()
 		for i in self.dictDiffer.added():
 			self.filesToDownload.append(i)
@@ -238,12 +252,14 @@ class Downloader(threading.Thread):
 				os.makedirs(self.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 				pathToAdd = pathToAdd + directory + "/"
 				#print pathToAdd
-				
-		f = self.parent.parent.smartfile.get('/path/data/', filepath)
-		realPath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
-		realPath = realPath.encode("utf-8")
-		with file(realPath, 'wb') as o:
-			shutil.copyfileobj(f, o)
+		try:
+			f = self.parent.parent.smartfile.get('/path/data/', filepath)
+			realPath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+			realPath = realPath.encode("utf-8")
+			with file(realPath, 'wb') as o:
+				shutil.copyfileobj(f, o)
+		except:
+			pass
                 
                 
 class Uploader(threading.Thread):
