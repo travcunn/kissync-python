@@ -95,12 +95,15 @@ class BottomPanel(QtGui.QWidget):
 		self.buttonsLayout = flowlayout.FlowLayout(self)
 		self.buttonsWidget.setLayout(self.buttonsLayout)
 		#self.buttonsWidget.setContentsMargins(10, 10, 10, 10)
-		#buttons add to layout
+		
+		#add buttons to layout
 		self.addButton = PanelButton(self, "add")
 		self.deleteButton = PanelButton(self, "delete")
+		self.moveButton = PanelButton(self, "move")
 		self.generateLinkButton = PanelButton(self, "generate_link")
 		self.buttonsLayout.addWidget(self.addButton)
 		self.buttonsLayout.addWidget(self.deleteButton)
+		self.buttonsLayout.addWidget(self.moveButton)
 		self.buttonsLayout.addWidget(self.generateLinkButton)
 	
 		
@@ -159,6 +162,7 @@ class BottomPanel(QtGui.QWidget):
 		self.lastModifiedText.hide()
 		self.numberSelected.show()
 		self.generateLinkButton.hide()
+		self.moveButton.hide()
 	
 	def showSingle(self):
 		#self.fileNameTitle.show()
@@ -169,6 +173,7 @@ class BottomPanel(QtGui.QWidget):
 		self.lastModifiedText.show()
 		self.numberSelected.hide()
 		self.generateLinkButton.show()
+		self.moveButton.show()
 			
 	
 	def updateSizes(self):
@@ -222,10 +227,9 @@ class BottomPanel(QtGui.QWidget):
 			print "Dest: " + destination_folder
 			#if not os.path.exists(destination_folder):
 				#os.makedirs(destination_folder)
-			if not (str(source_file) == "" or str(source_file) == None):
-				shutil.move(str(source_file),str(destination_folder))
-			else:
-				print "User canceled upload dialog"
+			
+			#Call Move File Function.
+			self.moveFile(str(souce_file),str(destination_folder))
 			
 			#deleteFileName = self.parent.fileview.squareArray[0].filePath
 			#print deleteFileName
@@ -247,6 +251,33 @@ class BottomPanel(QtGui.QWidget):
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
+		
+		elif (button == "move"):
+			#Move File...
+			source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			
+			'''
+			#Get file extension and type
+			extension = None
+			if (source_file.rfind('.') != -1):
+				dotIndex = source_file.rfind('.')
+				#print dotIndex
+				fileNameLength = len(source_file)
+				#print fileNameLength
+				extension = source_file[dotIndex:fileNameLength]
+			else:
+				extension = None
+			'''
+			
+			print str(source_file)
+			inputter = InputDialog(self, title="Move:", label="Folder:", text="/")
+			inputter.exec_()
+			comment = inputter.text.text()
+			print comment
+			
+			destination_folder = comment
+			
+			self.moveFile(str(source_file),str(destination_folder))
 			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
@@ -288,8 +319,44 @@ class BottomPanel(QtGui.QWidget):
 			self.parent.parent.tray.notification("Kissync", "Link coppied to clipboard.")
 		else:
 			print "Op. that button isn't alive yet!"
+	def moveFile(self, source, dest):
+		if not (source == "" or dest == None):
+			shutil.move(source,dest)
+		else:
+			print "User canceled upload dialog"
 		
+class InputDialog(QtGui.QDialog):
+	'''
+	this is for when you need to get some user input text
+	'''
+	def __init__(self, parent=None, title='user input', label='comment', text=''):
 
+		QtGui.QWidget.__init__(self, parent)
+
+		#--Layout Stuff---------------------------#
+		mainLayout = QtGui.QVBoxLayout()
+
+		layout = QtGui.QHBoxLayout()
+		self.label = QtGui.QLabel()
+		self.label.setText(label)
+		layout.addWidget(self.label)
+
+		self.text = QtGui.QLineEdit(text)
+		layout.addWidget(self.text)
+
+		mainLayout.addLayout(layout)
+
+		#--The Button------------------------------#
+		layout = QtGui.QHBoxLayout()
+		button = QtGui.QPushButton("okay") #string or icon
+		self.connect(button, QtCore.SIGNAL("clicked()"), self.close)
+		layout.addWidget(button)
+
+		mainLayout.addLayout(layout)
+		self.setLayout(mainLayout)
+
+		self.resize(400, 60)
+		self.setWindowTitle(title)
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)
