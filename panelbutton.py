@@ -83,7 +83,8 @@ class PanelButton(QtGui.QWidget):
 		painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())	
 	
 	def mousePressEvent(self, event):
-		print "Clicked on " + self.buttonType
+		print "Clicked on " + self.buttonType.title()
+		self.parent.buttonClicked(self.buttonType)
 		
 	def mouseDoubleClickEvent(self, event):
 		pass

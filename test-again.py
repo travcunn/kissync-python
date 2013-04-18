@@ -14,13 +14,16 @@ def main():
 		#pprint.pprint(api.get('/path/info', children = True))
 		
 		#Get JSON for root
-		tree = api.get('/whoami')
-		if 'user' not in tree:
-			return []
+		tree = api.post('/link', path='/Test Folder/Test/test.txt', name='text')
+		pprint.pprint(tree)
+		for i in tree:
+			print i['href']
+		#print url
 		# Returns all directories and files in root!
 		#pprint.pprint(tree['site'])
 		#pprint.pprint(tree['user']['name'].encode("utf-8"))
 		
+<<<<<<< HEAD
 		
 		try:
 			api.post("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
@@ -39,8 +42,11 @@ def main():
 					return
 				
 			break
+=======
+		#ost("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
+>>>>>>> 53e3cee287b8bf373d8e2e8a76964433e35d0288
 		#s = api.get('/task')
-		#print s
+		#pprint.pprint(tree)
 		"""
 			if s['status'] == 'SUCCESS':
 				print "success"
