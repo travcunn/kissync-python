@@ -1,5 +1,5 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import datetime, os, platform, sqlite3, sys, time
+import datetime, hashlib, os, platform, sqlite3, sys, time
 
 
 class FileDatabase(object):
@@ -7,6 +7,7 @@ class FileDatabase(object):
 		object.__init__(self)
 		self.parent = parent
 		self.createDatabase()
+		self.remoteFilesList = []
 		#self.indexFiles()
 	
 	#####################################################
@@ -14,7 +15,8 @@ class FileDatabase(object):
 	#####################################################
 	
 	def dbConnect(self):
-		self.dbconnection = sqlite3.connect("localdb.db")
+		dbFile = self.parent.workingDirectory + "localdb.db"
+		self.dbconnection = sqlite3.connect(dbFile)
 		return self.dbconnection.cursor()
 	
 	def dbDisconnect(self):
@@ -50,7 +52,7 @@ class FileDatabase(object):
 		
 	def moveFileLocal(self, oldpath, newpath):
 		cursor = self.dbConnect()
-		cursor.execute("UPDATE localfiles SET status=? WHERE peerip=?", (newpath, oldpath))	
+		cursor.execute("UPDATE localfiles SET sharepath=? WHERE sharepath=?", (newpath, oldpath))	
 		self.dbconnection.commit()
 		
 	def deleteFileLocal(self, sharepath):
@@ -62,11 +64,11 @@ class FileDatabase(object):
 	##### Remote file listing in the local database ######
 	#####################################################
 			
-	def addFileRemote(self, sharepath, modified):
+	def addFileRemote(self, sharepath, filehash):
 		#Adds files to the database.
 		try:
 			cursor = self.dbConnect()
-			cursor.execute("INSERT INTO remotefiles VALUES (?, ?)", (sharepath.decode('utf-8'), modified))
+			cursor.execute("INSERT INTO remotefiles VALUES (?, ?)", (sharepath.decode('utf-8'), filehash))
 			self.dbconnection.commit()
 		except:
 			raise
@@ -79,15 +81,15 @@ class FileDatabase(object):
 		cursor.execute("DELETE FROM remotefiles")
 		self.dbconnection.commit()
 		
-	def getModifiedRemote(self, filepath): 	
+	def getHashRemote(self, filepath): 	
 		##Returns when a file was last modified
 		cursor = self.dbConnect()
-		cursor.execute("SELECT modified FROM remotefiles WHERE sharepath=?", (filepath,))	
+		cursor.execute("SELECT hash FROM remotefiles WHERE sharepath=?", (filepath,))	
 		return cursor.fetchone()
 		
 	def moveFileRemote(self, oldpath, newpath):
 		cursor = self.dbConnect()
-		cursor.execute("UPDATE remotefiles SET status=? WHERE peerip=?", (newpath, oldpath))	
+		cursor.execute("UPDATE remotefiles SET sharepath=? WHERE sharepath=?", (newpath, oldpath))	
 		self.dbconnection.commit()
 		
 	def deleteFileRemote(self, sharepath):
@@ -98,12 +100,12 @@ class FileDatabase(object):
 	
 
 	#####################################################
-	######## Local file discovery and indexing  #########
+	######## Local and remote file indexing #############
 	#####################################################
 	
 	def indexFiles(self):
 		syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
-		print "[database]: Indexing all files in the shared folder..."
+		print "[database]: Local Database: Indexing local files..."
 		##we must clear the existing table if there is request to index the files
 		self.clearFilesLocal()
 		for (paths, folders, files) in os.walk(syncdirPath):
@@ -113,12 +115,47 @@ class FileDatabase(object):
 				#print paths
 				## os.path.join combines the real path with the filename, and it works cross platform, woot!
 				discoveredFilePath = os.path.join(paths,item)
-				modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
-				self.addFileLocal(discoveredFilePath.replace(syncdirPath,''), modifiedTime)
-				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,''), modifiedTime)
-		print "[database]: Indexing complete..."
-			
+				filehash = self.hashFile(discoveredFilePath)
+				self.addFileLocal(discoveredFilePath.replace(syncdirPath,''), filehash)
+				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,''), filehash)
+		print "[database]: Local Database: Done indexing local files..."
+		
+	def indexRemoteFiles(self, path):
+		#this might take some time, as we are creating a 'task' on their server for MD5 hashing
+		tree = self.parent.smartfile.get('/path/info' + path, children = True)
+		if 'children' not in tree:
+			return []
+		for i in tree['children']:
+			if i['isdir']:
+				self.indexRemoteFiles(i['path'])
+			else:
+				self.remoteFilesList.append(i['path'])
+	
+	def hashtask(self):
+		#print self.remoteFilesList
+		#for i in self.remoteFilesList:
 
+		t = self.parent.smartfile.get("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
+		print t
+		while True:
+			s = self.parent.smartfile.get('/task', t['uuid'])
+			if s['status'] == 'SUCCESS':
+				print "success"
+				break
+	
+	def hashFile(self, filepath):
+	##Read files line by line instead of all at once (allows for large files to be hashes)
+	##For each line in the file, update the hash, then when it reaches the end of the 
+		fileToHash = open(filepath)
+		md5 = hashlib.md5()
+		while(True):
+			currentLine = fileToHash.readline()
+			if not currentLine:
+				#when readline() returns false, it is at the end of the file, so break the loop
+				break
+			md5.update(currentLine)
+		return md5.hexdigest()
+		
 	#####################################################
 	################# Database creation #################
 	#####################################################
@@ -126,9 +163,9 @@ class FileDatabase(object):
 	def createDatabase(self):
 		try:
 			cursor = self.dbConnect()
-			cursor.execute("""CREATE TABLE localfiles (sharepath text, modified datetime)""")
-			cursor.execute("""CREATE TABLE remotefiles (sharepath text, modified datetime)""")
-			cursor.execute("""CREATE TABLE watchworkqueue (sharepath text, modified datetime)""")
+			cursor.execute("""CREATE TABLE localfiles (sharepath text, hash text)""")
+			cursor.execute("""CREATE TABLE remotefiles (sharepath text, hash text)""")
+			cursor.execute("""CREATE TABLE watchworkqueue (sharepath text, hash text)""")
 		except sqlite3.OperationalError:
 			pass
 		finally:

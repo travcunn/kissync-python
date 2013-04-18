@@ -41,6 +41,5 @@ class Authenticator(object):
 			self.parent.setupwizard.show()
 			self.parent.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
 		else:
-			self.parent.show()
 			self.parent.start()
 			#self.parent.filewatcher.start()

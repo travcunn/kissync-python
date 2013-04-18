@@ -24,7 +24,7 @@ class AuthBrowser(QtWebKit.QWebView):
 			user = doc.findFirst("input[id=id_login]")
 			passwd = doc.findFirst("input[id=id_password]")
 			#####this should read from the config file
-			self.parent.parent.config.read('configuration.cfg')
+			self.parent.parent.config.read(self.parent.parent.settingsFile)
 			user.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'username') + "'")
 			passwd.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'password') + "'")
 

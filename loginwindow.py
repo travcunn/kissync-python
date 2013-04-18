@@ -95,7 +95,7 @@ class LoginWindow(QtGui.QWidget):
 	def tryLogin(self):
 		self.parent.config.set('Login', 'username', str(self.usernameField.text()))
 		self.parent.config.set('Login', 'password', str(self.passwordField.text()))
-		with open('configuration.cfg', 'wb') as configfile:
+		with open(self.parent.settingsFile, 'wb') as configfile:
 			self.parent.config.write(configfile)
 		
 		self.parent.authenticator.go()

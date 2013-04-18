@@ -19,7 +19,16 @@ def main():
 			return []
 		# Returns all directories and files in root!
 		#pprint.pprint(tree['site'])
-		pprint.pprint(tree['user']['name'].encode("utf-8"))
+		#pprint.pprint(tree['user']['name'].encode("utf-8"))
+		
+		api.post("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
+		s = api.get('/task')
+		print s
+		"""
+			if s['status'] == 'SUCCESS':
+				print "success"
+				break
+		"""
 		'''
 		************ OUTPUT *********************
 		['/Test',

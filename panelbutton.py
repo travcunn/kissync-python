@@ -55,7 +55,8 @@ class PanelButton(QtGui.QWidget):
 		self.gridlayout.addWidget(PanelIcon(self, self.buttonType))
 		self.setLayout(self.gridlayout)
 		
-		self.opacity = .07
+		#self.opacity = .07
+		self.opacity = .2
 		self.hover = False
 		self.setStatusTip('Exit application')
 	

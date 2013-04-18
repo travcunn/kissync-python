@@ -21,8 +21,13 @@ class Main(QtGui.QWidget):
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		
+		self.workingDirectory = os.path.expanduser("~") + "/.kissync"
+		self.settingsFile = os.path.expanduser("~") + "/.kissync/configuration.cfg"
+		if not os.path.exists(self.workingDirectory):
+			os.makedirs(self.workingDirectory)
+		
 		try:
-			with open('configuration.cfg'): pass
+			with open(self.settingsFile): pass
 		except IOError:
 			self.config.add_section('Login')
 			self.config.set('Login', 'username', None)
@@ -33,10 +38,10 @@ class Main(QtGui.QWidget):
 			self.config.set('LocalSettings', 'notifications', True)
 			self.config.set('LocalSettings', 'sync-offline', False)
 			self.config.set('LocalSettings', 'sync-dir', None)
-			with open('configuration.cfg', 'wb') as configfile:
+			with open(self.settingsFile, 'wb') as configfile:
 				self.config.write(configfile)
 		else:
-			self.config.read('configuration.cfg')
+			self.config.read(self.settingsFile)
 		
 		#connects directly to the smartfile api, but relies upon self.authenticator	to create
 		self.smartfile = None #we don't want to init yet, so we can handle errors later on login
@@ -71,7 +76,7 @@ class Main(QtGui.QWidget):
 		
 		
 		#Title Text Font
-		topText = QtGui.QLabel('Kissync Enterprise')
+		topText = QtGui.QLabel('Kissync')
 		#http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
 		font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
 		topText.setFont(font)
@@ -91,6 +96,16 @@ class Main(QtGui.QWidget):
 		
 	def start(self):
 		#this method is called on login success
+		self.show()
+		
+		self.database.indexFiles()
+		self.database.indexRemoteFiles("/")
+		print "done with hashing"
+		#self.database.hashtask()
+		
+		#self.filewatcher = watcher.Watcher(self)
+		#self.filewatcher.start()
+		
 		self.filebrowsergui = FileBrowserGUI(self)		
 		self.accountwidget = AccountWidget(self)
 		self.grid.addWidget(self.titlewidget, 0, 0)

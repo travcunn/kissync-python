@@ -25,9 +25,9 @@ class BottomPanel(QtGui.QWidget):
 		self.numberSelected.setFont(fontsmall)
 		self.numberSelected.setAlignment(QtCore.Qt.AlignHCenter)
 		
-		self.actionsText = QtGui.QLabel('Actions')
-		self.actionsText.setFont(font)
-		self.actionsText.setAlignment(QtCore.Qt.AlignHCenter)
+		#self.actionsText = QtGui.QLabel('Actions')
+		#self.actionsText.setFont(font)
+		#self.actionsText.setAlignment(QtCore.Qt.AlignHCenter)
 		
 		self.topText = QtGui.QLabel('Information')
 		self.topText.setFont(font)
@@ -123,7 +123,7 @@ class BottomPanel(QtGui.QWidget):
 			self.item.close()
 			self.topText.setText("Multiple Files")
 			self.numberSelected.setText(str(numberOfItems) + " items selected.")
-			self.sizeSelectedTitle.setText("Size of Selection: ")
+			#self.sizeSelectedTitle.setText("Size of Selection: ")
 			self.hideSingle()
 		else:
 			#set the max size on one object
@@ -190,7 +190,7 @@ class BottomPanel(QtGui.QWidget):
 		self.updateView()
 		
 		#update the size total
-		self.updateSizes()
+		#self.updateSizes()
 		
 		#show the widget
 		self.show()

@@ -32,7 +32,7 @@ class IconWidget(QtGui.QWidget):
 			extension = "unknown"
 		else:
 			extension = extension[1:]
-		print extension
+		#print extension
 		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
@@ -84,14 +84,14 @@ class ItemObject(QtGui.QWidget):
 		#Get file extension and type
 		if (self.fileName.rfind('.') != -1):
 			dotIndex = self.fileName.rfind('.')
-			print dotIndex
+			#print dotIndex
 			fileNameLength = len(self.fileName)
-			print fileNameLength
+			#print fileNameLength
 			extension = self.fileName[dotIndex:fileNameLength]
 		else:
 			extension = None
 			
-		print extension
+		#print extension
 		
 		#Icon
 		self.icon = IconWidget(self, extension)
@@ -180,7 +180,7 @@ class ItemObject(QtGui.QWidget):
 		
 	def mousePressEvent(self, event):
 		if not(self.panelView):
-			print("Clicked")
+			#print("Clicked")
 			if not(self.isActive):
 				self.isActive = True
 				self.opacity = 1.0
@@ -244,10 +244,11 @@ class ItemObject(QtGui.QWidget):
 			if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
 				os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 				pathToAdd = pathToAdd + directory + "/"
-				print pathToAdd
+				#print pathToAdd
 				
 		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+		realPath = realPath.encode("utf-8")
 		with file(realPath, 'wb') as o:
 			shutil.copyfileobj(f, o)
 		return realPath

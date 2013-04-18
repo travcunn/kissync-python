@@ -45,6 +45,13 @@ class LogoutLabel(QtGui.QLabel):
 		
 	def mousePressEvent(self, event):
 		print "Logout button pressed"
+		reply = QtGui.QMessageBox.question(self,'Kissync',"Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if (reply == QtGui.QMessageBox.Yes):
+			event.accept()
+		else:
+			event.ignore()
+			self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
+			self.parent.show()
 		
 	def mouseDoubleClickEvent(self, event):
 		pass

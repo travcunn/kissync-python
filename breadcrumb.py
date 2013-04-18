@@ -183,7 +183,7 @@ class BreadCrumb(QtGui.QWidget):
 			self.gridlayout.removeWidget(self.breadcrumbItems[i])
 			self.breadcrumbItems[i].close()
 		self.breadcrumbItems = []
-		print newpath
+		#print newpath
 		pathArray = newpath.split("/")
 		
 		self.__add("/Home")

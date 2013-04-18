@@ -71,7 +71,7 @@ class FileView(QtGui.QWidget):
 	def setPath(self, path):
 		#clear current files...
 		self.clearAll()
-		print "Cleared all breadcrumbs"
+		#print "Cleared all breadcrumbs"
 		############set new path
 		
 		#Get JSON for root

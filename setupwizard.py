@@ -55,6 +55,7 @@ class SetupWizard(QtGui.QWidget):
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
 		self.checkboxOfflineMode.setFont(font)
 		self.checkboxNotifications.setFont(font)
+		self.checkboxOfflineMode.toggle()
 		self.checkboxNotifications.toggle()
 		
 		finishButton = QtGui.QPushButton('Finish Setup')
@@ -95,9 +96,10 @@ class SetupWizard(QtGui.QWidget):
 		
 		self.parent.config.set('LocalSettings', 'first-run', False)
 		
-		with open('configuration.cfg', 'wb') as configfile:
+		with open(self.parent.settingsFile, 'wb') as configfile:
 				self.parent.config.write(configfile)
 		self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
+		self.parent.start()
 		self.hide()
 		
 	def centerOnScreen (self):
@@ -106,10 +108,10 @@ class SetupWizard(QtGui.QWidget):
 				(resolution.height() / 2) - (self.frameSize().height() / 2))
 
 	def closeEvent(self, event):
-		reply=QtGui.QMessageBox.question(self,'Setup Wizard',"Are you sure you want to exit?",QtGui.QMessageBox.Yes,QtGui.QMessageBox.No)
-		if reply==QtGui.QMessageBox.Yes:
+		reply = QtGui.QMessageBox.question(self,'Setup Wizard',"Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if (reply==QtGui.QMessageBox.Yes):
 			event.accept()
 		else:
 			event.ignore()
-			self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
-			self.parent.show()
+			#self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
+			#self.parent.show()

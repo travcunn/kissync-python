@@ -26,6 +26,6 @@ class FileBrowserGUI(QtGui.QWidget):
 		self.setLayout(self.layoutgrid)
 	
 	def changePath(self, path):
-		print "Changing path to " + path
+		#print "Changing path to " + path
 		self.breadcrumb.setPath(path)
 		self.fileview.setPath(path)
