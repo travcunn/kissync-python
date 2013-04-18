@@ -309,9 +309,16 @@ class Uploader(threading.Thread):
 					username = self.parent.parent.config.get('Login', 'username')
 					password = self.parent.parent.config.get('Login', 'password')
 					
-					ftpaddress = self.sitename + ".smartfile.com"
-					ftp = FTP(ftpaddress, username, password)
-					ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+					while(True):
+						ftpaddress = self.sitename + ".smartfile.com"
+						try:
+							ftp = FTP(ftpaddress, username, password)
+							ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+						except:
+							pass
+						else:
+							break
+							
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))
 			
