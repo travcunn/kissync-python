@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import datetime, hashlib, os, platform, Queue, sys, time, threading
+import cPickle as pickle
 
 
 class FileDatabase(object):
@@ -10,6 +11,7 @@ class FileDatabase(object):
 		
 		self.remoteFilesDictionary = {}
 		self.localFilesDictionary = {}
+		self.localFilesDictionaryTime = {}
 	
 	def indexLocalFiles(self):
 		syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
@@ -20,41 +22,30 @@ class FileDatabase(object):
 			for item in files:
 				discoveredFilePath = os.path.join(paths,item)
 				filehash = self.hashFile(discoveredFilePath)
+				modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
+				#Add file to dictionary. filename:ksjdfoi23lkx983n2lj9x823jl
 				self.localFilesDictionary[discoveredFilePath.replace(syncdirPath,'').encode('utf-8')] = filehash.encode('utf-8')
+				#Add file to dictionary with time. filename: timestamp
+				self.localFilesDictionaryTime[discoveredFilePath.replace(syncdirPath,'').encode('utf-8')] = modifiedTime
+				
 				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
 		print "[database]: Local Database: Done indexing local files..."
 		
-	def indexRemoteFiles(self, path):
-		#this might take some time, as we are creating a 'task' on their server for MD5 hashing
-		tree = self.parent.smartfile.get('/path/info' + path, children = True)
-		if 'children' not in tree:
-			return []
-		for i in tree['children']:
-			if i['isdir']:
-				self.indexRemoteFiles(i['path'].encode('utf-8'))
-			else:
-				try:
-					self.remoteFilesDictionary[i['path'].encode('utf-8')] = self.hashtask(i['path'].encode('utf-8'))
-				except:
-					self.indexRemoteFiles("/")
+	def getRemoteFiles(self):
+		self.remoteFilesDictionary[i['path']] = self.hashtask(i['path'])
 	
-	def hashtask(self, filepath):
-		try:
-			self.parent.smartfile.post("/path/oper/checksum", path=(filepath,), algorithm='MD5')
-		except:
-			try:
-				self.parent.smartfile.post("/path/oper/checksum", path=(filepath,), algorithm='MD5')
-			except:
-				pass
-		
-		while True:
-			s = self.parent.smartfile.get('/task')
-			for i in s:
-				results = i['result']['result']
-				if 'checksums' in results:
-					fileAndHash =  i['result']['result']['checksums']
-					if filepath in fileAndHash:
-						return i['result']['result']['checksums'][filepath].encode('utf-8')
+	def loadRemoteListingFile(self):
+		openPath = self.downloadFile("/.kissync")
+		subprocess.call(('xdg-open', openPath))
+				
+	def getServerListingFile(self):
+				
+		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
+		realPath = self.parent.parent.parent.workingDirectory + filepath
+		realPath = realPath.encode("utf-8")
+		with file(realPath, 'wb') as o:
+			shutil.copyfileobj(f, o)
+		return realPath
 			
 	
 	def hashFile(self, filepath):
