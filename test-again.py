@@ -15,9 +15,10 @@ def main():
 		
 		#Get JSON for root
 		tree = api.post('/link', path='/Test Folder/Test/test.txt', name='text')
-		pprint.pprint(tree)
 		for i in tree:
-			print i['href']
+			if(i == "href"):
+				print tree[i]
+		
 		#print url
 		# Returns all directories and files in root!
 		#pprint.pprint(tree['site'])
