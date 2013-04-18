@@ -80,6 +80,7 @@ class FileView(QtGui.QWidget):
 			return []
 		# Returns all directories and files in directory!
 		for i in tree['children']:
+			print i['path']
 			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)

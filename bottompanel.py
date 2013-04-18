@@ -324,7 +324,7 @@ class BottomPanel(QtGui.QWidget):
 			#Share on twitter.
 			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
-			self.parent.parent.tray.notification("Kissync", "Link coppied to clipboard.")
+			self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
 		else:
 			print "Op. that button isn't alive yet!"
 	def moveFile(self, source, dest):
