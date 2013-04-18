@@ -124,6 +124,7 @@ class BreadCrumb(QtGui.QWidget):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		self.path = path
+		self.currentPath = None
 
 		self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
@@ -179,6 +180,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.breadcrumbItems[self.breadcrumbItems.index(item)].makeActive()
 		
 	def setPath(self, newpath):
+		self.currentPath = newpath
 		for i in range(len(self.breadcrumbItems)):
 			self.gridlayout.removeWidget(self.breadcrumbItems[i])
 			self.breadcrumbItems[i].close()

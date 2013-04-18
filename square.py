@@ -231,7 +231,17 @@ class ItemObject(QtGui.QWidget):
 	def deleteMe(self):
 		#This will delete it's self.
 		print "Delete button clicked!"
-	
+		#Create the file path to delete.
+		deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.filePath
+		#print deleteMeFilePath
+		##Delete the file from the system.
+		os.remove(deleteMeFilePath)
+		
+		##Instead of deleting a specific square.. just re-update the fileview.
+		deleteFileName = self.filePath.rfind('/')
+		#Prints out the directory...
+		#print self.filePath[:deleteFileName + 1] 
+		self.parent.parent.changePath(self.filePath[:deleteFileName + 1] )
 		pass
 		
 	def downloadFile(self, filepath):
