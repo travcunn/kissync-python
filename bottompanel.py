@@ -203,6 +203,46 @@ class BottomPanel(QtGui.QWidget):
 			self.item.close()
 		self.hide()
 
+	def buttonClicked(self, buttonType):
+		button = buttonType.lower()
+		if (button == "add"):
+			print "Add pressed."
+		elif (button == "delete"):
+			print "Delete pressed."
+		elif (button == "generate_link"):
+			print "Gen Link Pressed"
+			print self.parent.fileview.activeSquares[0].filePath
+			path = self.parent.fileview.activeSquares[0].filePath
+			url = ""
+			
+			#Create a temp url in the background!
+			
+			#Make API call for url.
+			tree = self.parent.parent.smartfile.get('/link', path=path)
+			#pprint.pprint(tree['href'])
+			for i in tree:
+				if 'href' not in i:
+					return []
+				url = i['href'].encode("utf-8")
+			
+			if not (url == "" or url == None):
+				pass
+			else:
+				print "Nothing!  Yet! GENERATE A URL!"
+				tree2 = self.parent.parent.smartfile.post('/link', path=path)
+				#pprint.pprint(tree['href'])
+				for i in tree2:
+					if 'href' not in i:
+						return []
+					url = i['href'].encode("utf-8")
+			
+			print "RESPONSE:"
+			print url
+			#url = self.parent.fileview.activeSquares[0].fileName
+			#text = "lala"
+			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
+		else:
+			print "Op. that button isn't alive yet!"
 		
 
 class Main(QtGui.QWidget):
