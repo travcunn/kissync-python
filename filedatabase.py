@@ -315,6 +315,7 @@ class Uploader(threading.Thread):
 							ftp = FTP(ftpaddress, username, password)
 							ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
 						except:
+							raise
 							pass
 						else:
 							break
