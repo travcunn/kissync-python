@@ -21,9 +21,24 @@ def main():
 		#pprint.pprint(tree['site'])
 		#pprint.pprint(tree['user']['name'].encode("utf-8"))
 		
-		api.post("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
-		s = api.get('/task')
-		print s
+		try:
+			api.post("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
+		except:
+			pass
+		
+		while True:
+			s = api.get('/task')
+			for i in s:
+				fileAndHash =  i['result']['result']['checksums']
+				if '/globed.txt' not in fileAndHash:
+					print "Not found  in this iteration"
+				else:
+					print i['result']['result']['checksums']['/globed.txt']
+					return
+				
+			break
+		#s = api.get('/task')
+		#print s
 		"""
 			if s['status'] == 'SUCCESS':
 				print "success"
