@@ -21,10 +21,12 @@ def main():
 		#pprint.pprint(tree['site'])
 		#pprint.pprint(tree['user']['name'].encode("utf-8"))
 		
+		
 		try:
 			api.post("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
 		except:
 			pass
+
 		
 		while True:
 			s = api.get('/task')

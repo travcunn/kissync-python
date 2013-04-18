@@ -48,7 +48,7 @@ class Client(object):
     def _do_request(self, request, url, **kwargs):
         "Actually makes the HTTP request."
         try:
-            response = request(url, stream=True, **kwargs)
+			response = request(url, stream=True, **kwargs)
         except RequestException, e:
             raise RequestError(e)
         else:
