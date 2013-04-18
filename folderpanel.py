@@ -70,7 +70,10 @@ class FolderPanel(QtGui.QWidget):
 			#if not os.path.exists(destination_folder):
 				#os.makedirs(destination_folder)
 			#os.rename(source_file,destination_folder)
-			shutil.move(str(source_file),str(destination_folder))
+			if not (str(source_file) == "" or str(source_file) == None):
+				shutil.move(str(source_file),str(destination_folder))
+			else:
+				print "User canceled upload dialog"
 			#deleteFileName = self.parent.fileview.squareArray[0].filePath
 			#print deleteFileName
 			#print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
