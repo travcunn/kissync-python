@@ -7,6 +7,8 @@ import sqlite3
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
+from ftplib import FTP
+
 class Watcher(threading.Thread):
 	def __init__(self, parent = None):
 		threading.Thread.__init__(self)
@@ -14,6 +16,7 @@ class Watcher(threading.Thread):
 		self.database = self.parent.database
 	
 	def run(self):
+		print "started the watcher"
 		self.path = self.parent.config.get('LocalSettings', 'sync-dir')
 		self.event_handler = EventHandler(self.parent)
 		self.observer = Observer()
@@ -41,8 +44,22 @@ class EventHandler(FileSystemEventHandler):
 	def on_created(self, event):
 		if not (event.is_directory):
 			fileToUpload = file(event.src_path)
-			self.parent.smartfile.post('/path/data/', file=("/TestingFolder" + event.src_path.replace(self.syncdirPath,''), fileToUpload))
-			#self.parent.smartfile.post('/path/data/', file=file(event.src_path.replace(self.syncdirPath,''), 'rb'))
+			try:
+				self.parent.smartfile.post('/path/data/', file=(event.src_path.replace(self.syncdirPath,''), fileToUpload))
+			except:
+				print "Could not convert into utf-8, so make FTP connection"
+				tree = self.parent.smartfile.get('/whoami', '/')
+				if 'site' in tree:
+					self.sitename = tree['site']['name'].encode("utf-8")
+					print self.sitename
+					
+					username = self.parent.config.get('Login', 'username')
+					password = self.parent.config.get('Login', 'password')
+					
+					ftpaddress = self.sitename + ".smartfile.com"
+					ftp = FTP(ftpaddress, username, password)
+					pathOnServer = event.src_path.replace(self.syncdirPath,'')
+					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
 		else:
 			self.parent.smartfile.post('/path/oper/mkdir/', event.src_path.replace(self.syncdirPath,''))
 		print event.event_type
