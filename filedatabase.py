@@ -6,117 +6,21 @@ class FileDatabase(object):
 	def __init__(self, parent = None):
 		object.__init__(self)
 		self.parent = parent
-		self.createDatabase()
 		self.remoteFilesList = []
-		#self.indexFiles()
+		
+		self.remoteFilesDictionary = {}
+		self.localFilesDictionary = {}
 	
-	#####################################################
-	############ Database Connect/Disconnect ############
-	#####################################################
-	
-	def dbConnect(self):
-		dbFile = self.parent.workingDirectory + "localdb.db"
-		self.dbconnection = sqlite3.connect(dbFile)
-		return self.dbconnection.cursor()
-	
-	def dbDisconnect(self):
-		self.dbconnection.close()
-		
-		
-	#####################################################
-	##### Local file listing in the local database ######
-	#####################################################
-			
-	def addFileLocal(self, sharepath, modified):
-		#Adds files to the database.
-		try:
-			cursor = self.dbConnect()
-			cursor.execute("INSERT INTO localfiles VALUES (?, ?)", (sharepath.decode('utf-8'), modified))
-			self.dbconnection.commit()
-		except:
-			raise
-		finally:
-			self.dbDisconnect()	
-	
-	def clearFilesLocal(self):
-		#clears the local files table
-		cursor = self.dbConnect()
-		cursor.execute("DELETE FROM localfiles")
-		self.dbconnection.commit()
-		
-	def getModifiedLocal(self, filepath): 	
-		##Returns when a file was last modified
-		cursor = self.dbConnect()
-		cursor.execute("SELECT modified FROM localfiles WHERE sharepath=?", (filepath,))	
-		return cursor.fetchone()
-		
-	def moveFileLocal(self, oldpath, newpath):
-		cursor = self.dbConnect()
-		cursor.execute("UPDATE localfiles SET sharepath=? WHERE sharepath=?", (newpath, oldpath))	
-		self.dbconnection.commit()
-		
-	def deleteFileLocal(self, sharepath):
-		cursor = self.dbConnect()
-		cursor.execute("DELETE FROM localfiles WHERE sharepath=?", (sharepath,))
-		self.dbconnection.commit()
-		
-	#####################################################
-	##### Remote file listing in the local database ######
-	#####################################################
-			
-	def addFileRemote(self, sharepath, filehash):
-		#Adds files to the database.
-		try:
-			cursor = self.dbConnect()
-			cursor.execute("INSERT INTO remotefiles VALUES (?, ?)", (sharepath.decode('utf-8'), filehash))
-			self.dbconnection.commit()
-		except:
-			raise
-		finally:
-			self.dbDisconnect()	
-	
-	def clearFilesRemote(self):
-		#clears the remote files table
-		cursor = self.dbConnect()
-		cursor.execute("DELETE FROM remotefiles")
-		self.dbconnection.commit()
-		
-	def getHashRemote(self, filepath): 	
-		##Returns when a file was last modified
-		cursor = self.dbConnect()
-		cursor.execute("SELECT hash FROM remotefiles WHERE sharepath=?", (filepath,))	
-		return cursor.fetchone()
-		
-	def moveFileRemote(self, oldpath, newpath):
-		cursor = self.dbConnect()
-		cursor.execute("UPDATE remotefiles SET sharepath=? WHERE sharepath=?", (newpath, oldpath))	
-		self.dbconnection.commit()
-		
-	def deleteFileRemote(self, sharepath):
-		cursor = self.dbConnect()
-		cursor.execute("DELETE FROM remotefiles WHERE sharepath=?", (sharepath,))
-		self.dbconnection.commit()
-		
-	
-
-	#####################################################
-	######## Local and remote file indexing #############
-	#####################################################
-	
-	def indexFiles(self):
+	def indexLocalFiles(self):
 		syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
 		print "[database]: Local Database: Indexing local files..."
 		##we must clear the existing table if there is request to index the files
-		self.clearFilesLocal()
+		self.localFilesDictionary = {}
 		for (paths, folders, files) in os.walk(syncdirPath):
-			#for each file it sees, we want the path and the file to we can store it
 			for item in files:
-				#os.walk crawls in the "Shared" folder and it returns an array of great things (being the file path)!
-				#print paths
-				## os.path.join combines the real path with the filename, and it works cross platform, woot!
 				discoveredFilePath = os.path.join(paths,item)
 				filehash = self.hashFile(discoveredFilePath)
-				self.addFileLocal(discoveredFilePath.replace(syncdirPath,''), filehash)
+				self.localFilesDictionary[discoveredFilePath.replace(syncdirPath,'')] = filehash
 				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,''), filehash)
 		print "[database]: Local Database: Done indexing local files..."
 		
@@ -130,18 +34,29 @@ class FileDatabase(object):
 				self.indexRemoteFiles(i['path'])
 			else:
 				self.remoteFilesList.append(i['path'])
+				try:
+					self.remoteFilesDictionary[i['path']] = self.hashtask(i['path'])
+				except:
+					self.indexRemoteFiles("/")
 	
-	def hashtask(self):
-		#print self.remoteFilesList
-		#for i in self.remoteFilesList:
-
-		t = self.parent.smartfile.get("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
-		print t
+	def hashtask(self, filepath):
+		try:
+			self.parent.smartfile.post("/path/oper/checksum", path=(filepath,), algorithm='MD5')
+		except:
+			pass
+		
 		while True:
-			s = self.parent.smartfile.get('/task', t['uuid'])
-			if s['status'] == 'SUCCESS':
-				print "success"
-				break
+			s = self.parent.smartfile.get('/task')
+			for i in s:
+				results = i['result']['result']
+				if 'checksums' in results:
+					fileAndHash =  i['result']['result']['checksums']
+					if filepath in fileAndHash:
+						return i['result']['result']['checksums'][filepath]
+
+						
+
+			
 	
 	def hashFile(self, filepath):
 	##Read files line by line instead of all at once (allows for large files to be hashes)
@@ -155,18 +70,4 @@ class FileDatabase(object):
 				break
 			md5.update(currentLine)
 		return md5.hexdigest()
-		
-	#####################################################
-	################# Database creation #################
-	#####################################################
-	
-	def createDatabase(self):
-		try:
-			cursor = self.dbConnect()
-			cursor.execute("""CREATE TABLE localfiles (sharepath text, hash text)""")
-			cursor.execute("""CREATE TABLE remotefiles (sharepath text, hash text)""")
-			cursor.execute("""CREATE TABLE watchworkqueue (sharepath text, hash text)""")
-		except sqlite3.OperationalError:
-			pass
-		finally:
-			self.dbDisconnect()
+
