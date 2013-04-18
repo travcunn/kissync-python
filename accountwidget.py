@@ -47,7 +47,13 @@ class LogoutLabel(QtGui.QLabel):
 		print "Logout button pressed"
 		reply = QtGui.QMessageBox.question(self,'Kissync',"Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 		if (reply == QtGui.QMessageBox.Yes):
-			event.accept()
+			self.parent.parent.tray.notification("Kissync", "Logging out..")
+			try:
+				os.remove(self.parent.parent.settingsFile)
+				#print "Deleted Config"
+				sys.exit(0)
+			except OSError:
+				pass
 		else:
 			event.ignore()
 			self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")

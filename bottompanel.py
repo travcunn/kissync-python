@@ -1,10 +1,14 @@
 import math, os, sys
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 from square import ItemObject
+import webbrowser
 
 from panelbutton import PanelButton
 
 import flowlayout
+
+#Copy and paste library.. platform independent.
+import pyperclip
 
 
 class BottomPanel(QtGui.QWidget):
@@ -154,6 +158,7 @@ class BottomPanel(QtGui.QWidget):
 		#self.lastModifiedTitle.hide()
 		self.lastModifiedText.hide()
 		self.numberSelected.show()
+		self.generateLinkButton.hide()
 	
 	def showSingle(self):
 		#self.fileNameTitle.show()
@@ -163,6 +168,7 @@ class BottomPanel(QtGui.QWidget):
 		#self.lastModifiedTitle.show()
 		self.lastModifiedText.show()
 		self.numberSelected.hide()
+		self.generateLinkButton.show()
 			
 	
 	def updateSizes(self):
@@ -213,6 +219,7 @@ class BottomPanel(QtGui.QWidget):
 			print "Gen Link Pressed"
 			print self.parent.fileview.activeSquares[0].filePath
 			path = self.parent.fileview.activeSquares[0].filePath
+			name = self.parent.fileview.activeSquares[0].fileName
 			url = ""
 			
 			#Create a temp url in the background!
@@ -224,23 +231,28 @@ class BottomPanel(QtGui.QWidget):
 				if 'href' not in i:
 					return []
 				url = i['href'].encode("utf-8")
-			
+			print path
+			print "-----------"
+			print name
 			if not (url == "" or url == None):
 				pass
 			else:
 				print "Nothing!  Yet! GENERATE A URL!"
-				tree2 = self.parent.parent.smartfile.post('/link', path=path)
+				p = path
+				n = name
+				tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True, recursive=True)
 				#pprint.pprint(tree['href'])
 				for i in tree2:
-					if 'href' not in i:
-						return []
-					url = i['href'].encode("utf-8")
-			
+					if(i == "href"):
+						url = tree2[i]
+
 			print "RESPONSE:"
 			print url
-			#url = self.parent.fileview.activeSquares[0].fileName
-			#text = "lala"
+			pyperclip.copy(url)
+			#Share on twitter.
+			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
+			self.parent.parent.tray.notification("Kissync", "Link coppied to clipboard.")
 		else:
 			print "Op. that button isn't alive yet!"
 		
