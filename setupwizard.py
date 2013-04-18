@@ -1,8 +1,6 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import os, sys
 
-import loadingwidget
-
 
 class SetupWizard(QtGui.QWidget):
 
@@ -30,12 +28,6 @@ class SetupWizard(QtGui.QWidget):
 		topText.setPalette(palette)
 		topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 		#topText.setStyleSheet("color: #FFFFFF;")
-
-		if not (sys.platform == 'win32'):
-			loading = loadingwidget.Main()
-			#this allows the squares to show properly, as the timing gets off sometimes
-			loading.show()
-			loading.hide()
 
 		grid = QtGui.QGridLayout()
 		
@@ -71,8 +63,6 @@ class SetupWizard(QtGui.QWidget):
 		grid.addWidget(spacer, 0, 2)
 		grid.addWidget(topText, 0, 1)
 		grid.addWidget(formwidget, 2, 1)
-		if not (sys.platform == 'win32'):
-			grid.addWidget(loading, 4, 1)
 		grid.addWidget(spacer, 5, 1)
 		#set the layout to grid layout
 		self.setLayout(grid)
@@ -95,12 +85,11 @@ class SetupWizard(QtGui.QWidget):
 		self.parent.config.set('LocalSettings', 'sync-dir', directory)
 		
 		self.parent.config.set('LocalSettings', 'first-run', False)
-		
+		self.hide()
 		with open(self.parent.settingsFile, 'wb') as configfile:
 				self.parent.config.write(configfile)
 		self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
 		self.parent.start()
-		self.hide()
 		
 	def centerOnScreen (self):
 		resolution = QtGui.QDesktopWidget().screenGeometry()

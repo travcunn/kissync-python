@@ -291,8 +291,6 @@ class Main(QtGui.QWidget):
 		self.loginButton = QtGui.QPushButton('Add Square')
 		self.loginButton.clicked.connect(self.addSquare)
 		self.grid.addWidget(self.loginButton)
-		
-		self.grid.addWidget(self.loadingwidget)
 
 		self.setLayout(self.grid)
 		

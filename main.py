@@ -1,7 +1,7 @@
 import ConfigParser, os, sys
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
-import breadcrumb, flowlayout, loadingwidget, style, square
+import breadcrumb, flowlayout, style, square
 from authenticator import Authenticator
 from filedatabase import FileDatabase
 from filedatabase import Synchronizer

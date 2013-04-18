@@ -28,6 +28,9 @@ class Watcher(threading.Thread):
 		except KeyboardInterrupt:
 			observer.stop()
 			observer.join()
+		except:
+			observer.stop()
+			observer.join()
 		
 		
 		
