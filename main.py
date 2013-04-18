@@ -102,13 +102,13 @@ class Main(QtGui.QWidget):
 		#this method is called on login success
 		self.show()
 		
-		self.database.indexLocalFiles()
-		self.database.indexRemoteFiles("/")
+		#self.database.indexLocalFiles()
+		#self.database.indexRemoteFiles("/")
 		
 		
 		
 		print "done with hashing"
-		self.synchronizer.start()
+		#self.synchronizer.start()
 		
 		#self.filewatcher = watcher.Watcher(self)
 		#self.filewatcher.start()
