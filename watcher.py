@@ -34,16 +34,6 @@ class EventHandler(FileSystemEventHandler):
 		self.syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
 		
 	def on_moved(self, event):
-		#self.parent.parent.tray.notification("Kissync", "Event! woot!")
-		#print self.parent.smartfile.get('/path/info', '/')
-		'''
-		task = self.parent.smartfile.post("/path/oper/move", src="/globe.txt", dst="/globecopy.txt")
-		while True:
-			status = self.parent.smartfile.get('/task', task['uuid'])
-			if status['status'] == 'SUCCESS':
-				print "success"
-				break
-				'''
 		print event.event_type
 		print event.src_path
 		print event.dest_path
