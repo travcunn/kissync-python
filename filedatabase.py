@@ -20,8 +20,8 @@ class FileDatabase(object):
 			for item in files:
 				discoveredFilePath = os.path.join(paths,item)
 				filehash = self.hashFile(discoveredFilePath)
-				self.localFilesDictionary[discoveredFilePath.replace(syncdirPath,'')] = filehash
-				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,''), filehash)
+				self.localFilesDictionary[discoveredFilePath.replace(syncdirPath,'').encode('utf-8')] = filehash.encode('utf-8')
+				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
 		print "[database]: Local Database: Done indexing local files..."
 		
 	def indexRemoteFiles(self, path):
@@ -31,19 +31,23 @@ class FileDatabase(object):
 			return []
 		for i in tree['children']:
 			if i['isdir']:
-				self.indexRemoteFiles(i['path'])
+				self.indexRemoteFiles(i['path'].encode('utf-8'))
 			else:
 				try:
 					print i['path']
-					self.remoteFilesDictionary[i['path']] = self.hashtask(i['path'])
+					self.remoteFilesDictionary[i['path'].encode('utf-8')] = self.hashtask(i['path'].encode('utf-8'))
 				except:
+					raise
 					self.indexRemoteFiles("/")
 	
 	def hashtask(self, filepath):
 		try:
 			self.parent.smartfile.post("/path/oper/checksum", path=(filepath,), algorithm='MD5')
 		except:
-			pass
+			try:
+				self.parent.smartfile.post("/path/oper/checksum", path=(filepath,), algorithm='MD5')
+			except:
+				pass
 		
 		while True:
 			s = self.parent.smartfile.get('/task')
@@ -52,7 +56,7 @@ class FileDatabase(object):
 				if 'checksums' in results:
 					fileAndHash =  i['result']['result']['checksums']
 					if filepath in fileAndHash:
-						return i['result']['result']['checksums'][filepath]
+						return i['result']['result']['checksums'][filepath].encode('utf-8')
 			
 	
 	def hashFile(self, filepath):
@@ -74,20 +78,32 @@ class Synchronizer(object):
 		object.__init__(self)
 		self.parent = parent
 		self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
-	
+		
+		self.filesToDownload = []
+		self.filesToUpload = []
+		
 	def start(self):
 		#Compare what files server has against local files
-		print "Compare what files server has against local files:"
-		print self.dictDiffer.added()
+		#print self.parent.database.remoteFilesDictionary
+		#print self.parent.database.localFilesDictionary
+		#print "Compare what files server has against local files:"
 		
-
-class QueueManager(object):
-	def __init__(self, parent = None):
-		object.__init__(self)
-		self.parent = parent
-		self.downloadQueue = []
-		self.uploadQueue = []
-
+		#files the server that client needs
+		for i in self.dictDiffer.added():
+			self.filesToDownload.append(i)
+			
+		#files that are different on the server, that the client needs	
+		for i in self.dictDiffer.changed():
+			self.filesToDownload.append(i)
+		
+		#local files that smartfile needs
+		for i in self.dictDiffer.removed():
+			self.filesToUpload.append(i)
+		
+		print "Files to download:"
+		print self.filesToDownload
+		print "Files to upload:"
+		print self.filesToUpload
 
 
 """

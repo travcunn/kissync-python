@@ -4,7 +4,6 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import breadcrumb, flowlayout, loadingwidget, style, square
 from authenticator import Authenticator
 from filedatabase import FileDatabase
-from filedatabase import QueueManager
 from filedatabase import Synchronizer
 from loginwindow import LoginWindow
 from fileview import FileView
@@ -58,10 +57,8 @@ class Main(QtGui.QWidget):
 		self.setupwizard = SetupWizard(self)
 		#file database
 		self.database = FileDatabase(self)
-		self.queuemanager = QueueManager(self)
 		#file system watcher
 		#self.filewatcher = watcher.Watcher(self)
-		self.synchronizer = Synchronizer(self)
 		
 		
 		#################MAIN WINDOW GUI#####################
@@ -105,9 +102,8 @@ class Main(QtGui.QWidget):
 		self.database.indexLocalFiles()
 		self.database.indexRemoteFiles("/")
 		
-		
-		
 		print "done with hashing"
+		self.synchronizer = Synchronizer(self)
 		self.synchronizer.start()
 		
 		#self.filewatcher = watcher.Watcher(self)
