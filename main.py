@@ -114,11 +114,8 @@ class Main(QtGui.QWidget):
 		
 		self.filewatcher = watcher.Watcher(self)
 		
-		print "done with hashing"
 		self.synchronizer = Synchronizer(self)
 		self.synchronizer.start()
-		print "done syncing totally!"
-		
 		
 		self.rt = RefreshThread(self)
 		self.rt.start()

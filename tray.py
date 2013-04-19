@@ -23,7 +23,7 @@ class TrayMenu(QtGui.QMenu):
 		self.parent.notification("Kissync", "hello")
 
 	def exit(self):
-		print "exiting..."
+		##print "exiting..."
 		self.parent.parent.exit()
 		
 
