@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['/home/travis/Dropbox/kissync/kissync-client/kissync.py'],
+a = Analysis(['/home/travis/Dropbox/kissync/kissync-client/main.py'],
              pathex=['/home/travis'],
              hiddenimports=[],
              hookspath=None)

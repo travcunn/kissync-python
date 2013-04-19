@@ -21,8 +21,8 @@ class Crumb(QtGui.QWidget):
 		
 		fontDatabase = QtGui.QFontDatabase()
 		#fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-		fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-		os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
+		fontDatabase.addApplicationFont(os.path.expanduser("~") + "/resources/Roboto-Light-webfont.ttf")
+		os.path.dirname(os.path.expanduser("~") + "/resources/Roboto-Light-webfont.ttf")
 		
 		self.text = crumbpath
 		self.font = QtGui.QFont("Roboto", 12, QtGui.QFont.Bold, False)

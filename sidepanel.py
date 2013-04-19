@@ -204,7 +204,7 @@ class PanelButton(QtGui.QWidget):
 	def addIcon(self, buttonType):
 		self.icon = QtGui.QImage()
 		print buttonType
-		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/simplicio/icons48/" + buttonType + ".png")
+		self.icon.load(os.path.expanduser("~") + "/icons/simplicio/icons48/" + buttonType + ".png")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 48, 48)
         

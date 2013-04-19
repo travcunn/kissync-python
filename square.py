@@ -37,13 +37,13 @@ class IconWidget(QtGui.QWidget):
 		#print extension
 		
 
-		if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg") == True):
+		if (self.icon.load(os.path.expanduser("~") + "/icons/faience/mimetypes/" + extension + ".svg") == True):
 			#print "KNOWN"
 			pass
 		else:
 			extension = "unknown"
 		
-		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
+		self.icon.load(os.path.expanduser("~") + "/icons/faience/mimetypes/" + extension + ".svg")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
         

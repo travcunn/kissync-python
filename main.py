@@ -20,6 +20,7 @@ class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)
 		self.style = style.KissyncStyle()
+		print os.path.expanduser("~") 
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		
@@ -75,8 +76,8 @@ class Main(QtGui.QWidget):
 		
 		#Load font for the title text
 		fontDatabase = QtGui.QFontDatabase()
-		fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-		fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
+		fontfile = QtCore.QFile(os.path.expanduser("~") + "resources/Roboto-Light-webfont.ttf")
+		fontDatabase.addApplicationFont(os.path.expanduser("~") + "/resources/Roboto-Light-webfont.ttf")
 		#os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
 		palette = QtGui.QPalette()
 		#palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))

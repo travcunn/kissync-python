@@ -7,7 +7,7 @@ class TrayMenu(QtGui.QMenu):
 		QtGui.QMenu.__init__(self)
 		self.parent = parent
 		
-		openItem = QtGui.QAction('Open Kissync Browser', self)   
+		openItem = QtGui.QAction('Open Kissync Browser', self)
 		openItem.triggered.connect(self.openmain)
 
 		exitItem = QtGui.QAction('&Exit', self)   
@@ -31,8 +31,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 	def __init__(self, parent=None):
 		QtGui.QSystemTrayIcon.__init__(self, parent)
 		self.parent = parent
-		
-		self.setIcon(QtGui.QIcon("icons/icon.xpm"))
+		self.setIcon(QtGui.QIcon(os.path.expanduser("~") + "/icons/icon.xpm"))
 		self.setToolTip(QtCore.QString('Kissync'))
 		
 		self.menu = TrayMenu(self)
