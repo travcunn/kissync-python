@@ -194,13 +194,15 @@ class AccountWidget(QtGui.QWidget):
 		
 		#self.loadGravatar()
 		
-		self.gridlayout.addWidget(self.lbFullName, 0, 1, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-		#self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-		self.gridlayout.addWidget(self.lblogout, 1, 2, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-		
 		#Icon stuff
 		self.newicon = IconWidget(self, self.email)
-		self.gridlayout.addWidget(self.newicon, 0, 0, 2, 1 , QtCore.Qt.AlignCenter)
+		self.gridlayout.addWidget(self.newicon, 0, 1, 2, 2 , QtCore.Qt.AlignRight)
+		
+		self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+		#self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+		self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+		
+		
 		
 		self.setLayout(self.gridlayout)
 		

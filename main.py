@@ -15,7 +15,7 @@ from accountwidget import AccountWidget
 
 import watcher
 							
-			#.replace(self.syncdirPath,'')
+
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)
