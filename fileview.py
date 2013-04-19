@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 from square import ItemObject
 
-import style, flowlayout, pprint
+import style, flowlayout, pprint, os, mimetypes
 
 
 class FileView(QtGui.QWidget):
@@ -64,11 +64,35 @@ class FileView(QtGui.QWidget):
 		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
 		
 		for i in tree['children']:
-			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
+			#print i['path']
+			if (i['path'].startswith('/.')):
+				pass
+			else:
+				item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
+				self.squareArray.append(item)
+				self.flowLayout.addWidget(item)
+				
+		'''
+		
+		os.chdir(self.parent.parent.sorageDirectory)
+		rootPath = self.parent.parent.sorageDirectory + "/"
+		fullName = None
+		
+		for files in os.listdir(self.parent.parent.sorageDirectory):
+			print rootPath + files
+			print files
+			print str(os.stat(rootPath + files).st_size)
+			print str( mimetypes.guess_type(rootPath + files, strict=True))
+			print str(os.path.isdir(rootPath + files))
+			print str(os.stat(rootPath + files).st_mtime)
+			print "******************"
+			item = ItemObject(self, rootPath + files, files, os.stat(rootPath + files).st_size ,  mimetypes.guess_type(rootPath + files, strict=True)[0], os.path.isdir(rootPath + files), str(os.stat(rootPath + files).st_mtime))
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
 			
+			'''
 	def setPath(self, path):
+		
 		#clear current files...
 		self.clearAll()
 		#print "Cleared all breadcrumbs"
@@ -80,10 +104,35 @@ class FileView(QtGui.QWidget):
 			return []
 		# Returns all directories and files in directory!
 		for i in tree['children']:
-			print i['path']
-			item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
+			if (i['path'].startswith('/.')):
+				pass
+			else:
+				item = ItemObject(self, i['path'], i['name'], i['size'] , i['mime'], i['isdir'], i['time'])
+				self.squareArray.append(item)
+				self.flowLayout.addWidget(item)
+				
+		'''
+		self.clearAll()
+		
+		os.chdir(self.parent.parent.sorageDirectory)
+		rootPath = self.parent.parent.sorageDirectory + path
+		fullName = None
+		for files in os.listdir(self.parent.parent.sorageDirectory + path):
+			
+			print rootPath + files
+			print files
+			print str(os.stat(rootPath + files).st_size)
+			print str( mimetypes.guess_type(rootPath + files, strict=True))
+			print str(os.path.isdir(rootPath + files))
+			print str(os.stat(rootPath + files).st_mtime)
+			print "******************"
+			
+			
+			
+			item = ItemObject(self, rootPath + files, files, os.stat(rootPath + files).st_size ,  mimetypes.guess_type(rootPath + files, strict=True), os.path.isdir(rootPath + files), str(os.stat(rootPath + files).st_mtime))
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
+		'''
 
 	def clearAll(self):
 		

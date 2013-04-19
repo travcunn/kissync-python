@@ -100,10 +100,12 @@ class BottomPanel(QtGui.QWidget):
 		self.addButton = PanelButton(self, "add")
 		self.deleteButton = PanelButton(self, "delete")
 		self.moveButton = PanelButton(self, "move")
+		self.renameButton = PanelButton(self, "rename")
 		self.generateLinkButton = PanelButton(self, "generate_link")
 		self.buttonsLayout.addWidget(self.addButton)
 		self.buttonsLayout.addWidget(self.deleteButton)
 		self.buttonsLayout.addWidget(self.moveButton)
+		self.buttonsLayout.addWidget(self.renameButton)
 		self.buttonsLayout.addWidget(self.generateLinkButton)
 	
 		
@@ -142,10 +144,15 @@ class BottomPanel(QtGui.QWidget):
 			#self.sizeSelectedTitle.setText("Size: ")
 			
 			#only details for only single files
-			filetype = self.parent.fileview.activeSquares[0].fileType
+			#filetype = self.parent.fileview.activeSquares[0].fileType
+			
+			## not sure why this is here... ##
+			'''
 			if not (len(filetype) <= 24):
 				cut = len(filetype) - 24
 				filetype = filetype.replace(filetype[-cut:], '...')
+				
+			'''
 			
 			#self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
 			self.topText.setText(self.parent.fileview.activeSquares[0].fileName)
@@ -286,6 +293,13 @@ class BottomPanel(QtGui.QWidget):
 			self.moveFile(str(source_file),str(destination_folder))
 			
 			self.parent.parent.tray.notification("Kissync", "Moved")
+		elif (button == "rename"):
+			
+			inputter = InputDialog(self, title="Move:", label="Folder:", text="/")
+			inputter.exec_()
+			comment = inputter.text.text()
+			
+			
 			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
