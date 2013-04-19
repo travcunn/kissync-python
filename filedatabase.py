@@ -421,7 +421,10 @@ class Uploader(threading.Thread):
 							print "created directory " + pathToAdd + directory
 						#os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 						pathToAdd = pathToAdd + directory + "/"
-					ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+					try:
+						ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+					except:
+						pass
 				else:
 					print "Could not upload the file via ftp"
 							
