@@ -61,7 +61,6 @@ class FolderPanel(QtGui.QWidget):
 	def buttonClicked(self, buttonType):
 		button = buttonType.lower()
 		if (button == "add"):
-<<<<<<< HEAD
 			print "Add pressed."
 			##Open Dialog
 			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
@@ -70,70 +69,38 @@ class FolderPanel(QtGui.QWidget):
 			destination_folder = os.path.expanduser("~") + "/Kissync" + self.parent.breadcrumb.currentPath
 			print "Source: " + source_file
 			print "Dest: " + destination_folder
-=======
-			###print "Add pressed."
-			##Open Dialog
-			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
-			## ###print File Name
-			####print str(fname)
-			destination_folder = os.path.expanduser("~") + "/Kissync" + self.parent.breadcrumb.currentPath
-			###print "Source: " + source_file
-			###print "Dest: " + destination_folder
->>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			#if not os.path.exists(destination_folder):
 				#os.makedirs(destination_folder)
 			#os.rename(source_file,destination_folder)
 			if not (str(source_file) == "" or str(source_file) == None):
 				shutil.move(str(source_file),str(destination_folder))
-<<<<<<< HEAD
 			else:
 				print "User canceled upload dialog"
 			#deleteFileName = self.parent.fileview.squareArray[0].filePath
 			#print deleteFileName
 			#print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
-=======
-				###print "User canceled upload dialog"
-			#deleteFileName = self.parent.fileview.squareArray[0].filePath
-			####print deleteFileName
-			####print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
->>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			#self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1])
 			
 			#### NEED TO ADD REFRESH FILEVIEW #########
 			#Refreshes FileVIEW
 			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
-<<<<<<< HEAD
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
-=======
-			####prints out the directory...
-			####print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
->>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 		elif (button == "refresh"):
 			
 			Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
-<<<<<<< HEAD
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
 		else:
 			print "Op. that button isn't alive yet!"
-=======
-			####prints out the directory...
-			####print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
-			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
->>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 		
 
 		
 if __name__ == "__main__":
 	
-<<<<<<< HEAD
 	#print os.path.realpath(__file__)
-=======
-	####print os.path.realpath(__file__)
->>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()
