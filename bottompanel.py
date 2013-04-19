@@ -318,11 +318,13 @@ class BottomPanel(QtGui.QWidget):
 				extension = source_file[dotIndex:fileNameLength]
 			else:
 				extension = None
-			
-			inputter = InputDialog(self, title="Rename:", label="Folder:", text=extension)
+			indFolder = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			folder = "/Kissync" + self.parent.fileview.activeSquares[0].filePath[:indFolder + 1]
+		
+			inputter = InputDialog(self, title="Rename:", label="New Name:", text=extension)
 			inputter.exec_()
 			print source_file
-			dest_file = os.path.expanduser("~") + "/Kissync/" + inputter.text.text()
+			dest_file = os.path.expanduser("~") + folder + inputter.text.text()
 			print dest_file
 			self.moveFile(str(source_file),str(dest_file))
 			self.parent.parent.tray.notification("Kissync", "Renamed")
