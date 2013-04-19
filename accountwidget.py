@@ -182,9 +182,9 @@ class AccountWidget(QtGui.QWidget):
 		##get rid of the widget border
 		self.setStyleSheet("QWidget { border: 0px; }")
 		
-		self.setMinimumSize(300, 85)
+		self.setMinimumSize(300, 80)
 	
-		self.setMaximumSize(300, 85)
+		self.setMaximumSize(300, 80)
 		
 		self.gridlayout = QtGui.QGridLayout()
 		

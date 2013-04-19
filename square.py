@@ -28,11 +28,21 @@ class IconWidget(QtGui.QWidget):
 		self.icon = QtGui.QImage()
 		if(self.isFolder == True):
 			extension = "folder"
-		elif(extension == None):
+		elif(extension == None or extension == ""):
 			extension = "unknown"
 		else:
+			#print "Meh: " + extension
 			extension = extension[1:]
+			
 		#print extension
+		
+
+		if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg") == True):
+			#print "KNOWN"
+			pass
+		else:
+			extension = "unknown"
+		
 		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
@@ -291,6 +301,8 @@ class Main(QtGui.QWidget):
 		self.loginButton = QtGui.QPushButton('Add Square')
 		self.loginButton.clicked.connect(self.addSquare)
 		self.grid.addWidget(self.loginButton)
+		
+		self.grid.addWidget(self.loadingwidget)
 
 		self.setLayout(self.grid)
 		
