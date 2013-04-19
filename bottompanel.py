@@ -295,11 +295,31 @@ class BottomPanel(QtGui.QWidget):
 			self.parent.parent.tray.notification("Kissync", "Moved")
 		elif (button == "rename"):
 			
-			inputter = InputDialog(self, title="Move:", label="Folder:", text="/")
+			source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			
+			#Get file extension and type
+			extension = None
+			if (source_file.rfind('.') != -1):
+				dotIndex = source_file.rfind('.')
+				#print dotIndex
+				fileNameLength = len(source_file)
+				#print fileNameLength
+				extension = source_file[dotIndex:fileNameLength]
+			else:
+				extension = None
+			
+			inputter = InputDialog(self, title="Rename:", label="Folder:", text=extension)
 			inputter.exec_()
-			comment = inputter.text.text()
+			print source_file
+			dest_file = os.path.expanduser("~") + "/Kissync/" + inputter.text.text()
+			print dest_file
+			self.moveFile(str(source_file),str(dest_file))
+			self.parent.parent.tray.notification("Kissync", "Renamed")
 			
-			
+			deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
 			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
