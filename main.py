@@ -15,7 +15,7 @@ from accountwidget import AccountWidget
 
 import watcher
 							
-
+			
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)
@@ -99,6 +99,7 @@ class Main(QtGui.QWidget):
 		
 		self.tray = SystemTrayIcon(self) #tray icon
 		self.tray.show()
+		self.tray.notification("Kissync Enterprise", "Starting up....")
 		
 		self.authenticator = Authenticator(self) #login in
 		

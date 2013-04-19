@@ -56,8 +56,9 @@ class Authenticator(object):
 						os._exit()
 				else:
 					#logged in successfully
-					userpass, ok = QtGui.QInputDialog.getText(self.parent, 'Kissync', 'Reenter your password:')
-					
+					inputd = QtGui.QInputDialog()
+					inputd.setTextEchoMode(QtGui.QLineEdit.Password)
+					userpass, ok = inputd.getText(self.parent, 'Kissync', 'Reenter your password:')
 					if not ok:
 						userpass = None
 					else:

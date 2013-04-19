@@ -1,6 +1,6 @@
 import os, platform, shutil, subprocess, sys, time, urllib2
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import math
+import math, webbrowser
 from authenticator import Authenticator
 
 # import code for encoding urls and generating md5 hashes
@@ -84,6 +84,12 @@ class UsernameLabel(QtGui.QLabel):
 		self.setText(fullname)
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
 		self.setFont(font)
+	
+	def mousePressEvent(self, event):
+		webbrowser.open('https://app.smartfile.com/ftp/private/account/')
+		
+	def mouseDoubleClickEvent(self, event):
+		pass
 
 		
 class IconWidget(QtGui.QWidget):
@@ -127,6 +133,13 @@ class IconWidget(QtGui.QWidget):
 		
 		#End Painter
 		painter.end()
+
+	def mousePressEvent(self, event):
+		webbrowser.open('http://www.gravatar.com/')
+		
+	def mouseDoubleClickEvent(self, event):
+		pass
+		
 		
 class InputDialog(QtGui.QDialog):
 	'''
