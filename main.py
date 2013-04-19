@@ -15,12 +15,11 @@ from accountwidget import AccountWidget
 
 import watcher
 							
-			
+			#.replace(self.syncdirPath,'')
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)
 		self.style = style.KissyncStyle()
-		print os.path.expanduser("~") 
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		
@@ -51,21 +50,6 @@ class Main(QtGui.QWidget):
 		else:
 			self.config.read(self.settingsFile)
 		
-		#connects directly to the smartfile api, but relies upon self.authenticator	to create
-		self.smartfile = None #we don't want to init yet, so we can handle errors later on login
-		#login screen
-		self.loginwindow = LoginWindow(self)
-		#runs the authentication process that connects self.smartfile with a smartfile client
-		self.authenticator = Authenticator(self) #login in
-		#tray icon
-		self.tray = SystemTrayIcon(self) #tray icon
-		self.tray.show()
-		#setup window for initial user configuration
-		self.setupwizard = SetupWizard(self)
-		#file database
-		self.database = FileDatabase(self)
-		#file system watcher
-		#self.filewatcher = watcher.Watcher(self)
 		
 		
 		#################MAIN WINDOW GUI#####################
@@ -84,7 +68,7 @@ class Main(QtGui.QWidget):
 		
 		
 		#Title Text Font
-		topText = QtGui.QLabel('Kissync')
+		topText = QtGui.QLabel('Kissync Enterprise')
 		#http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
 		font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
 		topText.setFont(font)
@@ -101,6 +85,24 @@ class Main(QtGui.QWidget):
 		self.grid = QtGui.QGridLayout()
 		self.grid.setContentsMargins(0, 10, 10, 0)
 		self.setLayout(self.grid)
+		
+		#connects directly to the smartfile api, but relies upon self.authenticator	to create
+		self.smartfile = None #we don't want to init yet, so we can handle errors later on login
+		#login screen
+		self.database = FileDatabase(self)
+		
+		#setup window for initial user configuration
+		self.setupwizard = SetupWizard(self)
+		
+		self.loginwindow = LoginWindow(self)
+		#runs the authentication process that connects self.smartfile with a smartfile client
+		
+		self.tray = SystemTrayIcon(self) #tray icon
+		self.tray.show()
+		
+		self.authenticator = Authenticator(self) #login in
+		
+		#self.filewatcher = watcher.Watcher(self)
 		
 	def start(self):
 		#this method is called on login success

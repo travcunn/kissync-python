@@ -2,14 +2,19 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 from authbrowser import AuthBrowser
 from smartfile import OAuthClient
 
+import os, webbrowser
+
 
 class Authenticator(object):
 	def __init__(self, parent = None):
 		super(Authenticator, self).__init__()
 		self.parent = parent 
 		
-		self.htmlView = AuthBrowser(self)
-		self.go()
+		if not (os.name == 'nt'):
+			self.htmlView = AuthBrowser(self)
+			self.go()
+		else:
+			self.goWindows() # #thingsnottosayoutloud
                 
 	def go(self):
 		try:
@@ -21,6 +26,37 @@ class Authenticator(object):
 		else:
 			self.parent.smartfile.get_request_token()
 			self.htmlView.load(QtCore.QUrl(self.parent.smartfile.get_authorization_url()))
+	
+	def goWindows(self):
+		try:
+			self.parent.smartfile = OAuthClient("zGSJpILRq2889Ne2bPBdEmEZLsRHpe", "KOb97irJG84PJ8dtEkoYt2Kqwz3VJa")
+		except:
+			self.networkerror()
+		else:
+			self.parent.smartfile.get_request_token()
+			webbrowser.open(self.parent.smartfile.get_authorization_url())
+			text, ok = QtGui.QInputDialog.getText(self.parent, 'Kissync Verification', 'Paste the verifier here:')
+        
+			if not ok:
+				text = None
+				os._exit()
+			else:
+				try:
+					self.parent.smartfile.get_access_token(None, text)
+				except:
+					#something happened after logging in successfully, and is not sucessful now
+					quit_msg = "Wrong verification code. Try again?"
+					reply = QtGui.QMessageBox.question(self.parent, 'Kissync Login', 
+						quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+
+					if reply == QtGui.QMessageBox.Yes:
+						self.goWindows()
+					else:
+						os._exit()
+				else:
+					#logged in successfully
+					self.success()
+				
 	
 	def networkerror(self):
 		self.parent.loginwindow.networkerror()

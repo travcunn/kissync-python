@@ -4,7 +4,7 @@ import math
 from authenticator import Authenticator
 
 # import code for encoding urls and generating md5 hashes
-import urllib, hashlib, Image, cStringIO
+import urllib, hashlib, cStringIO
 
 import style
 
