@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 import sys
 
+
 class LoginWindow(QtGui.QWidget):
 
 	def __init__(self, parent = None):

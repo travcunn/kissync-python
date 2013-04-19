@@ -15,6 +15,7 @@ class AuthBrowser(QtWebKit.QWebView):
 	def _result_available(self, ok):
 		frame = self.page().mainFrame()
 		soup = BeautifulSoup(unicode(frame.toHtml()).encode('utf-8'))
+		print soup
 		doc = self.page().mainFrame().documentElement()
 
         

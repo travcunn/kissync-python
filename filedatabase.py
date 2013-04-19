@@ -406,8 +406,9 @@ class Uploader(threading.Thread):
 					ftp = FTP(ftpaddress, username, password)
 					
 					pathArray = localpath.split("/")
-					pathArray.pop(0)
-					pathArray.pop(len(pathArray) - 1)
+					if not(len(pathArray) == 1):
+						pathArray.pop(0)
+						pathArray.pop(len(pathArray) - 1)
 					pathToAdd = ""
 					
 					#A BUG EXISTS IN THIS, PLEASE TEST THIS
