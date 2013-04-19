@@ -31,7 +31,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 	def __init__(self, parent=None):
 		QtGui.QSystemTrayIcon.__init__(self, parent)
 		self.parent = parent
-		self.setIcon(QtGui.QIcon(os.path.expanduser("~") + "/icons/icon.xpm"))
+		self.setIcon(QtGui.QIcon(os.path.dirname(os.path.realpath(__file__)) + "/icons/icon.xpm"))
 		self.setToolTip(QtCore.QString('Kissync'))
 		
 		self.menu = TrayMenu(self)

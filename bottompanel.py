@@ -229,7 +229,7 @@ class BottomPanel(QtGui.QWidget):
 			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
 			## Print File Name
 			#print str(source_file)
-			destination_folder = os.path.expanduser("~") + "/Kissync" + self.parent.breadcrumb.currentPath
+			destination_folder = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.breadcrumb.currentPath
 			print "Source: " + source_file
 			print "Dest: " + destination_folder
 			#if not os.path.exists(destination_folder):
@@ -255,7 +255,7 @@ class BottomPanel(QtGui.QWidget):
 		elif (button == "delete"):
 			print "Delete pressed."
 			#Create the file path to delete.
-			deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			deleteMeFilePath = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
 			##Delete the file from the system.
 			os.remove(deleteMeFilePath)
 			
@@ -269,7 +269,7 @@ class BottomPanel(QtGui.QWidget):
 		
 		elif (button == "move"):
 			#Move File...
-			source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			source_file = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
 			
 			'''
 			#Get file extension and type
@@ -327,7 +327,7 @@ class BottomPanel(QtGui.QWidget):
 			inputter.exec_()
 			
 			print source_file
-			dest_file = os.path.expanduser("~") + folder + inputter.text.text()
+			dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
 			print dest_file
 			self.moveFile(str(source_file),str(dest_file))
 			self.parent.parent.tray.notification("Kissync", "Renamed")
