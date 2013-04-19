@@ -42,18 +42,18 @@ class SetupWizard(QtGui.QWidget):
 		formgrid = QtGui.QFormLayout()
 		formwidget.setLayout(formgrid)
 		
-		self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
+		#self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
 		self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
-		self.checkboxOfflineMode.setFont(font)
+		s#elf.checkboxOfflineMode.setFont(font)
 		self.checkboxNotifications.setFont(font)
-		self.checkboxOfflineMode.toggle()
+		#self.checkboxOfflineMode.toggle()
 		self.checkboxNotifications.toggle()
 		
 		finishButton = QtGui.QPushButton('Finish Setup')
 		finishButton.clicked.connect(self.saveSettings)
 		
-		formgrid.addRow(self.checkboxOfflineMode)
+		#formgrid.addRow(self.checkboxOfflineMode)
 		formgrid.addRow(self.checkboxNotifications)
 		formgrid.addRow(spacer)
 		formgrid.addRow(finishButton)
@@ -69,10 +69,8 @@ class SetupWizard(QtGui.QWidget):
 		self.centerOnScreen()
 		
 	def saveSettings(self):
-		if(self.checkboxOfflineMode.isChecked()):
-			self.parent.config.set('LocalSettings', 'sync-offline', True)
-		else:
-			self.parent.config.set('LocalSettings', 'sync-offline', False)
+		self.parent.config.set('LocalSettings', 'sync-offline', True)
+
 		if(self.checkboxNotifications.isChecked()):
 			self.parent.config.set('LocalSettings', 'notifications', True)
 		else:
