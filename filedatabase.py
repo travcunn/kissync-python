@@ -216,8 +216,92 @@ class Synchronizer(object):
 		self.parent.database.generateRemoteListing()
 		
 		print "done generating remote listing"
-		
 		self.parent.filewatcher.start()
+
+
+class RefreshThread(threading.Thread):
+ 
+	def __init__(self, parent):
+		threading.Thread.__init__(self)
+		self.parent = parent
+ 
+	def start(self):
+			daemon = Daemon(self.parent)
+			daemon.setDaemon(True)
+			daemon.start()
+			
+
+class Daemon(threading.Thread):
+ 
+	def __init__(self, parent):
+		threading.Thread.__init__(self)
+		self.parent = parent
+		
+		self.filesToDownload = []
+		self.filesToUpload = []
+		self.filesToCheckChanges = []
+		
+		self.downloadQueue = Queue.Queue()
+		self.uploadQueue = Queue.Queue()
+		self.checkChangesQueue = Queue.Queue()
+ 
+	def run(self):
+		while True:
+			#Compare what files server has against local files
+			#print self.parent.database.remoteFilesDictionary
+			#print self.parent.database.localFilesDictionary
+			#print "Compare what files server has against local files:"
+			self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
+			
+			#files the server that client needs
+			print "FILES THAT WERE ADDED:"
+			print self.dictDiffer.added()
+			for i in self.dictDiffer.added():
+				self.filesToDownload.append(i)
+				self.downloadQueue.put(i)
+			
+			#local files that smartfile needs
+			for i in self.dictDiffer.removed():
+				self.filesToUpload.append(i)
+				self.uploadQueue.put(i)
+				
+			#files that are different on the server, that the client needs	
+			for i in self.dictDiffer.changed():
+				self.filesToCheckChanges.append(i)
+				self.checkChangesQueue.put(i)
+			
+			print "Files to download:"
+			print self.filesToDownload
+			print "Files to upload:"
+			print self.filesToUpload	
+			print "Files to check for changes:"
+			print self.filesToCheckChanges
+
+			comparethread = CheckChanges(self, self.checkChangesQueue)
+			comparethread.setDaemon(True)
+			comparethread.start()
+			
+			downthread = Downloader(self, self.downloadQueue)
+			downthread.setDaemon(True)
+			downthread.start()
+			
+			upthread = Uploader(self, self.uploadQueue)
+			upthread.setDaemon(True)
+			upthread.start()
+			
+			self.checkChangesQueue.join()
+			print "changes queue joined"
+			self.downloadQueue.join()
+			print "dl queue joined"
+			self.uploadQueue.join()
+			print "ul queue joined"
+			
+			print "done joining"
+			
+			self.parent.database.generateRemoteListing()
+			
+			print "done generating remote listing"
+			time.sleep(90)
 
 
 class CheckChanges(threading.Thread):
@@ -245,6 +329,7 @@ class CheckChanges(threading.Thread):
 			print "Newer on the client: " + filepath
 		else:
 			print "Equal on server and client: " + filepath
+
 
 		
 class Downloader(threading.Thread):

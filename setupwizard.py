@@ -45,7 +45,7 @@ class SetupWizard(QtGui.QWidget):
 		#self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
 		self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
-		s#elf.checkboxOfflineMode.setFont(font)
+		#self.checkboxOfflineMode.setFont(font)
 		self.checkboxNotifications.setFont(font)
 		#self.checkboxOfflineMode.toggle()
 		self.checkboxNotifications.toggle()

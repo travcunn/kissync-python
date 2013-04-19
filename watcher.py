@@ -66,7 +66,10 @@ class EventHandler(FileSystemEventHandler):
 					ftpaddress = self.sitename + ".smartfile.com"
 					ftp = FTP(ftpaddress, username, password)
 					pathOnServer = event.src_path.replace(self.syncdirPath,'')
-					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+					try:
+						ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+					except:
+						pass
 		else:
 			self.parent.smartfile.post('/path/oper/mkdir/', event.src_path.replace(self.syncdirPath,''))
 		print event.event_type
@@ -97,7 +100,10 @@ class EventHandler(FileSystemEventHandler):
 					ftpaddress = self.sitename + ".smartfile.com"
 					ftp = FTP(ftpaddress, username, password)
 					pathOnServer = event.src_path.replace(self.syncdirPath,'')
-					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+					try:
+						ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+					except:
+						pass
 		print event.event_type
 		print event.src_path
 			

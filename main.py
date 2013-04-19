@@ -5,6 +5,7 @@ import breadcrumb, flowlayout, style, square
 from authenticator import Authenticator
 from filedatabase import FileDatabase
 from filedatabase import Synchronizer
+from filedatabase import RefreshThread
 from loginwindow import LoginWindow
 from fileview import FileView
 from setupwizard import SetupWizard
@@ -115,6 +116,8 @@ class Main(QtGui.QWidget):
 		print "done syncing totally!"
 		
 		
+		self.rt = RefreshThread(self)
+		self.rt.start()
 		
 		self.filebrowsergui = FileBrowserGUI(self)		
 		self.accountwidget = AccountWidget(self)
