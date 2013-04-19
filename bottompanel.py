@@ -323,6 +323,7 @@ class BottomPanel(QtGui.QWidget):
 			folder = "/Kissync" + self.parent.fileview.activeSquares[0].filePath[:indFolder + 1]
 			
 			inputter = InputDialog(self, title="Rename:", label="Folder:", text=extension)
+
 			inputter.exec_()
 			
 			print source_file
