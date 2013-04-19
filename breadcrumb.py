@@ -135,7 +135,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.gridlayout = QtGui.QHBoxLayout()
 		self.gridlayout.setAlignment(QtCore.Qt.AlignLeft)
 		
-		#print self.frameSize().width()
+		##print self.frameSize().width()
 		self.gridlayout.setSpacing(0)
 		
 		# make a widget called
@@ -185,7 +185,7 @@ class BreadCrumb(QtGui.QWidget):
 			self.gridlayout.removeWidget(self.breadcrumbItems[i])
 			self.breadcrumbItems[i].close()
 		self.breadcrumbItems = []
-		#print newpath
+		##print newpath
 		pathArray = newpath.split("/")
 		
 		self.__add("/Home")
@@ -219,7 +219,7 @@ class Main(QtGui.QWidget):
 		
 if __name__ == "__main__":
 	
-	#print os.path.realpath(__file__)
+	##print os.path.realpath(__file__)
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()

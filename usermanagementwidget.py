@@ -107,6 +107,7 @@ class ManageUserPermissions(QtGui.QWidget):
 				if(i['acl']['list']):
 					self.cbView.toggle()
 				else:
+					#pass
 					pass
 					
 				if(i['acl']['read']):

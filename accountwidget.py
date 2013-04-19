@@ -44,15 +44,15 @@ class LogoutLabel(QtGui.QLabel):
 		self.setStyleSheet("color: #1BA1E2;")
 		
 	def mousePressEvent(self, event):
-		##print "Logout button pressed"
+		###print "Logout button pressed"
 		reply = QtGui.QMessageBox.question(self,'Kissync',"Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 		if (reply == QtGui.QMessageBox.Yes):
 			self.parent.parent.tray.notification("Kissync", "Logging out..")
 			try:
-				##print "rm..."
+				###print "rm..."
 				os.remove(self.parent.parent.settingsFile)
-				###print "Deleted Config"
-				##print "exiting..."
+				####print "Deleted Config"
+				###print "exiting..."
 				
 				#sys.exit()
 				
@@ -241,7 +241,7 @@ class Main(QtGui.QWidget):
 		
 if __name__ == "__main__":
 	
-	###print os.path.realpath(__file__)
+	####print os.path.realpath(__file__)
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()

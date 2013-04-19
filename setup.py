@@ -29,7 +29,7 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     import py2exe
 else:
-    print "Unknown platform: %s" % sys.platform
+    #print "Unknown platform: %s" % sys.platform
     sys.exit(-1)
 
 setup(

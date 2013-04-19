@@ -31,14 +31,14 @@ class IconWidget(QtGui.QWidget):
 		elif(extension == None or extension == ""):
 			extension = "unknown"
 		else:
-			#print "Meh: " + extension
+			##print "Meh: " + extension
 			extension = extension[1:]
 			
-		#print extension
+		##print extension
 		
 
 		if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg") == True):
-			#print "KNOWN"
+			##print "KNOWN"
 			pass
 		else:
 			extension = "unknown"
@@ -94,14 +94,14 @@ class ItemObject(QtGui.QWidget):
 		#Get file extension and type
 		if (self.fileName.rfind('.') != -1):
 			dotIndex = self.fileName.rfind('.')
-			#print dotIndex
+			##print dotIndex
 			fileNameLength = len(self.fileName)
-			#print fileNameLength
+			##print fileNameLength
 			extension = self.fileName[dotIndex:fileNameLength]
 		else:
 			extension = None
 			
-		#print extension
+		##print extension
 		
 		#Icon
 		self.icon = IconWidget(self, extension)
@@ -190,7 +190,7 @@ class ItemObject(QtGui.QWidget):
 		
 	def mousePressEvent(self, event):
 		if not(self.panelView):
-			#print("Clicked")
+			##print("Clicked")
 			if not(self.isActive):
 				self.isActive = True
 				self.opacity = 1.0
@@ -209,32 +209,32 @@ class ItemObject(QtGui.QWidget):
 	def mouseDoubleClickEvent(self, event):
 		if not(self.panelView):
 			#Go Deeper into directory, or download and open if file.
-			#print self.filePath
+			##print self.filePath
 			self.isActive = False
 			self.parent.parent.bottompanel.deactivate()
 			self.parent.parent.folderpanel.show()
 			if(self.isFolder):
-				#print "You double clicked a folder"
+				##print "You double clicked a folder"
 				#Item double clicked upon is a Folder. 
 				#Change the breadcrumb path.
 				self.parent.parent.changePath(self.filePath) 
 				#Change Sidebar to show directory properties.
 			else:
 				#Item double clicked upon.
-				#print "You double clicked a file."
+				##print "You double clicked a file."
 				self.parent.parent.parent.tray.notification("Kissync", "Downloading and Opening...")
 				self.openFile(self.filePath)
 				
 	
 	def enterEvent(self,event): 
 		if not(self.panelView):
-			#print("Enter") 
+			##print("Enter") 
 			self.opacity = 1.0
 			self.repaint()
 	
 	def leaveEvent(self,event): 
 		if not(self.panelView):
-			#print("Leave") 
+			##print("Leave") 
 			if not(self.isActive == True):
 				self.opacity = 0.66
 				
@@ -243,21 +243,21 @@ class ItemObject(QtGui.QWidget):
 	def deleteMe(self):
 		
 		#This will delete it's self.
-		print "Delete button clicked!"
+		#print "Delete button clicked!"
 		#Create the file path to delete.
 		try:
 			deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.filePath
-			#print deleteMeFilePath
+			##print deleteMeFilePath
 			##Delete the file from the system.
 			os.remove(deleteMeFilePath)
 			
 			##Instead of deleting a specific square.. just re-update the fileview.
 			deleteFileName = self.filePath.rfind('/')
-			#Prints out the directory...
-			#print self.filePath[:deleteFileName + 1] 
+			##prints out the directory...
+			##print self.filePath[:deleteFileName + 1] 
 			self.parent.parent.changePath(self.filePath[:deleteFileName + 1])
 		except:
-			#print "File does not exist on computer... Deleting from Cloud!"
+			##print "File does not exist on computer... Deleting from Cloud!"
 			try:
 				self.parent.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
 			except:
@@ -275,7 +275,7 @@ class ItemObject(QtGui.QWidget):
 			if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
 				os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 				pathToAdd = pathToAdd + directory + "/"
-				#print pathToAdd
+				##print pathToAdd
 				
 		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
@@ -337,7 +337,7 @@ class Main(QtGui.QWidget):
 		
 if __name__ == "__main__":
 	
-	#print os.path.realpath(__file__)
+	##print os.path.realpath(__file__)
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()

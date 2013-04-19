@@ -232,6 +232,7 @@ class BottomPanel(QtGui.QWidget):
 	def buttonClicked(self, buttonType):
 		button = buttonType.lower()
 		if (button == "add"):
+<<<<<<< HEAD
 			print "Add pressed."
 			##Open Dialog
 			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
@@ -240,6 +241,16 @@ class BottomPanel(QtGui.QWidget):
 			destination_folder = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
 			print "Source: " + source_file
 			print "Dest: " + destination_folder
+=======
+			##print "Add pressed."
+			##Open Dialog
+			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
+			## ##print File Name
+			###print str(source_file)
+			destination_folder = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
+			##print "Source: " + source_file
+			##print "Dest: " + destination_folder
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			#if not os.path.exists(destination_folder):
 				#os.makedirs(destination_folder)
 			
@@ -247,8 +258,13 @@ class BottomPanel(QtGui.QWidget):
 			self.moveFile(str(source_file),str(destination_folder))
 			
 			#deleteFileName = self.parent.fileview.squareArray[0].filePath
+<<<<<<< HEAD
 			#print deleteFileName
 			#print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
+=======
+			###print deleteFileName
+			###print self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1]
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			#self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1])
 			
 			#### NEED TO ADD REFRESH FILEVIEW #########
@@ -256,12 +272,21 @@ class BottomPanel(QtGui.QWidget):
 			
 			#Refresh FILEVIEW
 			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+<<<<<<< HEAD
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 			
 		elif (button == "delete"):
 			print "Delete pressed."
+=======
+			###prints out the directory...
+			###print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+			
+		elif (button == "delete"):
+			##print "Delete pressed."
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			#Create the file path to delete.
 			try:
 				deleteMeFilePath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
@@ -270,13 +295,22 @@ class BottomPanel(QtGui.QWidget):
 				
 				##Instead of deleting a specific square.. just re-update the fileview.
 				deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+<<<<<<< HEAD
 				#Prints out the directory...
 				#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+=======
+				###prints out the directory...
+				###print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 				self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
 				
 				self.parent.parent.tray.notification("Kissync", "Deleted")
 			except:
+<<<<<<< HEAD
 				#print "File does not exist on computer... Deleting from Cloud!"
+=======
+				###print "File does not exist on computer... Deleting from Cloud!"
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 				try:
 					self.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
 				except:
@@ -285,8 +319,13 @@ class BottomPanel(QtGui.QWidget):
 		
 		elif (button == "move"):
 			#Move File...
+<<<<<<< HEAD
 			print self.parent.fileview.activeSquares[0].filePath
 			print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+=======
+			##print self.parent.fileview.activeSquares[0].filePath
+			##print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			try:
 				self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
 			except:
@@ -299,9 +338,15 @@ class BottomPanel(QtGui.QWidget):
 			extension = None
 			if (source_file.rfind('.') != -1):
 				dotIndex = source_file.rfind('.')
+<<<<<<< HEAD
 				#print dotIndex
 				fileNameLength = len(source_file)
 				#print fileNameLength
+=======
+				###print dotIndex
+				fileNameLength = len(source_file)
+				###print fileNameLength
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 				extension = source_file[dotIndex:fileNameLength]
 			else:
 				extension = None
@@ -316,14 +361,24 @@ class BottomPanel(QtGui.QWidget):
 			comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.config.get('LocalSettings', 'sync-dir')))
 			
 			destination_folder = comment
+<<<<<<< HEAD
 			print str(source_file)
 			print str(destination_folder)
+=======
+			##print str(source_file)
+			##print str(destination_folder)
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			
 			self.moveFile(str(source_file),str(destination_folder))
 			
 			Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
+<<<<<<< HEAD
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+=======
+			###prints out the directory...
+			###print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
 			
 			self.parent.parent.tray.notification("Kissync", "Moved")
@@ -335,9 +390,15 @@ class BottomPanel(QtGui.QWidget):
 			extension = None
 			if (source_file.rfind('.') != -1):
 				dotIndex = source_file.rfind('.')
+<<<<<<< HEAD
 				#print dotIndex
 				fileNameLength = len(source_file)
 				#print fileNameLength
+=======
+				###print dotIndex
+				fileNameLength = len(source_file)
+				###print fileNameLength
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 				extension = source_file[dotIndex:fileNameLength]
 			else:
 				extension = None
@@ -349,14 +410,21 @@ class BottomPanel(QtGui.QWidget):
 
 			inputter.exec_()
 			
+<<<<<<< HEAD
 			print source_file
 			dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
 			print dest_file
+=======
+			##print source_file
+			dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
+			##print dest_file
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			self.moveFile(str(source_file),str(dest_file))
 			self.parent.parent.tray.notification("Kissync", "Renamed")
 			
 			#Refreshes FileVIEW
 			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+<<<<<<< HEAD
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
@@ -364,6 +432,15 @@ class BottomPanel(QtGui.QWidget):
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
 			print self.parent.fileview.activeSquares[0].filePath
+=======
+			###prints out the directory...
+			###print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+			
+		elif (button == "generate_link"):
+			##print "Gen Link Pressed"
+			##print self.parent.fileview.activeSquares[0].filePath
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			path = self.parent.fileview.activeSquares[0].filePath
 			name = self.parent.fileview.activeSquares[0].fileName
 			url = ""
@@ -372,11 +449,16 @@ class BottomPanel(QtGui.QWidget):
 			
 			#Make API call for url.
 			tree = self.parent.parent.smartfile.get('/link', path=path)
+<<<<<<< HEAD
 			#pprint.pprint(tree['href'])
+=======
+			#p##print.p##print(tree['href'])
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			for i in tree:
 				if 'href' not in i:
 					return []
 				url = i['href'].encode("utf-8")
+<<<<<<< HEAD
 			print path
 			print "-----------"
 			print name
@@ -388,18 +470,37 @@ class BottomPanel(QtGui.QWidget):
 				n = name
 				tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True, recursive=True)
 				#pprint.pprint(tree['href'])
+=======
+			##print path
+			##print "-----------"
+			##print name
+			if not (url == "" or url == None):
+				pass
+			else:
+				##print "Nothing!  Yet! GENERATE A URL!"
+				p = path
+				n = name
+				tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True, recursive=True)
+				#p##print.p##print(tree['href'])
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 				for i in tree2:
 					if(i == "href"):
 						url = tree2[i]
 
+<<<<<<< HEAD
 			print "RESPONSE:"
 			print url
+=======
+			##print "RESPONSE:"
+			##print url
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 			pyperclip.copy(url)
 			#Share on twitter.
 			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
 			self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
 		elif(button == "user_premissions"):
+<<<<<<< HEAD
 			print "User Premissions!"
 			self.manageUser.show()
 			self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
@@ -411,6 +512,16 @@ class BottomPanel(QtGui.QWidget):
 			shutil.move(source,dest)
 		else:
 			print "User canceled upload dialog"
+=======
+			##print "User Premissions!"
+			self.manageUser.show()
+			self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
+			
+	def moveFile(self, source, dest):
+		if not (source == "" or dest == None):
+			shutil.move(source,dest)
+			
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 		
 class InputDialog(QtGui.QDialog):
 	'''
@@ -460,7 +571,11 @@ class Main(QtGui.QWidget):
 		
 if __name__ == "__main__":
 	
+<<<<<<< HEAD
 	#print os.path.realpath(__file__)
+=======
+	###print os.path.realpath(__file__)
+>>>>>>> 6d947e37e524a5d03318b94fa4ecbe383398a20d
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()
