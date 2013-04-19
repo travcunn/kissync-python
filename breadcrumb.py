@@ -130,7 +130,7 @@ class BreadCrumb(QtGui.QWidget):
 		self.style = style.KissyncStyle()
 		
 		self.setMaximumHeight(89)
-		self.setMinimumWidth(self.parent.width())
+		self.setMinimumWidth(self.parent.parent.width())
 		
 		self.gridlayout = QtGui.QHBoxLayout()
 		self.gridlayout.setAlignment(QtCore.Qt.AlignLeft)

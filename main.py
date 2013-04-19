@@ -120,6 +120,9 @@ class Main(QtGui.QWidget):
 	def closeEvent(self, event):
 		event.ignore()
 		self.hide()
+	
+	def exit(self):
+		os._exit(-1)
 
 
 if __name__ == "__main__":

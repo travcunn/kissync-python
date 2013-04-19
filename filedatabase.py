@@ -304,26 +304,46 @@ class Uploader(threading.Thread):
 				tree = self.parent.parent.smartfile.get('/whoami', '/')
 				if 'site' in tree:
 					self.sitename = tree['site']['name'].encode("utf-8")
-					print self.sitename
 					
 					username = self.parent.parent.config.get('Login', 'username')
 					password = self.parent.parent.config.get('Login', 'password')
 					
-					while(True):
-						ftpaddress = self.sitename + ".smartfile.com"
+					#while(True):
+					ftpaddress = self.sitename + ".smartfile.com"
+					ftp = FTP(ftpaddress, username, password)
+					
+					pathArray = localpath.split("/")
+					pathArray.pop(0)
+					pathArray.pop(len(pathArray) - 1)
+					pathToAdd = ""
+					
+					#A BUG EXISTS IN THIS, PLEASE TEST THIS
+					syncdir =  self.parent.parent.config.get('LocalSettings', 'sync-dir')	
+					for directory in pathArray:
 						try:
-							ftp = FTP(ftpaddress, username, password)
-							ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+							ftp.mkd("/" + pathToAdd + directory)
 						except:
-							raise
-							pass
+							print "directory exists already: " + directory
 						else:
-							break
+							print "created directory " + pathToAdd + directory
+						#os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+						pathToAdd = pathToAdd + directory + "/"
+					ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+				else:
+					print "Could not upload the file via ftp"
 							
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))
 			
-
+	def directoryexists(self, ftp, dir):
+		filelist = []
+		ftp.retrlines('LIST',filelist.append)
+		for f in filelist:
+			print f
+			if f.split()[-1] == dir and f.upper().startswith('D'):
+				return True
+		return False
+	
 """
 A dictionary difference calculator
 Originally posted as:
