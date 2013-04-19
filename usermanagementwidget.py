@@ -101,7 +101,7 @@ class ManageUserPermissions(QtGui.QWidget):
 		if (self.cbWrite.isChecked()):
 			self.cbWrite.toggle()
 			
-		tree = self.parent.parent.parent.smartfile.get('/access/path/KissyncShot.png')
+		tree = self.parent.parent.parent.smartfile.get('/access/path/' + self.path)
 		for i in tree['users']:
 			if (i['user'] == text):
 				if(i['acl']['list']):
@@ -158,8 +158,7 @@ class ManageUserPermissions(QtGui.QWidget):
 		try:	
 			tree = self.parent.parent.parent.smartfile.post('/access/user/',user=(self.selectedUser.encode('utf-8')), path=(self.path), read=(readval), list=(Viewval), remove=(Deleteval), write=(Writeval))	
 		except:
-			raise
-			print "Error"
+			pass
 		#Close Dialog...
 		self.close()
 	

@@ -2,7 +2,7 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 
 from square import ItemObject
 
-import style, flowlayout, p##print, os, mimetypes
+import style, flowlayout, os, mimetypes
 
 
 class FileView(QtGui.QWidget):
@@ -64,7 +64,7 @@ class FileView(QtGui.QWidget):
 		#rootDisDir = [i['isdir'].encode("utf-8") for i in tree['children']]
 		
 		for i in tree['children']:
-			###print i['path']
+			#print i['path']
 			if (i['path'].startswith('/.')):
 				pass
 			else:
@@ -79,13 +79,13 @@ class FileView(QtGui.QWidget):
 		fullName = None
 		
 		for files in os.listdir(self.parent.parent.sorageDirectory):
-			##print rootPath + files
-			##print files
-			##print str(os.stat(rootPath + files).st_size)
-			##print str( mimetypes.guess_type(rootPath + files, strict=True))
-			##print str(os.path.isdir(rootPath + files))
-			##print str(os.stat(rootPath + files).st_mtime)
-			##print "******************"
+			print rootPath + files
+			print files
+			print str(os.stat(rootPath + files).st_size)
+			print str( mimetypes.guess_type(rootPath + files, strict=True))
+			print str(os.path.isdir(rootPath + files))
+			print str(os.stat(rootPath + files).st_mtime)
+			print "******************"
 			item = ItemObject(self, rootPath + files, files, os.stat(rootPath + files).st_size ,  mimetypes.guess_type(rootPath + files, strict=True)[0], os.path.isdir(rootPath + files), str(os.stat(rootPath + files).st_mtime))
 			self.squareArray.append(item)
 			self.flowLayout.addWidget(item)
@@ -95,7 +95,7 @@ class FileView(QtGui.QWidget):
 		
 		#clear current files...
 		self.clearAll()
-		###print "Cleared all breadcrumbs"
+		#print "Cleared all breadcrumbs"
 		############set new path
 		
 		#Get JSON for root
@@ -119,13 +119,13 @@ class FileView(QtGui.QWidget):
 		fullName = None
 		for files in os.listdir(self.parent.parent.sorageDirectory + path):
 			
-			##print rootPath + files
-			##print files
-			##print str(os.stat(rootPath + files).st_size)
-			##print str( mimetypes.guess_type(rootPath + files, strict=True))
-			##print str(os.path.isdir(rootPath + files))
-			##print str(os.stat(rootPath + files).st_mtime)
-			##print "******************"
+			print rootPath + files
+			print files
+			print str(os.stat(rootPath + files).st_size)
+			print str( mimetypes.guess_type(rootPath + files, strict=True))
+			print str(os.path.isdir(rootPath + files))
+			print str(os.stat(rootPath + files).st_mtime)
+			print "******************"
 			
 			
 			
@@ -136,17 +136,17 @@ class FileView(QtGui.QWidget):
 
 	def clearAll(self):
 		
-		###print self.squareArray
-		###print len(self.squareArray)
+		#print self.squareArray
+		#print len(self.squareArray)
 		for item in self.squareArray:
-			###print item
+			#print item
 			self.flowLayout.removeWidget(item)
 			item.close()
 		for i in range(len(self.squareArray)):
-			###print "Deleting: " + str(i)
+			#print "Deleting: " + str(i)
 			self.squareArray.pop()
-		###print self.squareArray
-		###print len(self.squareArray)
+		#print self.squareArray
+		#print len(self.squareArray)
 	
 	def iterateActive(self):
 		for item in self.squareArray:
