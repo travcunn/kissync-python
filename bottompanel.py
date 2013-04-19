@@ -10,7 +10,7 @@ import flowlayout, shutil
 #Copy and paste library.. platform independent.
 import pyperclip
 
-from usermanagementwidget import ManageUserPremissions
+from usermanagementwidget import ManageUserPermissions
 
 
 class BottomPanel(QtGui.QWidget):
@@ -19,7 +19,7 @@ class BottomPanel(QtGui.QWidget):
 		self.parent = parent
 		self.setStyleSheet("QWidget { background: #FFFFFF; }")
 		
-		self.manageUser = ManageUserPremissions(self)
+		self.manageUser = ManageUserPermissions(self)
 		
 		self.setMinimumSize(50, 64)
 		self.setMaximumHeight(68)
@@ -402,6 +402,8 @@ class BottomPanel(QtGui.QWidget):
 		elif(button == "user_premissions"):
 			print "User Premissions!"
 			self.manageUser.show()
+			self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
+			
 		else:
 			print "Op. that button isn't alive yet!"
 	def moveFile(self, source, dest):

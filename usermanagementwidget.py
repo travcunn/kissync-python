@@ -2,14 +2,16 @@ from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import os, sys
 
 
-class ManageUserPremissions(QtGui.QWidget):
+class ManageUserPermissions(QtGui.QWidget):
 
 	def __init__(self, parent = None):
-		super(ManageUserPremissions, self).__init__()
+		super(ManageUserPermissions, self).__init__()
 		self.parent = parent
 
+		self.path = None
+		self.selectedUser = None
 		
-		self.setWindowTitle('User Premissions')   
+		self.setWindowTitle('User Permissions')   
 		#set the window type to a dialog
 		self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
 		
@@ -23,7 +25,7 @@ class ManageUserPremissions(QtGui.QWidget):
 		exit=QtGui.QAction(self)
 		self.connect(exit,QtCore.SIGNAL('triggered()'),QtCore.SLOT('close()'))
 		
-		topText = QtGui.QLabel('files premissions')
+		topText = QtGui.QLabel('files permissions')
 		#http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
 		font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
 		topText.setFont(font)
@@ -88,8 +90,41 @@ class ManageUserPremissions(QtGui.QWidget):
 		self.centerOnScreen()
 		
 	def onActivated(self, text):
-		print text
-		#print self.path
+		self.selectedUser = str(text)
+		
+		if (self.cbView.isChecked()):
+			self.cbView.toggle()
+		if (self.cbRead.isChecked()):
+			self.cbRead.toggle()
+		if (self.cbDelete.isChecked()):
+			self.cbDelete.toggle()
+		if (self.cbWrite.isChecked()):
+			self.cbWrite.toggle()
+			
+		tree = self.parent.parent.parent.smartfile.get('/access/path/KissyncShot.png')
+		for i in tree['users']:
+			if (i['user'] == text):
+				if(i['acl']['list']):
+					self.cbView.toggle()
+				else:
+					pass
+					
+				if(i['acl']['read']):
+					self.cbRead.toggle()
+				else:
+					pass
+					
+				if(i['acl']['remove']):
+					self.cbDelete.toggle()
+				else:
+					pass
+					
+				if(i['acl']['write']):
+					self.cbWrite.toggle()
+				else:
+					pass
+		
+		
 	def populateComboBox(self):
 		tree = self.parent.parent.parent.smartfile.get('/user', '/')
 		for i in tree:
@@ -99,7 +134,34 @@ class ManageUserPremissions(QtGui.QWidget):
 			
 	def savePremissions(self):
 		#Save premissions based upon what is selected.
-		pass
+		if (self.cbView.isChecked()):
+			Viewval = True
+		else:
+			Viewval = False
+		if (self.cbRead.isChecked()):
+			self.cbRead.toggle()
+			readval = True
+		else:
+			readval = False
+		if (self.cbDelete.isChecked()):
+			self.cbDelete.toggle()
+			Deleteval = True
+		else:
+			Deleteval = False
+		if (self.cbWrite.isChecked()):
+			self.cbWrite.toggle()
+			Writeval = True
+		else:
+			Writeval = False
+		
+		print self.selectedUser
+		try:	
+			tree = self.parent.parent.parent.smartfile.post('/access/user/',user=(self.selectedUser.encode('utf-8')), path=(self.path), read=(readval), list=(Viewval), remove=(Deleteval), write=(Writeval))	
+		except:
+			raise
+			print "Error"
+		#Close Dialog...
+		self.close()
 	
 	def centerOnScreen (self):
 		#Center window on screen!

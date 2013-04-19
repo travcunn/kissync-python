@@ -14,9 +14,15 @@ def main():
 		#pprint.pprint(api.get('/path/info', children = True))
 		
 		#Get JSON for root
-		tree = api.get('/user', '/')
-		for i in tree:
-			pprint.pprint(i['username'])
+		tree = api.get('/access/path/KissyncShot.png')
+		for i in tree['users']:
+			if (i['user'] == 'testaccount1'):
+				pprint.pprint(i['user'])
+				pprint.pprint(i)
+				pprint.pprint(i['acl']['list'])
+				pprint.pprint(i['acl']['read'])
+				pprint.pprint(i['acl']['remove'])
+				pprint.pprint(i['acl']['write'])
 		
 		#print url
 		# Returns all directories and files in root!
