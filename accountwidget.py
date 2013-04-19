@@ -14,13 +14,13 @@ class SettingsLabel(QtGui.QLabel):
 	def __init__(self, parent = None):
 		QtGui.QLabel.__init__(self)
 		self.parent = parent
-		self.setText("Settings")
+		self.setText("        ")
 		font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
 		self.setFont(font)
 		self.setStyleSheet("color: #1BA1E2;")
 		
 	def mousePressEvent(self, event):
-		print "Settings button pressed"
+		pass
 		
 	def mouseDoubleClickEvent(self, event):
 		pass
@@ -62,8 +62,8 @@ class LogoutLabel(QtGui.QLabel):
 				
 		else:
 			event.ignore()
-			self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
-			self.parent.show()
+			#self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
+			#self.parent.show()
 		
 	def mouseDoubleClickEvent(self, event):
 		pass
@@ -194,9 +194,9 @@ class AccountWidget(QtGui.QWidget):
 		
 		#self.loadGravatar()
 		
-		self.gridlayout.addWidget(self.lbFullName, 0, 1, 1, 2, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-		self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-		self.gridlayout.addWidget(self.lblogout, 1, 2, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+		self.gridlayout.addWidget(self.lbFullName, 0, 1, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+		#self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+		self.gridlayout.addWidget(self.lblogout, 1, 2, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 		
 		#Icon stuff
 		self.newicon = IconWidget(self, self.email)
