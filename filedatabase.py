@@ -19,7 +19,7 @@ class FileDatabase(object):
 	
 	def indexLocalFiles(self):
 		syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
-		print "[database]: Local Database: Indexing local files..."
+		#print "[database]: Local Database: Indexing local files..."
 		##we must clear the existing table if there is request to index the files
 		self.localFilesDictionary = {}
 		for (paths, folders, files) in os.walk(syncdirPath):
@@ -32,8 +32,8 @@ class FileDatabase(object):
 				#Add file to dictionary with time. filename: timestamp
 				self.localFilesDictionaryTime[discoveredFilePath.replace(syncdirPath,'').encode('utf-8')] = modifiedTime
 				
-				print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
-		print "[database]: Local Database: Done indexing local files..."
+				#print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
+		#print "[database]: Local Database: Done indexing local files..."
 
 	
 	def loadRemoteListingFile(self):
@@ -48,20 +48,20 @@ class FileDatabase(object):
 		try:
 			openPath = self.getServerListingFile()
 			openPathTime = self.getServerListingFileTime()
-			print "OPEN PATHS SHOULD CONTAIN A FILENAME"
-			print openPath
-			print openPathTime
+			#print "OPEN PATHS SHOULD CONTAIN A FILENAME"
+			#print openPath
+			#print openPathTime
 		except:
-			print "Remote listing does not exist..."
+			#print "Remote listing does not exist..."
 			openPath = None
 			openPathTime = None
 			self.remoteFilesDictionary = {}
 			self.remoteFilesDictionaryTime = {}
 			#self.generateRemoteListing()
 		else:
-			print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
-			print self.remoteFilesDictionary
-			print self.remoteFilesDictionaryTime
+			#print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
+			#print self.remoteFilesDictionary
+			#print self.remoteFilesDictionaryTime
 			picklefile = open(openPath, 'rb')
 			self.remoteFilesDictionary = pickle.load(picklefile)
 			picklefile.close()
@@ -95,8 +95,8 @@ class FileDatabase(object):
 		#now upload the pickled files to the server
 		try:
 			fileToUpload = file(tmpLocalPath)
-			print "Uploading files to the server"
-			print fileToUpload.read()
+			#print "Uploading files to the server"
+			#print fileToUpload.read()
 			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBserver', fileToUpload))
 			
 			fileToUpload = file(tmpLocalPathTime)
@@ -163,14 +163,14 @@ class Synchronizer(object):
 		
 	def start(self):
 		#Compare what files server has against local files
-		#print self.parent.database.remoteFilesDictionary
-		#print self.parent.database.localFilesDictionary
-		#print "Compare what files server has against local files:"
+		##print self.parent.database.remoteFilesDictionary
+		##print self.parent.database.localFilesDictionary
+		##print "Compare what files server has against local files:"
 		self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
 		
 		#files the server that client needs
-		print "FILES THAT WERE ADDED:"
-		print self.dictDiffer.added()
+		#print "FILES THAT WERE ADDED:"
+		#print self.dictDiffer.added()
 		for i in self.dictDiffer.added():
 			self.filesToDownload.append(i)
 			self.downloadQueue.put(i)
@@ -185,12 +185,12 @@ class Synchronizer(object):
 			self.filesToCheckChanges.append(i)
 			self.checkChangesQueue.put(i)
 		
-		print "Files to download:"
-		print self.filesToDownload
-		print "Files to upload:"
-		print self.filesToUpload	
-		print "Files to check for changes:"
-		print self.filesToCheckChanges
+		#print "Files to download:"
+		#print self.filesToDownload
+		#print "Files to upload:"
+		#print self.filesToUpload	
+		#print "Files to check for changes:"
+		#print self.filesToCheckChanges
 
 		comparethread = CheckChanges(self, self.checkChangesQueue)
 		comparethread.setDaemon(True)
@@ -205,17 +205,17 @@ class Synchronizer(object):
 		upthread.start()
 		
 		self.checkChangesQueue.join()
-		print "changes queue joined"
+		#print "changes queue joined"
 		self.downloadQueue.join()
-		print "dl queue joined"
+		#print "dl queue joined"
 		self.uploadQueue.join()
-		print "ul queue joined"
+		#print "ul queue joined"
 		
-		print "done joining"
+		#print "done joining"
 		
 		self.parent.database.generateRemoteListing()
 		
-		print "done generating remote listing"
+		#print "done generating remote listing"
 		self.parent.filewatcher.start()
 
 
@@ -248,14 +248,14 @@ class Daemon(threading.Thread):
 	def run(self):
 		while True:
 			#Compare what files server has against local files
-			#print self.parent.database.remoteFilesDictionary
-			#print self.parent.database.localFilesDictionary
-			#print "Compare what files server has against local files:"
+			##print self.parent.database.remoteFilesDictionary
+			##print self.parent.database.localFilesDictionary
+			##print "Compare what files server has against local files:"
 			self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
 			
 			#files the server that client needs
-			print "FILES THAT WERE ADDED:"
-			print self.dictDiffer.added()
+			#print "FILES THAT WERE ADDED:"
+			#print self.dictDiffer.added()
 			for i in self.dictDiffer.added():
 				self.filesToDownload.append(i)
 				self.downloadQueue.put(i)
@@ -270,12 +270,12 @@ class Daemon(threading.Thread):
 				self.filesToCheckChanges.append(i)
 				self.checkChangesQueue.put(i)
 			
-			print "Files to download:"
-			print self.filesToDownload
-			print "Files to upload:"
-			print self.filesToUpload	
-			print "Files to check for changes:"
-			print self.filesToCheckChanges
+			#print "Files to download:"
+			#print self.filesToDownload
+			#print "Files to upload:"
+			#print self.filesToUpload	
+			#print "Files to check for changes:"
+			#print self.filesToCheckChanges
 
 			comparethread = CheckChanges(self, self.checkChangesQueue)
 			comparethread.setDaemon(True)
@@ -290,17 +290,17 @@ class Daemon(threading.Thread):
 			upthread.start()
 			
 			self.checkChangesQueue.join()
-			print "changes queue joined"
+			#print "changes queue joined"
 			self.downloadQueue.join()
-			print "dl queue joined"
+			#print "dl queue joined"
 			self.uploadQueue.join()
-			print "ul queue joined"
+			#print "ul queue joined"
 			
-			print "done joining"
+			#print "done joining"
 			
 			self.parent.database.generateRemoteListing()
 			
-			print "done generating remote listing"
+			#print "done generating remote listing"
 			time.sleep(90)
 
 
@@ -313,22 +313,25 @@ class CheckChanges(threading.Thread):
  
 	def run(self):
 		while True:
-			print "running comparison..."
+			#print "running comparison..."
 			path = self.queue.get()
-			print path
+			#print path
 			self.checkFile(path)
 			self.queue.task_done()
 				
 	def checkFile(self, filepath):
-		print "checking " + filepath
+		#print "checking " + filepath
 		localpath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
 		localModifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(localpath))
 		if(self.parent.parent.database.remoteFilesDictionaryTime[filepath] > self.parent.parent.database.localFilesDictionaryTime[filepath]):
-			print "Newer on the server: " + filepath
+			#print "Newer on the server: " + filepath
+			pass
 		elif(self.parent.parent.database.remoteFilesDictionaryTime[filepath] < self.parent.parent.database.localFilesDictionaryTime[filepath]):
-			print "Newer on the client: " + filepath
+			#print "Newer on the client: " + filepath
+			pass
 		else:
-			print "Equal on server and client: " + filepath
+			#print "Equal on server and client: " + filepath
+			pass
 
 
 		
@@ -342,10 +345,10 @@ class Downloader(threading.Thread):
 	def run(self):
 		while True:
 			path = self.queue.get()
-			print "Downloading: " + path
+			#print "Downloading: " + path
 			self.downloadFile(path)
 			self.queue.task_done()
-			print self.queue.qsize()
+			#print self.queue.qsize()
 				
 	def downloadFile(self, filepath):
 		pathArray = filepath.split("/")
@@ -357,7 +360,7 @@ class Downloader(threading.Thread):
 			if not os.path.exists(self.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
 				os.makedirs(self.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 				pathToAdd = pathToAdd + directory + "/"
-				#print pathToAdd
+				##print pathToAdd
 		try:
 			f = self.parent.parent.smartfile.get('/path/data/', filepath)
 			realPath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
@@ -379,11 +382,11 @@ class Uploader(threading.Thread):
 	def run(self):
 		while True:
 			path = self.queue.get()
-			print "Uploading: " + path
+			#print "Uploading: " + path
 			self.uploadFile(path)
 			self.queue.task_done()
-			print "Done uploading " + path
-			print self.queue.qsize()
+			#print "Done uploading " + path
+			#print self.queue.qsize()
 				
 	def uploadFile(self, filepath):
 		localpath = filepath
@@ -393,7 +396,7 @@ class Uploader(threading.Thread):
 			try:
 				self.parent.parent.smartfile.post('/path/data/', file=(filepath.replace(self.syncdirPath,''), StringIO(fileToUpload.read())))
 			except:
-				print "Could not convert into utf-8, so make FTP connection"
+				#print "Could not convert into utf-8, so make FTP connection"
 				tree = self.parent.parent.smartfile.get('/whoami', '/')
 				if 'site' in tree:
 					self.sitename = tree['site']['name'].encode("utf-8")
@@ -403,9 +406,9 @@ class Uploader(threading.Thread):
 					
 					#while(True):
 					ftpaddress = self.sitename + ".smartfile.com"
-					print ftpaddress
-					print username
-					print password
+					#print ftpaddress
+					#print username
+					#print password
 					ftp = FTP(ftpaddress, username, password)
 					
 					pathArray = localpath.split("/")
@@ -419,17 +422,13 @@ class Uploader(threading.Thread):
 						try:
 							ftp.mkd("/" + pathToAdd + directory)
 						except:
-							print "directory exists already: " + directory
-						else:
-							print "created directory " + pathToAdd + directory
+							pass
 						#os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
 						pathToAdd = pathToAdd + directory + "/"
 					try:
 						ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
 					except:
 						pass
-				else:
-					print "Could not upload the file via ftp"
 							
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))
@@ -438,7 +437,7 @@ class Uploader(threading.Thread):
 		filelist = []
 		ftp.retrlines('LIST',filelist.append)
 		for f in filelist:
-			print f
+			#print f
 			if f.split()[-1] == dir and f.upper().startswith('D'):
 				return True
 		return False

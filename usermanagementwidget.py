@@ -128,7 +128,7 @@ class ManageUserPermissions(QtGui.QWidget):
 	def populateComboBox(self):
 		tree = self.parent.parent.parent.smartfile.get('/user', '/')
 		for i in tree:
-			print i['username']
+			#print i['username']
 			self.comboUser.addItem(i['username'])
 		
 			
@@ -154,12 +154,12 @@ class ManageUserPermissions(QtGui.QWidget):
 		else:
 			Writeval = False
 		
-		print self.selectedUser
+		#print self.selectedUser
 		try:	
 			tree = self.parent.parent.parent.smartfile.post('/access/user/',user=(self.selectedUser.encode('utf-8')), path=(self.path), read=(readval), list=(Viewval), remove=(Deleteval), write=(Writeval))	
 		except:
 			raise
-			print "Error"
+			#print "Error"
 		#Close Dialog...
 		self.close()
 	

@@ -147,7 +147,7 @@ class Browser(QtWebKit.QWebView):
 			self.pageloads = self.pageloads + 1
 			verify = doc.findFirst("button[type=submit]")
 			verify.evaluateJavaScript("this.click()")
-			print soup.find(id="id_verifier").get("value")
+			#print soup.find(id="id_verifier").get("value")
 		except:
 			if(self.pageloads >= 1):
 				try:
@@ -179,7 +179,7 @@ class Browser(QtWebKit.QWebView):
 		
 		self.timer.stop()
 			
-		#print unicode(frame.toHtml()).encode('utf-8')
+		##print unicode(frame.toHtml()).encode('utf-8')
 		#show the webpage after it loads completely
 		#self.parent.htmlView.show()
 	
@@ -214,17 +214,17 @@ class Browser(QtWebKit.QWebView):
 class AuthenticationClient(object):
 	
 	def __init__(self):
-		print "Loading the OAuth client..."
+		#print "Loading the OAuth client..."
 		self.api = OAuthClient("cBEd1e6022bPTJ3ygpGzQgkLLvEnTS", "LIIWruPvUTJGhBNtgoJM2SIghTyH5P")
 	
 	def get_auth_url(self):
 		try:
 			self.api.get_request_token()
 			auth_url = self.api.get_authorization_url()
-			print "Sending browser to: " + auth_url
+			#print "Sending browser to: " + auth_url
 			return auth_url
 		except:
-			print "There was an error loading the SmartFile OAuth authentication"
+			#print "There was an error loading the SmartFile OAuth authentication"
 			
 	#add the other OAuth methods here
 

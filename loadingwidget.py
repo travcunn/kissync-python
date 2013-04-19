@@ -19,7 +19,7 @@ class LoadingSquare(QtGui.QWidget):
 		self.initUI()
 		
 	def initUI(self):      
-		#print "Creating a square..."
+		##print "Creating a square..."
 		self.setFixedSize(self.squareWidth, self.squareHeight)
 		self.opacity = 0.0
 		
@@ -61,7 +61,7 @@ class LoadingSquare(QtGui.QWidget):
 		self.opacity = 1 - (value * 1)
 		self.repaint()
 		if(self.opacity == 0.0):
-			#print self.showdelay
+			##print self.showdelay
 			self.timeline1 = QtCore.QTimeLine()
 			self.timeline1.valueChanged.connect(self.animate)
 			self.timeline1.setDuration(300)
@@ -155,7 +155,7 @@ class Main(QtGui.QWidget):
 		
 if __name__ == "__main__":
 	
-	#print os.path.realpath(__file__)
+	##print os.path.realpath(__file__)
 	app = QtGui.QApplication(sys.argv)
 	mainwindow = Main()
 	mainwindow.show()

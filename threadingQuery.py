@@ -26,7 +26,7 @@ class Consumer(threading.Thread):
     def run(self):
         while True:
             item = self.out_queue.get()
-            print item
+            #print item
             result = 'This is your awesome output.'
             
             self.out_queue.task_done()
@@ -54,4 +54,4 @@ if __name__ == '__main__':
     in_queue.join()
     out_queue.join()
     
-    print str(out_queue.get())
+    #print str(out_queue.get())
