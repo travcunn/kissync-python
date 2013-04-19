@@ -40,6 +40,10 @@ class EventHandler(FileSystemEventHandler):
 		self.syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
 		
 	def on_moved(self, event):
+		try:
+			self.parent.smartfile.post('/path/oper/move/', src=(event.src_path), dst=(event.dest_path))
+		except:
+			raise
 		print event.event_type
 		print event.src_path
 		print event.dest_path
@@ -69,12 +73,31 @@ class EventHandler(FileSystemEventHandler):
 		print event.src_path
 
 	def on_deleted(self, event):
-		print event.event_type
-		print event.src_path
+		try:
+			thepath = event.src_path
+			self.parent.smartfile.post('/path/oper/remove', path=(thepath))
+		except:
+			pass
 
 	def on_modified(self, event):
-		#For polling, folders are "modified" when its contents are. we dont need to see this.
 		if not (event.is_directory):
-			print event.event_type
-			print event.src_path
+			fileToUpload = file(event.src_path)
+			try:
+				self.parent.smartfile.post('/path/data/', file=(event.src_path.replace(self.syncdirPath,''), fileToUpload))
+			except:
+				print "Could not convert into utf-8, so make FTP connection"
+				tree = self.parent.smartfile.get('/whoami', '/')
+				if 'site' in tree:
+					self.sitename = tree['site']['name'].encode("utf-8")
+					print self.sitename
+					
+					username = self.parent.config.get('Login', 'username')
+					password = self.parent.config.get('Login', 'password')
+					
+					ftpaddress = self.sitename + ".smartfile.com"
+					ftp = FTP(ftpaddress, username, password)
+					pathOnServer = event.src_path.replace(self.syncdirPath,'')
+					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+		print event.event_type
+		print event.src_path
 			

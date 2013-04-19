@@ -38,6 +38,14 @@ class FileDatabase(object):
 	
 	def loadRemoteListingFile(self):
 		try:
+			self.parent.smartfile.post('/path/oper/remove', path='/.kissyncDBserver')
+		except:
+			pass
+		try:
+			self.parent.smartfile.post('/path/oper/remove', path='/.kissyncDBtimeserver')
+		except:
+			pass
+		try:
 			openPath = self.getServerListingFile()
 			openPathTime = self.getServerListingFileTime()
 			print "OPEN PATHS SHOULD CONTAIN A FILENAME"
