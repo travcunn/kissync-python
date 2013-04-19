@@ -7,6 +7,8 @@ class ManageUserPremissions(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(ManageUserPremissions, self).__init__()
 		self.parent = parent
+
+		
 		self.setWindowTitle('User Premissions')   
 		#set the window type to a dialog
 		self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
@@ -85,6 +87,9 @@ class ManageUserPremissions(QtGui.QWidget):
 		self.setLayout(grid)
 		self.centerOnScreen()
 		
+	def onActivated(self, text):
+		print text
+		#print self.path
 	def populateComboBox(self):
 		tree = self.parent.parent.parent.smartfile.get('/user', '/')
 		for i in tree:
