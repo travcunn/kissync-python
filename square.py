@@ -37,13 +37,13 @@ class IconWidget(QtGui.QWidget):
 		#print extension
 		
 
-		if (self.icon.load(os.path.expanduser("~") + "/icons/faience/mimetypes/" + extension + ".svg") == True):
+		if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg") == True):
 			#print "KNOWN"
 			pass
 		else:
 			extension = "unknown"
 		
-		self.icon.load(os.path.expanduser("~") + "/icons/faience/mimetypes/" + extension + ".svg")
+		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
         
@@ -241,20 +241,29 @@ class ItemObject(QtGui.QWidget):
 			self.repaint()
 	
 	def deleteMe(self):
+		
 		#This will delete it's self.
 		print "Delete button clicked!"
 		#Create the file path to delete.
-		deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.filePath
-		#print deleteMeFilePath
-		##Delete the file from the system.
-		os.remove(deleteMeFilePath)
+		try:
+			deleteMeFilePath = os.path.expanduser("~") + "/Kissync" + self.filePath
+			#print deleteMeFilePath
+			##Delete the file from the system.
+			os.remove(deleteMeFilePath)
+			
+			##Instead of deleting a specific square.. just re-update the fileview.
+			deleteFileName = self.filePath.rfind('/')
+			#Prints out the directory...
+			#print self.filePath[:deleteFileName + 1] 
+			self.parent.parent.changePath(self.filePath[:deleteFileName + 1])
+		except:
+			#print "File does not exist on computer... Deleting from Cloud!"
+			try:
+				self.parent.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
+			except:
+				pass
+			self.parent.parent.parent.tray.notification("Kissync", "In Deletion Queue...")
 		
-		##Instead of deleting a specific square.. just re-update the fileview.
-		deleteFileName = self.filePath.rfind('/')
-		#Prints out the directory...
-		#print self.filePath[:deleteFileName + 1] 
-		self.parent.parent.changePath(self.filePath[:deleteFileName + 1] )
-		pass
 		
 	def downloadFile(self, filepath):
 		pathArray = filepath.split("/")

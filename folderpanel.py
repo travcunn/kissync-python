@@ -15,7 +15,7 @@ class FolderPanel(QtGui.QWidget):
 		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		
-		self.topText = QtGui.QLabel('Actions')
+		self.topText = QtGui.QLabel('       ')
 		self.topText.setFont(font)
 		self.topText.setAlignment(QtCore.Qt.AlignHCenter)
 		
