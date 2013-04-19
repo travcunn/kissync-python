@@ -22,10 +22,15 @@ class Main(QtGui.QWidget):
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		
+		self.kissyncDirectory = os.path.expanduser("~") + "/Kissync"
 		self.workingDirectory = os.path.expanduser("~") + "/.kissync"
 		self.settingsFile = os.path.expanduser("~") + "/.kissync/configuration.cfg"
+		
 		if not os.path.exists(self.workingDirectory):
 			os.makedirs(self.workingDirectory)
+		
+		if not os.path.exists(self.kissyncDirectory):
+			os.makedirs(self.kissyncDirectory)
 		
 		try:
 			with open(self.settingsFile): pass
