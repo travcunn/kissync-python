@@ -37,8 +37,10 @@ class FolderPanel(QtGui.QWidget):
 		#self.buttonsWidget.setContentsMargins(10, 10, 10, 10)
 		#buttons add to layout
 		self.addButton = PanelButton(self, "add")
+		self.refreshButton = PanelButton(self, "refresh")
 		
 		self.buttonsLayout.addWidget(self.addButton)
+		self.buttonsLayout.addWidget(self.refreshButton)
 		
 		self.gridLayout.addWidget(self.infoTextWidget, 0, 1)
 		self.gridLayout.addWidget(self.buttonsWidget, 0, 0)
@@ -80,7 +82,17 @@ class FolderPanel(QtGui.QWidget):
 			#self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:deleteFileName + 1])
 			
 			#### NEED TO ADD REFRESH FILEVIEW #########
-
+			#Refreshes FileVIEW
+			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+		elif (button == "refresh"):
+			
+			Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
 		else:
 			print "Op. that button isn't alive yet!"
 		

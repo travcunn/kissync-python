@@ -246,6 +246,12 @@ class BottomPanel(QtGui.QWidget):
 			#### NEED TO ADD REFRESH FILEVIEW #########
 			self.parent.parent.tray.notification("Kissync", "New File(s) Added!")
 			
+			#Refresh FILEVIEW
+			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+			
 		elif (button == "delete"):
 			print "Delete pressed."
 			#Create the file path to delete.
@@ -292,6 +298,11 @@ class BottomPanel(QtGui.QWidget):
 			
 			self.moveFile(str(source_file),str(destination_folder))
 			
+			Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
+			#Prints out the directory...
+			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
+			
 			self.parent.parent.tray.notification("Kissync", "Moved")
 		elif (button == "rename"):
 			
@@ -316,10 +327,11 @@ class BottomPanel(QtGui.QWidget):
 			self.moveFile(str(source_file),str(dest_file))
 			self.parent.parent.tray.notification("Kissync", "Renamed")
 			
-			deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			#Refreshes FileVIEW
+			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
-			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
+			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 			
 		elif (button == "generate_link"):
 			print "Gen Link Pressed"
