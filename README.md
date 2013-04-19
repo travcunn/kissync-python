@@ -7,4 +7,6 @@ Built to run on Ubuntu 12.10, but may be able to run on other operating systems.
 
 A file synchronization and browsing tool for SmartFile
 
+To synchronize files, upload using the Kissync client
+
 To use, run 'python main.py'
