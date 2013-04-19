@@ -10,12 +10,16 @@ import flowlayout, shutil
 #Copy and paste library.. platform independent.
 import pyperclip
 
+from usermanagementwidget import ManageUserPremissions
+
 
 class BottomPanel(QtGui.QWidget):
 	def __init__(self, parent):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
 		self.setStyleSheet("QWidget { background: #FFFFFF; }")
+		
+		self.manageUser = ManageUserPremissions(self)
 		
 		self.setMinimumSize(50, 64)
 		self.setMaximumHeight(68)
@@ -96,17 +100,21 @@ class BottomPanel(QtGui.QWidget):
 		self.buttonsWidget.setLayout(self.buttonsLayout)
 		#self.buttonsWidget.setContentsMargins(10, 10, 10, 10)
 		
-		#add buttons to layout
+		#create buttons
 		self.addButton = PanelButton(self, "add")
 		self.deleteButton = PanelButton(self, "delete")
 		self.moveButton = PanelButton(self, "move")
 		self.renameButton = PanelButton(self, "rename")
 		self.generateLinkButton = PanelButton(self, "generate_link")
+		self.userPremissionButton = PanelButton(self, "user_premissions")
+		
+		#add buttons to layout
 		self.buttonsLayout.addWidget(self.addButton)
 		self.buttonsLayout.addWidget(self.deleteButton)
 		self.buttonsLayout.addWidget(self.moveButton)
 		self.buttonsLayout.addWidget(self.renameButton)
 		self.buttonsLayout.addWidget(self.generateLinkButton)
+		self.buttonsLayout.addWidget(self.userPremissionButton)
 	
 		
 		self.gridLayout.addWidget(self.infoTextWidget, 0, 1)
@@ -229,7 +237,7 @@ class BottomPanel(QtGui.QWidget):
 			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
 			## Print File Name
 			#print str(source_file)
-			destination_folder = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.breadcrumb.currentPath
+			destination_folder = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
 			print "Source: " + source_file
 			print "Dest: " + destination_folder
 			#if not os.path.exists(destination_folder):
@@ -255,21 +263,36 @@ class BottomPanel(QtGui.QWidget):
 		elif (button == "delete"):
 			print "Delete pressed."
 			#Create the file path to delete.
-			deleteMeFilePath = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
-			##Delete the file from the system.
-			os.remove(deleteMeFilePath)
-			
-			##Instead of deleting a specific square.. just re-update the fileview.
-			deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
-			#Prints out the directory...
-			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
-			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
-			
-			self.parent.parent.tray.notification("Kissync", "Deleted")
+			try:
+				deleteMeFilePath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
+				##Delete the file from the system.
+				os.remove(deleteMeFilePath)
+				
+				##Instead of deleting a specific square.. just re-update the fileview.
+				deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+				#Prints out the directory...
+				#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
+				self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
+				
+				self.parent.parent.tray.notification("Kissync", "Deleted")
+			except:
+				#print "File does not exist on computer... Deleting from Cloud!"
+				try:
+					self.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
+				except:
+					pass
+				self.parent.parent.tray.notification("Kissync", "In Deletion Queue...")
 		
 		elif (button == "move"):
 			#Move File...
-			source_file = os.path.dirname(os.path.realpath(__file__)) + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+			print self.parent.fileview.activeSquares[0].filePath
+			print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+			try:
+				self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+			except:
+				pass
+			
+			source_file = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
 			
 			'''
 			#Get file extension and type
@@ -290,7 +313,7 @@ class BottomPanel(QtGui.QWidget):
 			comment = inputter.text.text()
 			'''
 			
-			comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", os.path.expanduser("~") + "/Kissync"))
+			comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.config.get('LocalSettings', 'sync-dir')))
 			
 			destination_folder = comment
 			print str(source_file)
@@ -376,6 +399,9 @@ class BottomPanel(QtGui.QWidget):
 			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
 			self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
+		elif(button == "user_premissions"):
+			print "User Premissions!"
+			self.manageUser.show()
 		else:
 			print "Op. that button isn't alive yet!"
 	def moveFile(self, source, dest):

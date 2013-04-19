@@ -14,14 +14,13 @@ def main():
 		#pprint.pprint(api.get('/path/info', children = True))
 		
 		#Get JSON for root
-		tree = api.post('/link', path='/Test Folder/Test/test.txt', name='text')
+		tree = api.get('/user', '/')
 		for i in tree:
-			if(i == "href"):
-				print tree[i]
+			pprint.pprint(i['username'])
 		
 		#print url
 		# Returns all directories and files in root!
-		#pprint.pprint(tree['site'])
+		#pprint.pprint(tree)
 		#pprint.pprint(tree['user']['name'].encode("utf-8"))
 		#yay 
 		#ost("/path/oper/checksum", path='/globe.txt', algorithm='MD5')
