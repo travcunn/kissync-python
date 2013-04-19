@@ -403,12 +403,14 @@ class Uploader(threading.Thread):
 					
 					#while(True):
 					ftpaddress = self.sitename + ".smartfile.com"
+					print ftpaddress
+					print username
+					print password
 					ftp = FTP(ftpaddress, username, password)
 					
 					pathArray = localpath.split("/")
-					if not(len(pathArray) == 1):
-						pathArray.pop(0)
-						pathArray.pop(len(pathArray) - 1)
+					pathArray.pop(0)
+					pathArray.pop(len(pathArray) - 1)
 					pathToAdd = ""
 					
 					#A BUG EXISTS IN THIS, PLEASE TEST THIS

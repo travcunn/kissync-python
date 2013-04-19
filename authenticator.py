@@ -43,6 +43,7 @@ class Authenticator(object):
 			else:
 				try:
 					self.parent.smartfile.get_access_token(None, text)
+					
 				except:
 					#something happened after logging in successfully, and is not sucessful now
 					quit_msg = "Wrong verification code. Try again?"
@@ -55,6 +56,18 @@ class Authenticator(object):
 						os._exit()
 				else:
 					#logged in successfully
+					userpass, ok = QtGui.QInputDialog.getText(self.parent, 'Kissync', 'Reenter your password:')
+					
+					if not ok:
+						userpass = None
+					else:
+						tree = self.parent.smartfile.get('/whoami', '/')
+						if 'site' in tree:
+							username = tree['site']['name'].encode("utf-8")
+						self.parent.config.set('Login', 'username', username)
+						self.parent.config.set('Login', 'password', userpass)
+						with open(self.parent.settingsFile, 'wb') as configfile:
+							self.parent.config.write(configfile)
 					self.success()
 				
 	
