@@ -316,7 +316,7 @@ class Daemon(threading.Thread):
 			self.parent.database.generateRemoteListing()
 			
 			#print "done generating remote listing"
-			time.sleep(15)
+			time.sleep(45)
 
 
 class CheckChanges(threading.Thread):
