@@ -26,11 +26,11 @@ class Watcher(threading.Thread):
 			while True:
 				time.sleep(1)
 		except KeyboardInterrupt:
-			observer.stop()
-			observer.join()
+			self.observer.stop()
+			self.observer.join()
 		except:
-			observer.stop()
-			observer.join()
+			self.observer.stop()
+			self.observer.join()
 		
 		
 		
@@ -44,6 +44,8 @@ class EventHandler(FileSystemEventHandler):
 			self.parent.smartfile.post('/path/oper/move/', src=(event.src_path), dst=(event.dest_path))
 		except:
 			raise
+		else:
+			self.parent.database.generateRemoteListing()
 		##print event.event_type
 		##print event.src_path
 		##print event.dest_path
@@ -51,25 +53,24 @@ class EventHandler(FileSystemEventHandler):
 	def on_created(self, event):
 		if not (event.is_directory):
 			fileToUpload = file(event.src_path)
-			try:
-				self.parent.smartfile.post('/path/data/', file=(event.src_path.replace(self.syncdirPath,''), fileToUpload))
-			except:
-				##print "Could not convert into utf-8, so make FTP connection"
-				tree = self.parent.smartfile.get('/whoami', '/')
-				if 'site' in tree:
-					self.sitename = tree['site']['name'].encode("utf-8")
-					##print self.sitename
-					
-					username = self.parent.config.get('Login', 'username')
-					password = self.parent.config.get('Login', 'password')
-					
-					ftpaddress = self.sitename + ".smartfile.com"
-					ftp = FTP(ftpaddress, username, password)
-					pathOnServer = event.src_path.replace(self.syncdirPath,'')
-					try:
-						ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
-					except:
-						pass
+			##print "Could not convert into utf-8, so make FTP connection"
+			tree = self.parent.smartfile.get('/whoami', '/')
+			if 'site' in tree:
+				self.sitename = tree['site']['name'].encode("utf-8")
+				##print self.sitename
+				
+				username = self.parent.config.get('Login', 'username')
+				password = self.parent.config.get('Login', 'password')
+				
+				ftpaddress = self.sitename + ".smartfile.com"
+				ftp = FTP(ftpaddress, username, password)
+				pathOnServer = event.src_path.replace(self.syncdirPath,'')
+				try:
+					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+				except:
+					pass
+				else:
+					self.parent.database.generateRemoteListing()
 		else:
 			self.parent.smartfile.post('/path/oper/mkdir/', event.src_path.replace(self.syncdirPath,''))
 		##print event.event_type
@@ -85,25 +86,24 @@ class EventHandler(FileSystemEventHandler):
 	def on_modified(self, event):
 		if not (event.is_directory):
 			fileToUpload = file(event.src_path)
-			try:
-				self.parent.smartfile.post('/path/data/', file=(event.src_path.replace(self.syncdirPath,''), fileToUpload))
-			except:
-				##print "Could not convert into utf-8, so make FTP connection"
-				tree = self.parent.smartfile.get('/whoami', '/')
-				if 'site' in tree:
-					self.sitename = tree['site']['name'].encode("utf-8")
-					##print self.sitename
-					
-					username = self.parent.config.get('Login', 'username')
-					password = self.parent.config.get('Login', 'password')
-					
-					ftpaddress = self.sitename + ".smartfile.com"
-					ftp = FTP(ftpaddress, username, password)
-					pathOnServer = event.src_path.replace(self.syncdirPath,'')
-					try:
-						ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
-					except:
-						pass
+			##print "Could not convert into utf-8, so make FTP connection"
+			tree = self.parent.smartfile.get('/whoami', '/')
+			if 'site' in tree:
+				self.sitename = tree['site']['name'].encode("utf-8")
+				##print self.sitename
+				
+				username = self.parent.config.get('Login', 'username')
+				password = self.parent.config.get('Login', 'password')
+				
+				ftpaddress = self.sitename + ".smartfile.com"
+				ftp = FTP(ftpaddress, username, password)
+				pathOnServer = event.src_path.replace(self.syncdirPath,'')
+				try:
+					ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
+				except:
+					pass
+				else:
+					self.parent.database.generateRemoteListing()
 		##print event.event_type
 		##print event.src_path
 			

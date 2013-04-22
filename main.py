@@ -1,15 +1,14 @@
 import ConfigParser, os, sys
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui
 
-import breadcrumb, flowlayout, style, square
+import style
 from authenticator import Authenticator
 from filedatabase import FileDatabase
 from filedatabase import Synchronizer
 from filedatabase import RefreshThread
 from loginwindow import LoginWindow
-from fileview import FileView
 from setupwizard import SetupWizard
-from tray import TrayMenu, SystemTrayIcon
+from tray import SystemTrayIcon
 from filebrowsergui import FileBrowserGUI
 from accountwidget import AccountWidget
 
@@ -23,9 +22,9 @@ class Main(QtGui.QWidget):
 		
 		self.config = ConfigParser.RawConfigParser() #configuration parser
 		
-		self.kissyncDirectory = os.path.expanduser("~") + "/Kissync"
-		self.workingDirectory = os.path.expanduser("~") + "/.kissync"
-		self.settingsFile = os.path.expanduser("~") + "/.kissync/configuration.cfg"
+		self.kissyncDirectory = os.path.join(os.path.expanduser("~"), "Kissync")
+		self.workingDirectory = os.path.join(os.path.expanduser("~"), ".kissync")
+		self.settingsFile = os.path.join(os.path.expanduser("~"), ".kissync", "configuration.cfg")
 		
 		if not os.path.exists(self.workingDirectory):
 			os.makedirs(self.workingDirectory)
@@ -109,6 +108,7 @@ class Main(QtGui.QWidget):
 		#this method is called on login success
 		self.show()
 		
+		self.database.generateAuthHash()
 		self.database.indexLocalFiles()
 		self.database.loadRemoteListingFile()
 		

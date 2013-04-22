@@ -255,7 +255,10 @@ class BottomPanel(QtGui.QWidget):
 			self.parent.parent.tray.notification("Kissync", "New File(s) Added!")
 			
 			#Refresh FILEVIEW
-			Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			try:
+				Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+			except:
+				pass
 			#Prints out the directory...
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
@@ -444,6 +447,8 @@ class InputDialog(QtGui.QDialog):
 
 		self.resize(400, 60)
 		self.setWindowTitle(title)
+		
+		
 class Main(QtGui.QWidget):
 	def __init__(self, parent = None):
 		super(Main, self).__init__(parent)

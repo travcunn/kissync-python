@@ -1,5 +1,5 @@
 from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import datetime, hashlib, os, platform, Queue, shutil, sys, time, threading, subprocess
+import datetime, hashlib, os, platform, Queue, shutil, sys, time, threading, urllib, urllib2, subprocess
 import cPickle as pickle
 
 from StringIO import StringIO
@@ -16,6 +16,21 @@ class FileDatabase(object):
 		self.remoteFilesDictionaryTime = {}
 		self.localFilesDictionary = {}
 		self.localFilesDictionaryTime = {}
+	
+	def generateAuthHash(self):
+		username = self.parent.config.get('Login', 'username')
+		password = self.parent.config.get('Login', 'password')
+		
+		self.authHash = hashlib.md5()
+		self.authHash.update(username + password + "listing")
+		self.authHash = self.authHash.hexdigest()
+		
+		self.authHashTimes = hashlib.md5()
+		self.authHashTimes.update(username + password + "times")
+		self.authHashTimes = self.authHashTimes.hexdigest()
+		
+		print self.authHash
+		print self.authHashTimes
 	
 	def indexLocalFiles(self):
 		syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
@@ -52,6 +67,7 @@ class FileDatabase(object):
 			#print openPath
 			#print openPathTime
 		except:
+			raise
 			#print "Remote listing does not exist..."
 			openPath = None
 			openPathTime = None
@@ -78,32 +94,39 @@ class FileDatabase(object):
 		try:
 			os.remove(tmpLocalPath)
 		except:
-			pass
-		output = open(tmpLocalPath, 'wb')
-		pickle.dump(self.localFilesDictionary, output)
-		output.close()
-		
-		tmpLocalPathTime = self.parent.workingDirectory + "/.kissyncDBtmptime"
-		try:
-			os.remove(tmpLocalPathTime)
-		except:
-			pass
-		outputtime = open(tmpLocalPathTime, 'wb')
-		pickle.dump(self.localFilesDictionaryTime, outputtime)
-		outputtime.close()
-		
-		#now upload the pickled files to the server
-		try:
-			fileToUpload = file(tmpLocalPath)
-			#print "Uploading files to the server"
-			#print fileToUpload.read()
-			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBserver', fileToUpload))
-			
-			fileToUpload = file(tmpLocalPathTime)
-			self.parent.smartfile.post('/path/data/', file=('/.kissyncDBtimeserver', fileToUpload))
-		except:
 			raise
-			self.generateRemoteListing()
+		else:
+			output = open(tmpLocalPath, 'wb')
+			pickle.dump(self.localFilesDictionary, output)
+			output.close()
+			
+			tmpLocalPathTime = self.parent.workingDirectory + "/.kissyncDBtmptime"
+			try:
+				os.remove(tmpLocalPathTime)
+			except:
+				pass
+			outputtime = open(tmpLocalPathTime, 'wb')
+			pickle.dump(self.localFilesDictionaryTime, outputtime)
+			outputtime.close()
+			
+			#now upload the pickled files to the server
+			try:
+				print "uploadng to the server...."
+				fileToUpload = file(tmpLocalPath)
+				url = "http://www.kissync.com/postindex?login_hash=%s" % self.authHash
+	
+				fileRead = str(fileToUpload.read())
+				data = urllib.urlencode({'content': fileRead})
+				results = urllib2.urlopen(url, data)
+				
+				fileToUpload = file(tmpLocalPathTime)
+				url = "http://www.kissync.com/postindex?login_hash=%s" % self.authHashTimes
+	
+				fileRead = str(fileToUpload.read())
+				data = urllib.urlencode({'content': fileRead})
+				results = urllib2.urlopen(url, data)
+			except:
+				self.generateRemoteListing()
 				
 	def getServerListingFile(self):
 		filepath = "/.kissyncDBserver"
@@ -112,11 +135,12 @@ class FileDatabase(object):
 			os.remove(fullpath)
 		except:
 			pass
-		f = self.parent.smartfile.get('/path/data', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
-		with file(realPath, 'wb') as o:
-			shutil.copyfileobj(f, o)
+		serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHash)
+		output = open(realPath,'wb')
+		output.write(serverFile.read())
+		output.close()
 		return realPath
 		
 	def getServerListingFileTime(self):
@@ -126,11 +150,12 @@ class FileDatabase(object):
 			os.remove(fullpath)
 		except:
 			pass
-		f = self.parent.smartfile.get('/path/data/', filepath)
 		realPath = self.parent.workingDirectory + filepath
 		realPath = realPath.encode("utf-8")
-		with file(realPath, 'wb') as o:
-			shutil.copyfileobj(f, o)
+		serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHashTimes)
+		output = open(realPath,'wb')
+		output.write(serverFile.read().replace('&amp', ''))
+		output.close()
 		return realPath
 			
 	
@@ -170,7 +195,7 @@ class Synchronizer(object):
 		
 		#files the server that client needs
 		#print "FILES THAT WERE ADDED:"
-		#print self.dictDiffer.added()
+		print self.dictDiffer.added()
 		for i in self.dictDiffer.added():
 			self.filesToDownload.append(i)
 			self.downloadQueue.put(i)
@@ -259,11 +284,6 @@ class Daemon(threading.Thread):
 			for i in self.dictDiffer.added():
 				self.filesToDownload.append(i)
 				self.downloadQueue.put(i)
-			
-			#local files that smartfile needs
-			for i in self.dictDiffer.removed():
-				self.filesToUpload.append(i)
-				self.uploadQueue.put(i)
 				
 			#files that are different on the server, that the client needs	
 			for i in self.dictDiffer.changed():
@@ -285,15 +305,10 @@ class Daemon(threading.Thread):
 			downthread.setDaemon(True)
 			downthread.start()
 			
-			upthread = Uploader(self, self.uploadQueue)
-			upthread.setDaemon(True)
-			upthread.start()
-			
 			self.checkChangesQueue.join()
 			#print "changes queue joined"
 			self.downloadQueue.join()
 			#print "dl queue joined"
-			self.uploadQueue.join()
 			#print "ul queue joined"
 			
 			#print "done joining"
@@ -301,7 +316,7 @@ class Daemon(threading.Thread):
 			self.parent.database.generateRemoteListing()
 			
 			#print "done generating remote listing"
-			time.sleep(90)
+			time.sleep(15)
 
 
 class CheckChanges(threading.Thread):
@@ -318,6 +333,11 @@ class CheckChanges(threading.Thread):
 			#print path
 			self.checkFile(path)
 			self.queue.task_done()
+		filepath = "/.kissyncDBserver"
+		fullpath = self.parent.workingDirectory + filepath
+		
+		filepath = "/.kissyncDBtimeserver"
+		fullpath = self.parent.workingDirectory + filepath
 				
 	def checkFile(self, filepath):
 		#print "checking " + filepath
@@ -382,10 +402,10 @@ class Uploader(threading.Thread):
 	def run(self):
 		while True:
 			path = self.queue.get()
-			#print "Uploading: " + path
+			print "Uploading: " + path
 			self.uploadFile(path)
 			self.queue.task_done()
-			#print "Done uploading " + path
+			print "Done uploading " + path
 			#print self.queue.qsize()
 				
 	def uploadFile(self, filepath):
@@ -393,42 +413,39 @@ class Uploader(threading.Thread):
 		filepath = self.syncdirPath + filepath
 		if not (os.path.isdir(filepath)):
 			fileToUpload = file(filepath, 'rb')
-			try:
-				self.parent.parent.smartfile.post('/path/data/', file=(filepath.replace(self.syncdirPath,''), StringIO(fileToUpload.read())))
-			except:
-				#print "Could not convert into utf-8, so make FTP connection"
-				tree = self.parent.parent.smartfile.get('/whoami', '/')
-				if 'site' in tree:
-					self.sitename = tree['site']['name'].encode("utf-8")
-					
-					username = self.parent.parent.config.get('Login', 'username')
-					password = self.parent.parent.config.get('Login', 'password')
-					
-					#while(True):
-					ftpaddress = self.sitename + ".smartfile.com"
-					#print ftpaddress
-					#print username
-					#print password
-					ftp = FTP(ftpaddress, username, password)
-					
-					pathArray = localpath.split("/")
-					pathArray.pop(0)
-					pathArray.pop(len(pathArray) - 1)
-					pathToAdd = ""
-					
-					#A BUG EXISTS IN THIS, PLEASE TEST THIS
-					syncdir =  self.parent.parent.config.get('LocalSettings', 'sync-dir')	
-					for directory in pathArray:
-						try:
-							ftp.mkd("/" + pathToAdd + directory)
-						except:
-							pass
-						#os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
-						pathToAdd = pathToAdd + directory + "/"
+			#print "Could not convert into utf-8, so make FTP connection"
+			tree = self.parent.parent.smartfile.get('/whoami', '/')
+			if 'site' in tree:
+				self.sitename = tree['site']['name'].encode("utf-8")
+				
+				username = self.parent.parent.config.get('Login', 'username')
+				password = self.parent.parent.config.get('Login', 'password')
+				
+				#while(True):
+				ftpaddress = self.sitename + ".smartfile.com"
+				#print ftpaddress
+				#print username
+				#print password
+				ftp = FTP(ftpaddress, username, password)
+				
+				pathArray = localpath.split("/")
+				pathArray.pop(0)
+				pathArray.pop(len(pathArray) - 1)
+				pathToAdd = ""
+				
+				#A BUG EXISTS IN THIS, PLEASE TEST THIS
+				syncdir =  self.parent.parent.config.get('LocalSettings', 'sync-dir')	
+				for directory in pathArray:
 					try:
-						ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+						ftp.mkd("/" + pathToAdd + directory)
 					except:
 						pass
+					#os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+					pathToAdd = pathToAdd + directory + "/"
+				try:
+					ftp.storbinary('STOR ' + localpath.encode('utf-8'), open(filepath, 'rb'))
+				except:
+					pass
 							
 		else:
 			self.parent.parent.smartfile.post('/path/oper/mkdir/', filepath.replace(self.syncdirPath,''))

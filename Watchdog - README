@@ -1,3 +1,0 @@
-Be sure to increase iNotify so it can monitor more files, as by default on my Linux install, iNotify breaks without this command:
-
-sudo sysctl fs.inotify.max_user_watches=16364
