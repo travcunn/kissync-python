@@ -87,6 +87,7 @@ class SetupWizard(QtGui.QWidget):
 		with open(self.parent.settingsFile, 'wb') as configfile:
 				self.parent.config.write(configfile)
 		self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
+		self.parent.show()
 		self.parent.start()
 		
 	def centerOnScreen (self):

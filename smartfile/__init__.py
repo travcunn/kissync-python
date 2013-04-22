@@ -235,8 +235,8 @@ try:
                            callback_uri=callback,
                            signature_method=SIGNATURE_PLAINTEXT)
             cert_path = self.resource_path('cacert.pem')
-            r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=cert_path)
-            #r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth)
+            #r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=cert_path)
+            r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth)
             credentials = urlparse.parse_qs(r.text)
             self.__request = OAuthToken(credentials.get('oauth_token')[0],
                                         credentials.get('oauth_token_secret')[0])
