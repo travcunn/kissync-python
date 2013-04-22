@@ -148,19 +148,11 @@ class BottomPanel(QtGui.QWidget):
 			#self.parent.fileview.squareArray[0]
 			self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
 			#self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
-			self.numberSelected.setText("1 item selected.")
+			#self.numberSelected.setText("1 item selected.")
 			#self.sizeSelectedTitle.setText("Size: ")
 			
 			#only details for only single files
 			#filetype = self.parent.fileview.activeSquares[0].fileType
-			
-			## not sure why this is here... ##
-			'''
-			if not (len(filetype) <= 24):
-				cut = len(filetype) - 24
-				filetype = filetype.replace(filetype[-cut:], '...')
-				
-			'''
 			
 			#self.fileNameText.setText(self.parent.fileview.activeSquares[0].fileName)
 			self.topText.setText(self.parent.fileview.activeSquares[0].fileName)
@@ -172,7 +164,7 @@ class BottomPanel(QtGui.QWidget):
 		#self.fileNameTitle.hide()
 		#self.fileNameText.hide()
 		#self.fileTypeTitle.hide()
-		self.fileTypeText.hide()
+		#self.fileTypeText.hide()
 		#self.lastModifiedTitle.hide()
 		self.lastModifiedText.hide()
 		self.numberSelected.show()
@@ -183,7 +175,7 @@ class BottomPanel(QtGui.QWidget):
 		#self.fileNameTitle.show()
 		#self.fileNameText.show()
 		#self.fileTypeTitle.show()
-		self.fileTypeText.show()
+		#self.fileTypeText.show()
 		#self.lastModifiedTitle.show()
 		self.lastModifiedText.show()
 		self.numberSelected.hide()
@@ -232,14 +224,14 @@ class BottomPanel(QtGui.QWidget):
 	def buttonClicked(self, buttonType):
 		button = buttonType.lower()
 		if (button == "add"):
-			print "Add pressed."
+			#print "Add pressed."
 			##Open Dialog
 			source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
 			## Print File Name
 			#print str(source_file)
 			destination_folder = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
-			print "Source: " + source_file
-			print "Dest: " + destination_folder
+			#print "Source: " + source_file
+			#print "Dest: " + destination_folder
 			#if not os.path.exists(destination_folder):
 				#os.makedirs(destination_folder)
 			
@@ -263,13 +255,21 @@ class BottomPanel(QtGui.QWidget):
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 			
+			self.parent.parent.database.generateRemoteListing()
+			
 		elif (button == "delete"):
-			print "Delete pressed."
+			#print "Delete ."
 			#Create the file path to delete.
 			try:
 				deleteMeFilePath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
 				##Delete the file from the system.
-				os.remove(deleteMeFilePath)
+				try:
+					if(os.path.isdir(deleteMeFilePath)):
+						os.remove(deleteMeFilePath)
+					else:
+						self.deleteFolder(deleteMeFilePath)
+				except:
+					pass
 				
 				##Instead of deleting a specific square.. just re-update the fileview.
 				deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
@@ -285,11 +285,13 @@ class BottomPanel(QtGui.QWidget):
 				except:
 					pass
 				self.parent.parent.tray.notification("Kissync", "In Deletion Queue...")
-		
+				
+			self.parent.parent.database.generateRemoteListing()
+			
 		elif (button == "move"):
 			#Move File...
-			print self.parent.fileview.activeSquares[0].filePath
-			print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+			#print self.parent.fileview.activeSquares[0].filePath
+			#print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
 			try:
 				self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
 			except:
@@ -319,8 +321,8 @@ class BottomPanel(QtGui.QWidget):
 			comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.config.get('LocalSettings', 'sync-dir')))
 			
 			destination_folder = comment
-			print str(source_file)
-			print str(destination_folder)
+			#print str(source_file)
+			#print str(destination_folder)
 			
 			self.moveFile(str(source_file),str(destination_folder))
 			
@@ -330,6 +332,9 @@ class BottomPanel(QtGui.QWidget):
 			self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
 			
 			self.parent.parent.tray.notification("Kissync", "Moved")
+			
+			self.parent.parent.database.generateRemoteListing()
+			
 		elif (button == "rename"):
 			
 			source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
@@ -352,9 +357,9 @@ class BottomPanel(QtGui.QWidget):
 
 			inputter.exec_()
 			
-			print source_file
+			#print source_file
 			dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
-			print dest_file
+			#print dest_file
 			self.moveFile(str(source_file),str(dest_file))
 			self.parent.parent.tray.notification("Kissync", "Renamed")
 			
@@ -364,9 +369,11 @@ class BottomPanel(QtGui.QWidget):
 			#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1] 
 			self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 			
+			self.parent.parent.database.generateRemoteListing()
+			
 		elif (button == "generate_link"):
-			print "Gen Link Pressed"
-			print self.parent.fileview.activeSquares[0].filePath
+			#print "Gen Link Pressed"
+			#print self.parent.fileview.activeSquares[0].filePath
 			path = self.parent.fileview.activeSquares[0].filePath
 			name = self.parent.fileview.activeSquares[0].fileName
 			url = ""
@@ -380,13 +387,13 @@ class BottomPanel(QtGui.QWidget):
 				if 'href' not in i:
 					return []
 				url = i['href'].encode("utf-8")
-			print path
-			print "-----------"
-			print name
+			#print path
+			#print "-----------"
+			#print name
 			if not (url == "" or url == None):
 				pass
 			else:
-				print "Nothing!  Yet! GENERATE A URL!"
+				#print "Nothing!  Yet! GENERATE A URL!"
 				p = path
 				n = name
 				tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True, recursive=True)
@@ -395,25 +402,32 @@ class BottomPanel(QtGui.QWidget):
 					if(i == "href"):
 						url = tree2[i]
 
-			print "RESPONSE:"
-			print url
+			#print "RESPONSE:"
+			#print url
 			pyperclip.copy(url)
 			#Share on twitter.
 			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
 			self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
 		elif(button == "user_premissions"):
-			print "User Premissions!"
+			#print "User Premissions!"
 			self.manageUser.show()
 			self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
 			
-		else:
-			print "Op. that button isn't alive yet!"
+			
 	def moveFile(self, source, dest):
 		if not (source == "" or dest == None):
 			shutil.move(source,dest)
-		else:
-			print "User canceled upload dialog"
+			
+	def deleteFolder(self, d):
+		for path in (os.path.join(d,f) for f in os.listdir(d)):
+			if os.path.isdir(path):
+				self.deleteFolder(path)
+			elif os.path.isfile(path):
+				os.remove(path)
+			else:
+				os.unlink(path)
+		os.rmdir(d)
 		
 class InputDialog(QtGui.QDialog):
 	'''

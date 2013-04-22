@@ -53,14 +53,6 @@ class FileDatabase(object):
 	
 	def loadRemoteListingFile(self):
 		try:
-			self.parent.smartfile.post('/path/oper/remove', path='/.kissyncDBserver')
-		except:
-			pass
-		try:
-			self.parent.smartfile.post('/path/oper/remove', path='/.kissyncDBtimeserver')
-		except:
-			pass
-		try:
 			openPath = self.getServerListingFile()
 			openPathTime = self.getServerListingFileTime()
 			#print "OPEN PATHS SHOULD CONTAIN A FILENAME"
@@ -73,7 +65,7 @@ class FileDatabase(object):
 			openPathTime = None
 			self.remoteFilesDictionary = {}
 			self.remoteFilesDictionaryTime = {}
-			#self.generateRemoteListing()
+			self.generateRemoteListing()
 		else:
 			#print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
 			#print self.remoteFilesDictionary
@@ -238,6 +230,7 @@ class Synchronizer(object):
 		
 		#print "done joining"
 		
+		self.parent.database.loadRemoteListingFile()
 		self.parent.database.generateRemoteListing()
 		
 		#print "done generating remote listing"
@@ -313,6 +306,7 @@ class Daemon(threading.Thread):
 			
 			#print "done joining"
 			
+			self.parent.database.indexLocalFiles()
 			self.parent.database.generateRemoteListing()
 			
 			#print "done generating remote listing"
