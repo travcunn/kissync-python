@@ -1,0 +1,13 @@
+Package: kissync
+Version: 1.0.0
+Architecture: i386
+Maintainer: Travis Cunningham <travcunn@umail.iu.edu>
+Installed-Size: 45977
+X-Python-Version: >= 2.7
+Depends:python2.7, python-qt4, python-bs4
+Section: extra
+Priority: optional
+Homepage: http://www.kissync.com
+Description: SmartFile Cloud Synchronization
+ Kissync is an open source desktop client that synchronizes all of your files 
+ between any computers and the SmartFile cloud.

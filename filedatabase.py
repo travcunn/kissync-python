@@ -59,7 +59,6 @@ class FileDatabase(object):
 			#print openPath
 			#print openPathTime
 		except:
-			raise
 			#print "Remote listing does not exist..."
 			openPath = None
 			openPathTime = None
@@ -86,7 +85,7 @@ class FileDatabase(object):
 		try:
 			os.remove(tmpLocalPath)
 		except:
-			raise
+			pass
 		else:
 			output = open(tmpLocalPath, 'wb')
 			pickle.dump(self.localFilesDictionary, output)
