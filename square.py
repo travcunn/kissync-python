@@ -36,7 +36,6 @@ class IconWidget(QtGui.QWidget):
 			
 		##print extension
 		
-
 		if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg") == True):
 			##print "KNOWN"
 			pass
