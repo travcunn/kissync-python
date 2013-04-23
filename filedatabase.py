@@ -69,13 +69,16 @@ class FileDatabase(object):
 			#print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
 			#print self.remoteFilesDictionary
 			#print self.remoteFilesDictionaryTime
-			picklefile = open(openPath, 'rb')
-			self.remoteFilesDictionary = pickle.load(picklefile)
-			picklefile.close()
-			
-			picklefiletime = open(openPathTime, 'rb')
-			self.remoteFilesDictionaryTime = pickle.load(picklefiletime)
-			picklefiletime.close()
+			try:
+				picklefile = open(openPath, 'rb')
+				self.remoteFilesDictionary = pickle.load(picklefile)
+				picklefile.close()
+				
+				picklefiletime = open(openPathTime, 'rb')
+				self.remoteFilesDictionaryTime = pickle.load(picklefiletime)
+				picklefiletime.close()
+			except:
+				self.loadRemoteListingFile()
 			
 			#subprocess.call(('xdg-open', openPath))
 			#subprocess.call(('xdg-open', openPathTime))
