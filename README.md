@@ -1,7 +1,7 @@
 Keep It Simple Sync in Python (SmartFile Client)
 ==============
 
-###*Built to run on Ubuntu 12.10, but may be able to run on other operating systems.*###
+####*Built to run on Ubuntu 12.10, but may be able to run on other operating systems.*####
 
 A file synchronization and browsing tool for SmartFile
 
@@ -9,6 +9,16 @@ To synchronize files, upload using the Kissync client
 
 ##Running Kissync##
 ===============
+
+If you are on Ubuntu or Debian:
+
+1) Go to [Kissync](http://kissync.com).
+
+2) Click the download for Ubuntu Button.
+
+3) Enjoy!
+
+or...
 
 1) Download all the program files.
 
@@ -18,6 +28,8 @@ To synchronize files, upload using the Kissync client
 ```
 python main.py
 ```
+OR
+
 
 ##Using Kissync##
 ===============
