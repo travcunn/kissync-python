@@ -266,23 +266,29 @@ class ItemObject(QtGui.QWidget):
 		
 		
 	def downloadFile(self, filepath):
-		pathArray = filepath.split("/")
-		pathArray.pop(0)
-		pathArray.pop(len(pathArray) - 1)
-		pathToAdd = ""
-		#A BUG EXISTS IN THIS, PLEASE TEST THIS
-		for directory in pathArray:
-			if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
-				os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
-				pathToAdd = pathToAdd + directory + "/"
-				##print pathToAdd
-				
-		f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
-		realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
-		realPath = realPath.encode("utf-8")
-		with file(realPath, 'wb') as o:
-			shutil.copyfileobj(f, o)
-		return realPath
+		try:
+			with open(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir')): pass
+		except:
+			pathArray = filepath.split("/")
+			pathArray.pop(0)
+			pathArray.pop(len(pathArray) - 1)
+			pathToAdd = ""
+			#A BUG EXISTS IN THIS, PLEASE TEST THIS
+			for directory in pathArray:
+				if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
+					os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+					pathToAdd = pathToAdd + directory + "/"
+					##print pathToAdd
+					
+			f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
+			realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+			realPath = realPath.encode("utf-8")
+			with file(realPath, 'wb') as o:
+				shutil.copyfileobj(f, o)
+			return realPath
+		else:
+			realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+			return realPath
 		
 	def openFile(self, filepath):
 		openPath = self.downloadFile(filepath)
