@@ -58,3 +58,5 @@ Taking a look at your home directory you might see a new folder after you've run
 [Kissync](http://kissync.com)
 
 [GPL License](https://github.com/kissync/kissync-python/blob/master/LICENSE.GPL)
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/83ebee1008a3caf7f74f8a98c5b44cea "githalytics.com")](http://githalytics.com/kissync/kissync-python)
