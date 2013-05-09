@@ -1,10 +1,11 @@
-import math, os, platform, sys, time, urllib2
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+import math, os, sys
+from PyQt4 import QtCore, QtGui
 
 import style
 
+
 class Crumb(QtGui.QWidget):
-    
+
 	def __init__(self, parent, color = None, crumbpath = None, arrow = 1):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
@@ -73,9 +74,8 @@ class Crumb(QtGui.QWidget):
 			self.drawArrow(painter)
 		self.drawText(e, painter)
 		painter.end()
-        
+
 	def drawCrumbBack(self, painter):
-		penbold = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
 		penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
 
 		painter.setPen(penblank)
@@ -87,7 +87,6 @@ class Crumb(QtGui.QWidget):
 		
 	def drawArrow(self, painter):
 		penbold = QtGui.QPen(QtCore.Qt.white, 3, QtCore.Qt.SolidLine)
-		penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
 		
 		side = math.sqrt(math.pow(self.squareHeight, 2)/2)
 		painter.setPen(penbold)

@@ -1,8 +1,7 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtGui
 
 from square import ItemObject
-
-import style, flowlayout, os, mimetypes
+import style, flowlayout
 
 
 class FileView(QtGui.QWidget):
@@ -12,9 +11,7 @@ class FileView(QtGui.QWidget):
 		##get rid of the widget border
 		#self.setStyleSheet("QWidget { border: 0px; }")
 		self.style = style.KissyncStyle()
-		
-		topText = QtGui.QLabel('Kissync File View Widget Test')
-		 
+
 		self.addButton = QtGui.QPushButton('button to add other widgets')
 		self.addButton.clicked.connect(self.addWidget)
 		

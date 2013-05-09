@@ -1,14 +1,13 @@
 import math, os, sys
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui
 from square import ItemObject
-import webbrowser
-
 from panelbutton import PanelButton
 
 import flowlayout, shutil
 
 #Copy and paste library.. platform independent.
-import pyperclip
+#breaks with the virtualenv
+#import pyperclip
 
 from usermanagementwidget import ManageUserPermissions
 
@@ -26,7 +25,6 @@ class BottomPanel(QtGui.QWidget):
 		
 		font = QtGui.QFont("Roboto", 18, QtGui.QFont.Normal, False)
 		fontsmall = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
-		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		
 		self.numberSelected = QtGui.QLabel()
@@ -404,7 +402,7 @@ class BottomPanel(QtGui.QWidget):
 
 			#print "RESPONSE:"
 			#print url
-			pyperclip.copy(url)
+			#pyperclip.copy(url)
 			#Share on twitter.
 			#text = "Kissync"
 			#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))

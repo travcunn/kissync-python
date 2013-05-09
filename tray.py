@@ -1,5 +1,5 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import os
+from PyQt4 import QtCore, QtGui
 
 
 class TrayMenu(QtGui.QMenu):
@@ -41,7 +41,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 		#enum MessageIcon { NoIcon, Information, Warning, Critical }
 		if(self.parent.config.get('LocalSettings', 'notifications')):
 			self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)
-        
+			
 	def show(self):
 		#QtCore.QTimer.singleShot(100, self.welcome)
 		QtGui.QSystemTrayIcon.show(self)

@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui
 
 import sys
 
@@ -12,13 +12,12 @@ class LoginWindow(QtGui.QWidget):
 		#set the window type to a dialog
 		self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
 		
-		fontDatabase = QtGui.QFontDatabase()
 		#fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
 		#fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
 		palette = QtGui.QPalette()
 		#palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 		
-		exit=QtGui.QAction(self)
+		exit = QtGui.QAction(self)
 		self.connect(exit,QtCore.SIGNAL('triggered()'),QtCore.SLOT('close()'))
 		
 		topText = QtGui.QLabel('Login to Kissync')

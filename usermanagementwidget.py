@@ -1,5 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import os, sys
+from PyQt4 import QtCore, QtGui
 
 
 class ManageUserPermissions(QtGui.QWidget):
@@ -14,15 +13,10 @@ class ManageUserPermissions(QtGui.QWidget):
 		self.setWindowTitle('User Permissions')   
 		#set the window type to a dialog
 		self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
-		
-		fontDatabase = QtGui.QFontDatabase()
-		#fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-		#fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-		#os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
+
 		palette = QtGui.QPalette()
-		#palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 		
-		exit=QtGui.QAction(self)
+		exit = QtGui.QAction(self)
 		self.connect(exit,QtCore.SIGNAL('triggered()'),QtCore.SLOT('close()'))
 		
 		topText = QtGui.QLabel('files permissions')

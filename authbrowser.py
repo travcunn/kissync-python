@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui, QtWebKit
 from bs4 import BeautifulSoup
 
 
@@ -17,7 +17,7 @@ class AuthBrowser(QtWebKit.QWebView):
 		soup = BeautifulSoup(unicode(frame.toHtml()).encode('utf-8'))
 		doc = self.page().mainFrame().documentElement()
 
-        
+
 		#IF ON THE LOGIN FORM PAGE
 		if(self.pageloads == 0):
 			#fill out the form here

@@ -1,10 +1,9 @@
-import os, platform, sys, time, urllib2
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+import sys
+from PyQt4 import QtCore, QtGui
 
 import style
 
 class LoadingSquare(QtGui.QWidget):
-    
 	def __init__(self, parent, color = None, delay = 0):
 		QtGui.QWidget.__init__(self)
 		self.parent = parent
@@ -39,7 +38,7 @@ class LoadingSquare(QtGui.QWidget):
 		painter.setOpacity(self.opacity)
 		self.drawSquare(painter)
 		painter.end()
-        
+
 	def drawSquare(self, painter):
 		#get rid of the pen... gets rid of outline on drawing
 		painter.setPen(QtCore.Qt.NoPen)

@@ -1,13 +1,9 @@
 import threading
-import sys
 import time
-import datetime
-import os
-import sqlite3
+from ftplib import FTP
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
-from ftplib import FTP
 
 class Watcher(threading.Thread):
 	def __init__(self, parent = None):
@@ -52,7 +48,6 @@ class EventHandler(FileSystemEventHandler):
 
 	def on_created(self, event):
 		if not (event.is_directory):
-			fileToUpload = file(event.src_path)
 			##print "Could not convert into utf-8, so make FTP connection"
 			tree = self.parent.smartfile.get('/whoami', '/')
 			if 'site' in tree:
@@ -85,7 +80,6 @@ class EventHandler(FileSystemEventHandler):
 
 	def on_modified(self, event):
 		if not (event.is_directory):
-			fileToUpload = file(event.src_path)
 			##print "Could not convert into utf-8, so make FTP connection"
 			tree = self.parent.smartfile.get('/whoami', '/')
 			if 'site' in tree:

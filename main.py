@@ -61,7 +61,7 @@ class Main(QtGui.QWidget):
 		
 		#Load font for the title text
 		fontDatabase = QtGui.QFontDatabase()
-		fontfile = QtCore.QFile(os.path.dirname(os.path.realpath(__file__)) + "resources/Roboto-Light-webfont.ttf")
+		#fontfile = QtCore.QFile(os.path.dirname(os.path.realpath(__file__)) + "resources/Roboto-Light-webfont.ttf")
 		fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
 		#os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
 		palette = QtGui.QPalette()

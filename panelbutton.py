@@ -1,6 +1,5 @@
-import math, os, sys
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-from square import ItemObject
+import os
+from PyQt4 import QtCore, QtGui
 
 
 class PanelIcon(QtGui.QWidget):
@@ -23,7 +22,7 @@ class PanelIcon(QtGui.QWidget):
 		self.icon = QtGui.QImage()
 		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/simplicio/icons48/" + buttonType + ".png")
 		self.icontarget = QtCore.QRectF(0, 0, 48, 48)
-        
+
 	def paintEvent(self, e):
 		painter = QtGui.QPainter()
 		painter.begin(self)
@@ -71,7 +70,6 @@ class PanelButton(QtGui.QWidget):
 		painter.end()
 		
 	def draw(self, painter):
-		penbold = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
 		penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
 
 		painter.setPen(penblank)

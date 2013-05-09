@@ -1,8 +1,6 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import datetime, hashlib, os, platform, Queue, shutil, sys, time, threading, urllib, urllib2, subprocess
+import datetime, hashlib, os, Queue, shutil, time, threading, urllib, urllib2
 import cPickle as pickle
 
-from StringIO import StringIO
 
 from ftplib import FTP
 
@@ -37,7 +35,7 @@ class FileDatabase(object):
 		#print "[database]: Local Database: Indexing local files..."
 		##we must clear the existing table if there is request to index the files
 		self.localFilesDictionary = {}
-		for (paths, folders, files) in os.walk(syncdirPath):
+		for (paths, dirs, files) in os.walk(syncdirPath):
 			for item in files:
 				discoveredFilePath = os.path.join(paths,item)
 				filehash = self.hashFile(discoveredFilePath)
@@ -240,11 +238,10 @@ class Synchronizer(object):
 
 
 class RefreshThread(threading.Thread):
- 
 	def __init__(self, parent):
 		threading.Thread.__init__(self)
 		self.parent = parent
- 
+
 	def start(self):
 			daemon = Daemon(self.parent)
 			daemon.setDaemon(True)
@@ -252,7 +249,6 @@ class RefreshThread(threading.Thread):
 			
 
 class Daemon(threading.Thread):
- 
 	def __init__(self, parent):
 		threading.Thread.__init__(self)
 		self.parent = parent
@@ -264,7 +260,7 @@ class Daemon(threading.Thread):
 		self.downloadQueue = Queue.Queue()
 		self.uploadQueue = Queue.Queue()
 		self.checkChangesQueue = Queue.Queue()
- 
+
 	def run(self):
 		while True:
 			#Compare what files server has against local files
@@ -316,12 +312,12 @@ class Daemon(threading.Thread):
 
 
 class CheckChanges(threading.Thread):
- 
+
 	def __init__(self, parent, queue):
 		threading.Thread.__init__(self)
 		self.parent = parent
 		self.queue = queue
- 
+
 	def run(self):
 		while True:
 			#print "running comparison..."
@@ -329,16 +325,8 @@ class CheckChanges(threading.Thread):
 			#print path
 			self.checkFile(path)
 			self.queue.task_done()
-		filepath = "/.kissyncDBserver"
-		fullpath = self.parent.workingDirectory + filepath
-		
-		filepath = "/.kissyncDBtimeserver"
-		fullpath = self.parent.workingDirectory + filepath
 				
 	def checkFile(self, filepath):
-		#print "checking " + filepath
-		localpath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
-		localModifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(localpath))
 		if(self.parent.parent.database.remoteFilesDictionaryTime[filepath] > self.parent.parent.database.localFilesDictionaryTime[filepath]):
 			#print "Newer on the server: " + filepath
 			pass
@@ -352,12 +340,11 @@ class CheckChanges(threading.Thread):
 
 		
 class Downloader(threading.Thread):
- 
 	def __init__(self, parent, queue):
 		threading.Thread.__init__(self)
 		self.parent = parent
 		self.queue = queue
- 
+
 	def run(self):
 		while True:
 			path = self.queue.get()
@@ -385,16 +372,15 @@ class Downloader(threading.Thread):
 				shutil.copyfileobj(f, o)
 		except:
 			pass
-                
-                
+
+
 class Uploader(threading.Thread):
- 
 	def __init__(self, parent, queue):
 		threading.Thread.__init__(self)
 		self.parent = parent
 		self.queue = queue
 		self.syncdirPath = self.parent.parent.config.get('LocalSettings', 'sync-dir')
- 
+		
 	def run(self):
 		while True:
 			path = self.queue.get()
@@ -408,8 +394,6 @@ class Uploader(threading.Thread):
 		localpath = filepath
 		filepath = self.syncdirPath + filepath
 		if not (os.path.isdir(filepath)):
-			fileToUpload = file(filepath, 'rb')
-			#print "Could not convert into utf-8, so make FTP connection"
 			tree = self.parent.parent.smartfile.get('/whoami', '/')
 			if 'site' in tree:
 				self.sitename = tree['site']['name'].encode("utf-8")
@@ -430,7 +414,6 @@ class Uploader(threading.Thread):
 				pathToAdd = ""
 				
 				#A BUG EXISTS IN THIS, PLEASE TEST THIS
-				syncdir =  self.parent.parent.config.get('LocalSettings', 'sync-dir')	
 				for directory in pathArray:
 					try:
 						ftp.mkd("/" + pathToAdd + directory)
@@ -462,30 +445,30 @@ http://stackoverflow.com/questions/1165352/fast-comparison-between-two-python-di
 """
 
 class DictDiffer(object):
-    """
-    Calculate the difference between two dictionaries as:
-    (1) items added
-    (2) items removed
-    (3) keys same in both but changed values
-    (4) keys same in both and unchanged values
-    """
-    def __init__(self, current_dict, past_dict):
-        self.current_dict, self.past_dict = current_dict, past_dict
-        self.current_keys, self.past_keys = [
-            set(d.keys()) for d in (current_dict, past_dict)
-        ]
-        self.intersect = self.current_keys.intersection(self.past_keys)
+	"""
+	Calculate the difference between two dictionaries as:
+	(1) items added
+	(2) items removed
+	(3) keys same in both but changed values
+	(4) keys same in both and unchanged values
+	"""
+	def __init__(self, current_dict, past_dict):
+		self.current_dict, self.past_dict = current_dict, past_dict
+		self.current_keys, self.past_keys = [
+		  set(d.keys()) for d in (current_dict, past_dict)
+    	]
+		self.intersect = self.current_keys.intersection(self.past_keys)
 
-    def added(self):
-        return self.current_keys - self.intersect
+	def added(self):
+		return self.current_keys - self.intersect
 
-    def removed(self):
-        return self.past_keys - self.intersect
+	def removed(self):
+		return self.past_keys - self.intersect
 
-    def changed(self):
-        return set(o for o in self.intersect
+	def changed(self):
+		return set(o for o in self.intersect
                    if self.past_dict[o] != self.current_dict[o])
 
-    def unchanged(self):
-        return set(o for o in self.intersect
+	def unchanged(self):
+		return set(o for o in self.intersect
                    if self.past_dict[o] == self.current_dict[o])

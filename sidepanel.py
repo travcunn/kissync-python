@@ -1,5 +1,5 @@
 import math, os, sys
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui
 
 from square import ItemObject
 
@@ -11,7 +11,6 @@ class SidePanel(QtGui.QWidget):
 		
 		font = QtGui.QFont("Roboto", 24, QtGui.QFont.Normal, False)
 		fontsmall = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
-		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		
 		self.numberSelected = QtGui.QLabel()
@@ -207,7 +206,7 @@ class PanelButton(QtGui.QWidget):
 		self.icon.load(os.path.expanduser("~") + "/icons/simplicio/icons48/" + buttonType + ".png")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 48, 48)
-        
+
 	def paintEvent(self, e):
 		painter = QtGui.QPainter()
 		painter.begin(self)

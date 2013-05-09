@@ -1,0 +1,10 @@
+PyYAML
+argparse
+beautifulsoup4
+oauthlib
+pathtools
+requests
+requests-oauthlib
+smartfile
+watchdog
+wsgiref

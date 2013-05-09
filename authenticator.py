@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+from PyQt4 import QtCore, QtGui
 from authbrowser import AuthBrowser
 from smartfile import OAuthClient
 
@@ -15,7 +15,7 @@ class Authenticator(object):
 			self.go()
 		else:
 			self.goWindows() # #thingsnottosayoutloud
-                
+
 	def go(self):
 		try:
 			#reset the pageloads counter every time the browser is called
@@ -36,7 +36,7 @@ class Authenticator(object):
 			self.parent.smartfile.get_request_token()
 			webbrowser.open(self.parent.smartfile.get_authorization_url())
 			text, ok = QtGui.QInputDialog.getText(self.parent, 'Kissync Verification', 'Paste the verifier here:')
-        
+
 			if not ok:
 				text = None
 				os._exit()

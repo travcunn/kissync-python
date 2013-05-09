@@ -1,5 +1,5 @@
-import math, sys, os
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
+import sys, os
+from PyQt4 import QtCore, QtGui
 from panelbutton import PanelButton
 import flowlayout, shutil
 
@@ -11,9 +11,6 @@ class FolderPanel(QtGui.QWidget):
 		self.setStyleSheet("QWidget { background: #FFFFFF; }")
 		
 		font = QtGui.QFont("Roboto", 24, QtGui.QFont.Normal, False)
-		fontsmall = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
-		fontsmallerbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
-		fontsmallbold = QtGui.QFont("Roboto", 10, QtGui.QFont.Bold, False)
 		
 		self.topText = QtGui.QLabel('       ')
 		self.topText.setFont(font)
@@ -104,21 +101,3 @@ class FolderPanel(QtGui.QWidget):
 				pass
 		else:
 			print "Op. that button isn't alive yet!"
-		
-
-		
-if __name__ == "__main__":
-	
-	#print os.path.realpath(__file__)
-	app = QtGui.QApplication(sys.argv)
-	mainwindow = Main()
-	mainwindow.show()
-	sys.exit(app.exec_())
-	
-	
-	
-
-
-			
-		
-		

@@ -1,8 +1,10 @@
-import os, platform, shutil, subprocess, sys, time, urllib2
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
 import math
+import os
+import shutil
+import subprocess
+import sys
+from PyQt4 import QtCore, QtGui
 
-import style
 
 class IconWidget(QtGui.QWidget):
 	def __init__(self, parent = None, extension = None):
@@ -45,7 +47,7 @@ class IconWidget(QtGui.QWidget):
 		self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
-        
+
 	#this is called every time something needs to be repainted
 	def paintEvent(self, e):
 		#Start Painter
@@ -171,7 +173,6 @@ class ItemObject(QtGui.QWidget):
 		painter.end()
 		
 	def draw(self, painter):
-		penbold = QtGui.QPen(QtCore.Qt.black, 5, QtCore.Qt.SolidLine)
 		penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
 
 		painter.setPen(penblank)

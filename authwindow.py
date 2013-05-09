@@ -1,9 +1,8 @@
-import os, sys, urllib2
+import os
 from smartfile import OAuthClient
 from PyQt4 import QtCore, QtGui, QtWebKit
 from bs4 import BeautifulSoup
 
-import loadingwidget
 
 class LoginWindow(QtGui.QWidget):
 
@@ -210,7 +209,7 @@ class Browser(QtWebKit.QWebView):
 			self.stop()
 			self.parent.networkerror()
 	
-        
+
 class AuthenticationClient(object):
 	
 	def __init__(self):
@@ -225,12 +224,5 @@ class AuthenticationClient(object):
 			return auth_url
 		except:
 			#print "There was an error loading the SmartFile OAuth authentication"
+			pass
 			
-	#add the other OAuth methods here
-
-if __name__ == "__main__":
-
-	app = QtGui.QApplication(sys.argv)
-	loginwindow = LoginWindow()
-	loginwindow.show()
-	sys.exit(app.exec_())

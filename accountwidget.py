@@ -1,14 +1,10 @@
-import os, platform, shutil, subprocess, sys, time, urllib2
-from PyQt4 import QtCore, QtGui, QtWebKit, QtSvg
-import math, webbrowser
-from authenticator import Authenticator
+import os
+import sys
+import webbrowser
+import urllib, hashlib
 
-# import code for encoding urls and generating md5 hashes
-import urllib, hashlib, cStringIO
+from PyQt4 import QtCore, QtGui
 
-import style
-
-#topText.setStyleSheet("color: #FFFFFF;")
 
 class SettingsLabel(QtGui.QLabel):
 	def __init__(self, parent = None):
@@ -121,7 +117,7 @@ class IconWidget(QtGui.QWidget):
 		self.icon.loadFromData(img_file, "JPG")
 		
 		self.icontarget = QtCore.QRectF(0, 0, 64, 64)
-        
+		
 	#this is called every time something needs to be repainted
 	def paintEvent(self, e):
 		#Start Painter
