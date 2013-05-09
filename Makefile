@@ -1,6 +1,6 @@
 verify:
-	pyflakes -x W smartfile
-	pep8 --exclude=migrations --ignore=E501,E225 smartfile
+	pyflakes -x W .
+	pep8 --exclude=migrations --ignore=E501,E225 .
 
 install:
 	sudo apt-get install python-sip python-qt4
