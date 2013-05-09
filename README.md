@@ -1,9 +1,10 @@
-Keep It Simple Sync in Python (SmartFile Client)
+[![Build Status](https://travis-ci.org/kissync/kissync-python.png?branch=master)](https://travis-ci.org/kissync/kissync-python)
+Keep It Simple Sync (SmartFile Client)
 ==============
 
 ####*Built to run on Ubuntu 12.10, but may be able to run on other operating systems.*####
 
-A file synchronization and browsing tool for SmartFile
+A file synchronization and browsing tool for SmartFile in Python
 
 To synchronize files, upload using the Kissync client
 
