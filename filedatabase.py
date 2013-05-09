@@ -23,9 +23,15 @@ class FileDatabase(object):
         self.localFilesDictionary = {}
         self.localFilesDictionaryTime = {}
 
+        self.workingDirectory = os.path.join(os.path.expanduser("~"), ".kissync")
+
     def generateAuthHash(self):
-        username = self.parent.config.get('Login', 'username')
-        password = self.parent.config.get('Login', 'password')
+        try:
+            username = self.parent.config.get('Login', 'username')
+            password = self.parent.config.get('Login', 'password')
+        except:
+            username = ""
+            password = ""
 
         self.authHash = hashlib.md5()
         self.authHash.update(username + password + "listing")
@@ -35,26 +41,33 @@ class FileDatabase(object):
         self.authHashTimes.update(username + password + "times")
         self.authHashTimes = self.authHashTimes.hexdigest()
 
-        print self.authHash
-        print self.authHashTimes
+        return(self.authHash, self.authHashTimes)
 
     def indexLocalFiles(self):
-        syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
-        #print "[database]: Local Database: Indexing local files..."
-        ##we must clear the existing table if there is request to index the files
-        self.localFilesDictionary = {}
-        for (paths, dirs, files) in os.walk(syncdirPath):
-            for item in files:
-                discoveredFilePath = os.path.join(paths, item)
-                filehash = self.hashFile(discoveredFilePath)
-                modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
-                #Add file to dictionary. filename:ksjdfoi23lkx983n2lj9x823jl
-                self.localFilesDictionary[discoveredFilePath.replace(syncdirPath, '').encode('utf-8')] = filehash.encode('utf-8')
-                #Add file to dictionary with time. filename: timestamp
-                self.localFilesDictionaryTime[discoveredFilePath.replace(syncdirPath, '').encode('utf-8')] = modifiedTime
+        try:
+            try:
+                syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
+            except:
+                syncdirPath = os.path.join(os.path.expanduser("~"), "Kissync")
+            #print "[database]: Local Database: Indexing local files..."
+            ##we must clear the existing table if there is request to index the files
+            self.localFilesDictionary = {}
+            for (paths, dirs, files) in os.walk(syncdirPath):
+                for item in files:
+                    discoveredFilePath = os.path.join(paths, item)
+                    filehash = self.hashFile(discoveredFilePath)
+                    modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
+                    #Add file to dictionary. filename:ksjdfoi23lkx983n2lj9x823jl
+                    self.localFilesDictionary[discoveredFilePath.replace(syncdirPath, '').encode('utf-8')] = filehash.encode('utf-8')
+                    #Add file to dictionary with time. filename: timestamp
+                    self.localFilesDictionaryTime[discoveredFilePath.replace(syncdirPath, '').encode('utf-8')] = modifiedTime
 
-                #print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
-        #print "[database]: Local Database: Done indexing local files..."
+                    #print  "[database-indexer]: %s %s" % (discoveredFilePath.replace(syncdirPath,'').encode('utf-8'), filehash.encode('utf-8'))
+            #print "[database]: Local Database: Done indexing local files..."
+        except:
+            return False
+        else:
+            return True
 
     def loadRemoteListingFile(self):
         try:
@@ -70,6 +83,7 @@ class FileDatabase(object):
             self.remoteFilesDictionary = {}
             self.remoteFilesDictionaryTime = {}
             self.generateRemoteListing()
+            return True
         else:
             #print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
             #print self.remoteFilesDictionary
@@ -84,11 +98,13 @@ class FileDatabase(object):
                 picklefiletime.close()
             except:
                 self.loadRemoteListingFile()
+            else:
+                return True
             #subprocess.call(('xdg-open', openPath))
             #subprocess.call(('xdg-open', openPathTime))
 
     def generateRemoteListing(self):
-        tmpLocalPath = self.parent.workingDirectory + "/.kissyncDBtmp"
+        tmpLocalPath = self.workingDirectory + "/.kissyncDBtmp"
         try:
             os.remove(tmpLocalPath)
         except:
@@ -98,7 +114,7 @@ class FileDatabase(object):
             pickle.dump(self.localFilesDictionary, output)
             output.close()
 
-            tmpLocalPathTime = self.parent.workingDirectory + "/.kissyncDBtmptime"
+            tmpLocalPathTime = self.workingDirectory + "/.kissyncDBtmptime"
             try:
                 os.remove(tmpLocalPathTime)
             except:
@@ -109,31 +125,31 @@ class FileDatabase(object):
 
             #now upload the pickled files to the server
             try:
-                print "uploadng to the server...."
+                print "Synchronizing file listing with the server..."
                 fileToUpload = file(tmpLocalPath)
                 url = "http://www.kissync.com/postindex?login_hash=%s" % self.authHash
 
                 fileRead = str(fileToUpload.read())
                 data = urllib.urlencode({'content': fileRead})
-                results = urllib2.urlopen(url, data)
+                urllib2.urlopen(url, data)
 
                 fileToUpload = file(tmpLocalPathTime)
                 url = "http://www.kissync.com/postindex?login_hash=%s" % self.authHashTimes
 
                 fileRead = str(fileToUpload.read())
                 data = urllib.urlencode({'content': fileRead})
-                results = urllib2.urlopen(url, data)
+                urllib2.urlopen(url, data)
             except:
                 self.generateRemoteListing()
 
     def getServerListingFile(self):
         filepath = "/.kissyncDBserver"
-        fullpath = self.parent.workingDirectory + filepath
+        fullpath = self.workingDirectory + filepath
         try:
             os.remove(fullpath)
         except:
             pass
-        realPath = self.parent.workingDirectory + filepath
+        realPath = self.workingDirectory + filepath
         realPath = realPath.encode("utf-8")
         serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHash)
         output = open(realPath, 'wb')
@@ -143,12 +159,12 @@ class FileDatabase(object):
 
     def getServerListingFileTime(self):
         filepath = "/.kissyncDBtimeserver"
-        fullpath = self.parent.workingDirectory + filepath
+        fullpath = self.workingDirectory + filepath
         try:
             os.remove(fullpath)
         except:
             pass
-        realPath = self.parent.workingDirectory + filepath
+        realPath = self.workingDirectory + filepath
         realPath = realPath.encode("utf-8")
         serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHashTimes)
         output = open(realPath, 'wb')

@@ -1,4 +1,5 @@
 from smartfile import OAuthClient
+from filedatabase import FileDatabase
 import unittest
 
 
@@ -13,6 +14,21 @@ class LoginTestCase(unittest.TestCase):
         else:
             oauthtest = True
         self.assertTrue(oauthtest)
+
+
+class FileDatabaseTest(unittest.TestCase):
+    def __init__(self, parent=None):
+        super(FileDatabaseTest, self).__init__(parent)
+        self.database = FileDatabase(self)
+
+    def test_database_authhash(self):
+        self.assertIsNotNone(self.database.generateAuthHash())
+
+    def test_database_indexlocalfiles(self):
+        self.assertTrue(self.database.indexLocalFiles())
+
+    def test_database_loadremotelisting(self):
+        self.assertTrue(self.database.loadRemoteListingFile())
 
 
 if __name__ == '__main__':
