@@ -2,7 +2,6 @@ language: python
 python:
   - "2.6"
   - "2.7"
-  - "3.0"
 install:
   - sudo apt-get install python-sip python-qt4
 install:
