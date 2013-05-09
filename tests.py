@@ -20,6 +20,7 @@ class LoginTestCase(unittest.TestCase):
 
         self.assertTrue(oauthtest)
 
+
 class MainWindowCase(unittest.TestCase):
     def test_main(self):
         app = QtGui.QApplication(sys.argv)
