@@ -1,4 +1,3 @@
 #python specific
 *.pyc
 configuration.cfg
-.settings
