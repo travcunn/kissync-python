@@ -1,15 +1,15 @@
+Kissync (SmartFile Client)
+==========================
 [![Build Status](https://travis-ci.org/kissync/kissync-python.png?branch=master)](https://travis-ci.org/kissync/kissync-python)
-Keep It Simple Sync (SmartFile Client)
-==============
 
-####*Built to run on Ubuntu 12.10, but may be able to run on other operating systems.*####
+####*Currently builds specifically for Ubuntu 10 and newer, but can port to other systems
 
 A file synchronization and browsing tool for SmartFile in Python
 
 To synchronize files, upload using the Kissync client
 
 ##Running Kissync##
-===============
+===================
 
 If you are on Ubuntu or Debian:
 
