@@ -1,5 +1,8 @@
+test:
+	coverage run tests.py
+
 verify:
-	pyflakes -x W .
+	#pyflakes -x W .
 	pep8 --exclude=migrations --ignore=E501,E225 .
 
 install:
