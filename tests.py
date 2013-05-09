@@ -12,7 +12,7 @@ class LoginTestCase(unittest.TestCase):
         api = OAuthClient("zGSJpILRq2889Ne2bPBdEmEZLsRHpe", "KOb97irJG84PJ8dtEkoYt2Kqwz3VJa")
         try:
             api.get_request_token()
-            client_token = api.get_authorization_url()
+            api.get_authorization_url()
         except:
             oauthtest = False
         else:
