@@ -12,7 +12,6 @@ class LoginTestCase(unittest.TestCase):
             oauthtest = False
         else:
             oauthtest = True
-
         self.assertTrue(oauthtest)
 
 
