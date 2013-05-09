@@ -129,13 +129,13 @@ class ItemObject(QtGui.QWidget):
         if(thissize < 1024):
             measurement = "bytes"
         elif(thissize < int(math.pow(1024, 2))):
-            thissize = thissize/1024
+            thissize = thissize / 1024
             measurement = "kB"
         elif(thissize < int(math.pow(1024, 3))):
-            thissize = thissize/int(math.pow(1024, 2))
+            thissize = thissize / int(math.pow(1024, 2))
             measurement = "mB"
         else:
-            thissize = thissize/int(math.pow(1024, 3))
+            thissize = thissize / int(math.pow(1024, 3))
             measurement = "gb"
 
         self.lbFileSize = QtGui.QLabel(str(thissize) + " " + measurement)

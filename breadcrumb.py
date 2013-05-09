@@ -88,7 +88,7 @@ class Crumb(QtGui.QWidget):
     def drawArrow(self, painter):
         penbold = QtGui.QPen(QtCore.Qt.white, 3, QtCore.Qt.SolidLine)
 
-        side = math.sqrt(math.pow(self.squareHeight, 2)/2)
+        side = math.sqrt(math.pow(self.squareHeight, 2) / 2)
         painter.setPen(penbold)
         painter.setBrush(self.color)
         painter.rotate(45)

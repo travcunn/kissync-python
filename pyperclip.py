@@ -61,10 +61,10 @@ def winSetClipboard(text):
     ctypes.windll.user32.EmptyClipboard()
     try:
         # works on Python 2 (bytes() only takes one argument)
-        hCd = ctypes.windll.kernel32.GlobalAlloc(GMEM_DDESHARE, len(bytes(text))+1)
+        hCd = ctypes.windll.kernel32.GlobalAlloc(GMEM_DDESHARE, len(bytes(text)) + 1)
     except TypeError:
         # works on Python 3 (bytes() requires an encoding)
-        hCd = ctypes.windll.kernel32.GlobalAlloc(GMEM_DDESHARE, len(bytes(text, 'ascii'))+1)
+        hCd = ctypes.windll.kernel32.GlobalAlloc(GMEM_DDESHARE, len(bytes(text, 'ascii')) + 1)
     pchData = ctypes.windll.kernel32.GlobalLock(hCd)
     try:
         # works on Python 2 (bytes() only takes one argument)
