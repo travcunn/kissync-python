@@ -9,7 +9,7 @@ A file synchronization and browsing tool for SmartFile in Python
 To synchronize files, upload using the Kissync client
 
 
-##Running Kissync##
+Running Kissync
 ===================
 
 If you are on Ubuntu or Debian:
@@ -33,7 +33,7 @@ python main.py
 OR
 
 
-##Using Kissync##
+Using Kissync
 ===============
 
 The kissync client is used to view your files on the smartfile servers. We access your files using a secure authentication method called Oauth. 
@@ -54,7 +54,7 @@ If you are in need of logging out. You can accomplish this task by pressing the 
 ####Local Files
 Taking a look at your home directory you might see a new folder after you've run the Kissync app for the first time. The folders name should be "Kissync" and it might contain just a few of the files from the server. If it doesn't contain anything however do not be concerned. You can start placing anything from your local file system directly into this folder and automatically it should be synced with the server. ( Give up to 2 to 5 minutes to sync, this really depends upon the files size. )
 
-##Links
+Links
 =============
 
 [Kissync](http://kissync.com)
