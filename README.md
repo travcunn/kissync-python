@@ -1,6 +1,6 @@
 Kissync (SmartFile Client)
 ==========================
-[![Build Status](https://travis-ci.org/kissync/kissync-python.png?branch=master)](https://travis-ci.org/kissync/kissync-python)[![Coverage Status](https://coveralls.io/repos/kissync/kissync-python/badge.png?branch=master)](https://coveralls.io/r/kissync/kissync-python?branch=master)
+[![Build Status](https://travis-ci.org/kissync/kissync-python.png?branch=master)](https://travis-ci.org/kissync/kissync-python) [![Coverage Status](https://coveralls.io/repos/kissync/kissync-python/badge.png?branch=master)](https://coveralls.io/r/kissync/kissync-python?branch=master)
 #####*Currently builds specifically for Ubuntu 10 and newer, but can port to other systems
 
 A file synchronization and browsing tool for SmartFile in Python
