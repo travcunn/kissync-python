@@ -42,15 +42,18 @@
 # 1.2 Use the platform module to help determine OS.
 # 1.3 Changed ctypes.windll.user32.OpenClipboard(None) to ctypes.windll.user32.OpenClipboard(0), after some people ran into some TypeError
 
-import platform, os
+import os
+import platform
+
 
 def winGetClipboard():
     ctypes.windll.user32.OpenClipboard(0)
-    pcontents = ctypes.windll.user32.GetClipboardData(1) # 1 is CF_TEXT
+    pcontents = ctypes.windll.user32.GetClipboardData(1)  # 1 is CF_TEXT
     data = ctypes.c_char_p(pcontents).value
     #ctypes.windll.kernel32.GlobalUnlock(pcontents)
     ctypes.windll.user32.CloseClipboard()
     return data
+
 
 def winSetClipboard(text):
     GMEM_DDESHARE = 0x2000
@@ -70,13 +73,15 @@ def winSetClipboard(text):
         # works on Python 3 (bytes() requires an encoding)
         ctypes.cdll.msvcrt.strcpy(ctypes.c_char_p(pchData), bytes(text, 'ascii'))
     ctypes.windll.kernel32.GlobalUnlock(hCd)
-    ctypes.windll.user32.SetClipboardData(1,hCd)
+    ctypes.windll.user32.SetClipboardData(1, hCd)
     ctypes.windll.user32.CloseClipboard()
+
 
 def macSetClipboard(text):
     outf = os.popen('pbcopy', 'w')
     outf.write(text)
     outf.close()
+
 
 def macGetClipboard():
     outf = os.popen('pbpaste', 'r')
@@ -84,24 +89,30 @@ def macGetClipboard():
     outf.close()
     return content
 
+
 def gtkGetClipboard():
     return gtk.Clipboard().wait_for_text()
+
 
 def gtkSetClipboard(text):
     cb = gtk.Clipboard()
     cb.set_text(text)
     cb.store()
 
+
 def qtGetClipboard():
     return str(cb.text())
 
+
 def qtSetClipboard(text):
     cb.setText(text)
+
 
 def xclipSetClipboard(text):
     outf = os.popen('xclip -selection c', 'w')
     outf.write(text)
     outf.close()
+
 
 def xclipGetClipboard():
     outf = os.popen('xclip -selection c -o', 'r')
@@ -109,10 +120,12 @@ def xclipGetClipboard():
     outf.close()
     return content
 
+
 def xselSetClipboard(text):
     outf = os.popen('xsel -i', 'w')
     outf.write(text)
     outf.close()
+
 
 def xselGetClipboard():
     outf = os.popen('xsel -o', 'r')

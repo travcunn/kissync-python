@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 
+
 class FlowLayout(QtGui.QLayout):
     def __init__(self, parent=None, margin=0, spacing=-1):
         super(FlowLayout, self).__init__(parent)

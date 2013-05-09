@@ -13,12 +13,12 @@ else:
     sys.exit(-1)
 
 setup(
-		name = 'kissync.py',
-    version = "1.0",
-    description = 'Kissync Desktop Client',
-    author = 'Kissync',
+    name='kissync.py',
+    version="1.0",
+    description='Kissync Desktop Client',
+    author='Kissync',
     author_email='travcunn@umail.iu.edu',
-    options = {
+    options={
         "py2exe": {
             "unbuffered": True,
             "optimize": 2,
@@ -30,22 +30,22 @@ setup(
         "py2app": {
             "optimize": 2,
             "argv_emulation": True,
-            "plist": {'LSBackgroundOnly':True},
+            "plist": {'LSBackgroundOnly': True},
         }
     },
-		data_files=[('', ['cacert.pem'])],
-    requires= [
-				'smartfile',
-				'oauthlib',
+    data_files=[('', ['cacert.pem'])],
+    requires=[
+        'smartfile',
+        'oauthlib',
         'requests',
         'requests_oauthlib',
         'pathtools',
         'watchdog',
     ],
-    app = ["kissync.py"],
+    app=["kissync.py"],
 
-    zipfile = None,
-    console = [{
+    zipfile=None,
+    console=[{
         "script": "kissync.py",
     }]
 )
