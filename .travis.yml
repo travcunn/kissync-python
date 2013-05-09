@@ -3,22 +3,8 @@ python:
   - "2.6"
   - "2.7"
 before_install:
-  - cd ..
-  - curl -O http://www.riverbankcomputing.co.uk/static/Downloads/sip4/sip-4.14.7-snapshot-dd473964ac33.tar.gz
-  - tar -xvf sip-4.14.7-snapshot-dd473964ac33.tar.gz
-  - cd sip-4.14.7
-  - python configure.py
-  - make -j 4
-  - sudo make install
-  - cd ..
-  - curl -O http://www.riverbankcomputing.co.uk/static/Downloads/PyQt4/PyQt-x11-gpl-4.10.2-snapshot-74ade0e1faf2.tar.gz
-  - tar -xvf PyQt-x11-gpl-4.10.2-snapshot-74ade0e1faf2.tar.gz
-  - cd PyQt-x11-gpl-4.10.2
-  - python configure.py --confirm-license
-  - make -j 4
-  - sudo make install
-  - cd ../TravisRamblings
+  - sudo apt-get install python-sip python-qt4 --confirm-license -f -y
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-script: python tests.py
+script: python main.py
