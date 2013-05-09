@@ -1,3 +1,5 @@
 [run]
 omit =
-    tests.py
+    tests.py, pyperclip.py, singleton.py
+include = 
+    *.py
