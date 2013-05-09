@@ -20,6 +20,6 @@ class LoginTestCase(unittest.TestCase):
 
         self.assertTrue(oauthtest)
 
-        
+
 if __name__ == '__main__':
     unittest.main()
