@@ -35,10 +35,11 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
         self.menu = TrayMenu(self)
         self.setContextMenu(self.menu)
+        self.show()
 
     def notification(self, title, message):
         #enum MessageIcon { NoIcon, Information, Warning, Critical }
-        if(self.parent.config.get('LocalSettings', 'notifications')):
+        if(self.parent.configuration.get('LocalSettings', 'notifications')):
             self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)
 
     def show(self):

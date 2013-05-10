@@ -6,7 +6,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 
 
-class IconWidget(QtGui.QWidget):
+class AvatarWidget(QtGui.QWidget):
     def __init__(self, parent=None, extension=None):
         QtGui.QWidget.__init__(self)
         self.parent = parent
@@ -101,7 +101,7 @@ class ItemObject(QtGui.QWidget):
         ##print extension
 
         #Icon
-        self.icon = IconWidget(self, extension)
+        self.icon = AvatarWidget(self, extension)
         self.gridlayout.addWidget(self.icon, 1, 1, 3, 1, QtCore.Qt.AlignLeft)
 
         #Delete Button
@@ -256,7 +256,7 @@ class ItemObject(QtGui.QWidget):
 
     def downloadFile(self, filepath):
         try:
-            with open(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir')):
+            with open(self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir')):
                 pass
         except:
             pathArray = filepath.split("/")
@@ -265,19 +265,19 @@ class ItemObject(QtGui.QWidget):
             pathToAdd = ""
             #A BUG EXISTS IN THIS, PLEASE TEST THIS
             for directory in pathArray:
-                if not os.path.exists(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
-                    os.makedirs(self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+                if not os.path.exists(self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
+                    os.makedirs(self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
                     pathToAdd = pathToAdd + directory + "/"
                     ##print pathToAdd
 
             f = self.parent.parent.parent.smartfile.get('/path/data/', filepath)
-            realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+            realPath = self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + filepath
             realPath = realPath.encode("utf-8")
             with file(realPath, 'wb') as o:
                 shutil.copyfileobj(f, o)
             return realPath
         else:
-            realPath = self.parent.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+            realPath = self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + filepath
             return realPath
 
     def openFile(self, filepath):

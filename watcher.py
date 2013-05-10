@@ -13,7 +13,7 @@ class Watcher(threading.Thread):
 
     def run(self):
         ##print "started the watcher"
-        self.path = self.parent.config.get('LocalSettings', 'sync-dir')
+        self.path = self.parent.configuration.get('LocalSettings', 'sync-dir')
         self.event_handler = EventHandler(self.parent)
         self.observer = Observer()
         self.observer.schedule(self.event_handler, self.path, recursive=True)
@@ -32,7 +32,7 @@ class Watcher(threading.Thread):
 class EventHandler(FileSystemEventHandler):
     def __init__(self, parent=None):
         self.parent = parent
-        self.syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
+        self.syncdirPath = self.parent.configuration.get('LocalSettings', 'sync-dir')
 
     def on_moved(self, event):
         try:
@@ -53,8 +53,8 @@ class EventHandler(FileSystemEventHandler):
                 self.sitename = tree['site']['name'].encode("utf-8")
                 ##print self.sitename
 
-                username = self.parent.config.get('Login', 'username')
-                password = self.parent.config.get('Login', 'password')
+                username = self.parent.configuration.get('Login', 'username')
+                password = self.parent.configuration.get('Login', 'password')
 
                 ftpaddress = self.sitename + ".smartfile.com"
                 ftp = FTP(ftpaddress, username, password)
@@ -85,8 +85,8 @@ class EventHandler(FileSystemEventHandler):
                 self.sitename = tree['site']['name'].encode("utf-8")
                 ##print self.sitename
 
-                username = self.parent.config.get('Login', 'username')
-                password = self.parent.config.get('Login', 'password')
+                username = self.parent.configuration.get('Login', 'username')
+                password = self.parent.configuration.get('Login', 'password')
 
                 ftpaddress = self.sitename + ".smartfile.com"
                 ftp = FTP(ftpaddress, username, password)

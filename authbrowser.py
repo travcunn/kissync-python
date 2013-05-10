@@ -22,10 +22,10 @@ class AuthBrowser(QtWebKit.QWebView):
             #fill out the form here
             user = doc.findFirst("input[id=id_login]")
             passwd = doc.findFirst("input[id=id_password]")
-            #####this should read from the config file
-            self.parent.parent.config.read(self.parent.parent.settingsFile)
-            user.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'username') + "'")
-            passwd.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'password') + "'")
+            #####this should read from the configuration file
+            self.parent.parent.configuration.read()
+            user.evaluateJavaScript("this.value = '" + self.parent.parent.configuration.get('Login', 'username') + "'")
+            passwd.evaluateJavaScript("this.value = '" + self.parent.parent.configuration.get('Login', 'password') + "'")
 
             button = doc.findFirst("button[type=button]")
             button.evaluateJavaScript("this.click()")
@@ -67,7 +67,7 @@ class AuthBrowser(QtWebKit.QWebView):
     def pagetimer(self):
         #starts up a page timer, so after 30 seconds, we can give a network error
         self.timer.valueChanged.connect(self.netwatch)
-        self.timer.setDuration(int(self.parent.parent.config.get('LocalSettings', 'network-timeout')) * 1000)
+        self.timer.setDuration(int(self.parent.parent.configuration.get('LocalSettings', 'network-timeout')) * 1000)
         self.timer.start()
 
     def netwatch(self, value):

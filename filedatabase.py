@@ -27,8 +27,8 @@ class FileDatabase(object):
 
     def generateAuthHash(self):
         try:
-            username = self.parent.config.get('Login', 'username')
-            password = self.parent.config.get('Login', 'password')
+            username = self.parent.configuration.get('Login', 'username')
+            password = self.parent.configuration.get('Login', 'password')
         except:
             username = ""
             password = ""
@@ -46,7 +46,7 @@ class FileDatabase(object):
     def indexLocalFiles(self):
         try:
             try:
-                syncdirPath = self.parent.config.get('LocalSettings', 'sync-dir')
+                syncdirPath = self.parent.configuration.get('LocalSettings', 'sync-dir')
             except:
                 syncdirPath = os.path.join(os.path.expanduser("~"), "Kissync")
             #print "[database]: Local Database: Indexing local files..."
@@ -83,7 +83,6 @@ class FileDatabase(object):
             self.remoteFilesDictionary = {}
             self.remoteFilesDictionaryTime = {}
             self.generateRemoteListing()
-            return True
         else:
             #print "REMOTE FILES DICTIONARIES.... THESE SHOULD BE POPULATED"
             #print self.remoteFilesDictionary
@@ -98,8 +97,6 @@ class FileDatabase(object):
                 picklefiletime.close()
             except:
                 self.loadRemoteListingFile()
-            else:
-                return True
             #subprocess.call(('xdg-open', openPath))
             #subprocess.call(('xdg-open', openPathTime))
 
@@ -380,13 +377,13 @@ class Downloader(threading.Thread):
         pathToAdd = ""
         #A BUG EXISTS IN THIS, PLEASE TEST THIS
         for directory in pathArray:
-            if not os.path.exists(self.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
-                os.makedirs(self.parent.parent.config.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+            if not os.path.exists(self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
+                os.makedirs(self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
                 pathToAdd = pathToAdd + directory + "/"
                 ##print pathToAdd
         try:
             f = self.parent.parent.smartfile.get('/path/data/', filepath)
-            realPath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + filepath
+            realPath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + filepath
             realPath = realPath.encode("utf-8")
             with file(realPath, 'wb') as o:
                 shutil.copyfileobj(f, o)
@@ -399,7 +396,7 @@ class Uploader(threading.Thread):
         threading.Thread.__init__(self)
         self.parent = parent
         self.queue = queue
-        self.syncdirPath = self.parent.parent.config.get('LocalSettings', 'sync-dir')
+        self.syncdirPath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir')
 
     def run(self):
         while True:
@@ -418,8 +415,8 @@ class Uploader(threading.Thread):
             if 'site' in tree:
                 self.sitename = tree['site']['name'].encode("utf-8")
 
-                username = self.parent.parent.config.get('Login', 'username')
-                password = self.parent.parent.config.get('Login', 'password')
+                username = self.parent.parent.configuration.get('Login', 'username')
+                password = self.parent.parent.configuration.get('Login', 'password')
                 #while(True):
                 ftpaddress = self.sitename + ".smartfile.com"
                 #print ftpaddress
@@ -455,12 +452,6 @@ class Uploader(threading.Thread):
             if f.split()[-1] == dir and f.upper().startswith('D'):
                 return True
         return False
-
-"""
-A dictionary difference calculator
-Originally posted as:
-http://stackoverflow.com/questions/1165352/fast-comparison-between-two-python-dictionary/1165552#1165552
-"""
 
 
 class DictDiffer(object):

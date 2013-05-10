@@ -1,7 +1,8 @@
 import hashlib
 import os
-import webbrowser
+import sys
 import urllib
+import webbrowser
 
 from PyQt4 import QtCore, QtGui
 
@@ -85,7 +86,7 @@ class UsernameLabel(QtGui.QLabel):
         pass
 
 
-class IconWidget(QtGui.QWidget):
+class AvatarWidget(QtGui.QWidget):
     def __init__(self, parent=None, email=None):
         QtGui.QWidget.__init__(self)
         self.parent = parent
@@ -105,22 +106,17 @@ class IconWidget(QtGui.QWidget):
     def addIcon(self, email):
         self.icon = QtGui.QImage()
         size = 64
-
         gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?s=" + str(size)
-
         img_file = urllib.urlopen(gravatar_url).read()
         self.icon.loadFromData(img_file, "JPG")
-
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 
-    #this is called every time something needs to be repainted
     def paintEvent(self, e):
         #Start Painter
         painter = QtGui.QPainter()
         painter.begin(self)
         # Draw Item Thumbnail.
         painter.drawImage(self.icontarget, self.icon)
-
         #End Painter
         painter.end()
 
@@ -131,41 +127,14 @@ class IconWidget(QtGui.QWidget):
         pass
 
 
-class InputDialog(QtGui.QDialog):
-    def __init__(self, parent=None, title='user input', label='comment', text=''):
-
-        QtGui.QWidget.__init__(self, parent)
-
-        #--Layout Stuff---------------------------#
-        mainLayout = QtGui.QVBoxLayout()
-
-        layout = QtGui.QHBoxLayout()
-        self.label = QtGui.QLabel()
-        self.label.setText(label)
-        layout.addWidget(self.label)
-
-        self.text = QtGui.QLineEdit(text)
-        layout.addWidget(self.text)
-
-        mainLayout.addLayout(layout)
-
-        #--The Button------------------------------#
-        layout = QtGui.QHBoxLayout()
-        button = QtGui.QPushButton("okay")  # string or icon
-        self.connect(button, QtCore.SIGNAL("clicked()"), self.close)
-        layout.addWidget(button)
-
-        mainLayout.addLayout(layout)
-        self.setLayout(mainLayout)
-
-        self.resize(400, 60)
-        self.setWindowTitle(title)
-
-
 class AccountWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self)
         self.parent = parent
+
+        ##get rid of the widget border
+        self.setStyleSheet("QWidget { border: 0px; }")
+
         #Call API to get full name and email address.
         try:
             tree = self.parent.smartfile.get('/whoami', '/')
@@ -175,28 +144,22 @@ class AccountWidget(QtGui.QWidget):
             self.fullname = tree['user']['name'].encode("utf-8")
             self.email = tree['user']['email'].encode("utf-8")
         except:
-            self.fullname = "Travis Cunningham"
-            self.email = "travcunn@umail.iu.edu"
-
-        ##get rid of the widget border
-        self.setStyleSheet("QWidget { border: 0px; }")
+            self.fullname = "Test FullName"
+            self.email = "web@google.com"
 
         self.setMinimumSize(300, 80)
-
         self.setMaximumSize(300, 80)
-
-        self.gridlayout = QtGui.QGridLayout()
 
         self.lbFullName = UsernameLabel(self, self.fullname)
         self.lbsettings = SettingsLabel(self)
         self.lblogout = LogoutLabel(self)
 
-        #self.loadGravatar()
-
         #Icon stuff
-        self.newicon = IconWidget(self, self.email)
-        self.gridlayout.addWidget(self.newicon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
+        self.icon = AvatarWidget(self, self.email)
 
+        self.gridlayout = QtGui.QGridLayout()
+
+        self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
         self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         #self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -207,11 +170,17 @@ class AccountWidget(QtGui.QWidget):
 class Main(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Main, self).__init__(parent)
-        self.setWindowTitle('Keep It Simple Sync')
-        #self.setStyleSheet("#MainWindow {background-color: #222222; }")
+        self.setWindowTitle('Account Widget Test')
         self.setGeometry(400, 200, 300, 325)
-        #Add Account Widget With dummy Info.
+        #Add Account Widget with dummy info.
         self.accountInfo = AccountWidget(self)
         self.grid = QtGui.QGridLayout()
         self.grid.addWidget(self.accountInfo)
         self.setLayout(self.grid)
+
+
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
+    mainwindow = Main()
+    mainwindow.show()
+    sys.exit(app.exec_())

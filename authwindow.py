@@ -16,13 +16,13 @@ class LoginWindow(QtGui.QWidget):
                 with open('configuration.cfg'):
                     pass
             except IOError:
-                self.parent.config.add_section('Login')
-                self.parent.config.set('Login', 'username', None)
-                self.parent.config.set('Login', 'password', None)
+                self.parent.configuration.add_section('Login')
+                self.parent.configuration.set('Login', 'username', None)
+                self.parent.configuration.set('Login', 'password', None)
                 with open('configuration.cfg', 'wb') as configfile:
-                    self.parent.config.write(configfile)
+                    self.parent.configuration.write(configfile)
             else:
-                self.parent.config.read('configuration.cfg')
+                self.parent.configuration.read('configuration.cfg')
 
         fontDatabase = QtGui.QFontDatabase()
         #fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
@@ -131,10 +131,10 @@ class Browser(QtWebKit.QWebView):
             #fill out the form here
             user = doc.findFirst("input[id=id_login]")
             passwd = doc.findFirst("input[id=id_password]")
-            #####this should read from the config file
+            #####this should read from the configuration file
             if not __name__ == "__main__":
-                user.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'username') + "'")
-                passwd.evaluateJavaScript("this.value = '" + self.parent.parent.config.get('Login', 'password') + "'")
+                user.evaluateJavaScript("this.value = '" + self.parent.parent.configuration.get('Login', 'username') + "'")
+                passwd.evaluateJavaScript("this.value = '" + self.parent.parent.configuration.get('Login', 'password') + "'")
             else:
                 user.evaluateJavaScript("this.value = 'ParadoxDuo'")
                 passwd.evaluateJavaScript("this.value = 'kissyncapp123!'")

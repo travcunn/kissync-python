@@ -221,7 +221,7 @@ class BottomPanel(QtGui.QWidget):
             source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
             ## Print File Name
             #print str(source_file)
-            destination_folder = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
+            destination_folder = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
             #print "Source: " + source_file
             #print "Dest: " + destination_folder
             #if not os.path.exists(destination_folder):
@@ -253,7 +253,7 @@ class BottomPanel(QtGui.QWidget):
             #print "Delete ."
             #Create the file path to delete.
             try:
-                deleteMeFilePath = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
+                deleteMeFilePath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
                 ##Delete the file from the system.
                 try:
                     if(os.path.isdir(deleteMeFilePath)):
@@ -289,9 +289,9 @@ class BottomPanel(QtGui.QWidget):
             except:
                 pass
 
-            source_file = self.parent.parent.config.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
+            source_file = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
 
-            comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.config.get('LocalSettings', 'sync-dir')))
+            comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.configuration.get('LocalSettings', 'sync-dir')))
 
             destination_folder = comment
             #print str(source_file)

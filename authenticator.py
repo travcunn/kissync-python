@@ -65,17 +65,17 @@ class Authenticator(object):
                         tree = self.parent.smartfile.get('/whoami', '/')
                         if 'site' in tree:
                             username = tree['site']['name'].encode("utf-8")
-                        self.parent.config.set('Login', 'username', username)
-                        self.parent.config.set('Login', 'password', userpass)
+                        self.parent.configuration.set('Login', 'username', username)
+                        self.parent.configuration.set('Login', 'password', userpass)
                         with open(self.parent.settingsFile, 'wb') as configfile:
-                            self.parent.config.write(configfile)
+                            self.parent.configuration.write(configfile)
                     self.success()
 
     def networkerror(self):
         self.parent.loginwindow.networkerror()
 
     def badloginerror(self):
-        if not(self.parent.config.get('Login', 'username') == "None" and self.parent.config.get('Login', 'username') == "None"):
+        if not(self.parent.configuration.get('Login', 'username') == "None" and self.parent.configuration.get('Login', 'username') == "None"):
             #if the username and pass are wrong but arent the defaults, give an invalid error
             self.parent.loginwindow.invaliderror()
         else:
@@ -86,7 +86,7 @@ class Authenticator(object):
 
     def success(self):
         #Successfully logged in
-        if(self.parent.config.get('LocalSettings', 'first-run') == "True"):
+        if(self.parent.configuration.get('LocalSettings', 'first-run') == "True"):
             self.parent.setupwizard.show()
             self.parent.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
         else:

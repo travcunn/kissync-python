@@ -1,20 +1,18 @@
-#!/usr/bin/python
-
-import ConfigParser
 import os
 import sys
 from PyQt4 import QtCore, QtGui
 
-import style
+from accountwidget import AccountWidget
 from authenticator import Authenticator
+from configuration import Configuration
+from filebrowsergui import FileBrowserGUI
 from filedatabase import FileDatabase
 from filedatabase import Synchronizer
 from filedatabase import RefreshThread
 from loginwindow import LoginWindow
 from setupwizard import SetupWizard
+from style import KissyncStyle
 from tray import SystemTrayIcon
-from filebrowsergui import FileBrowserGUI
-from accountwidget import AccountWidget
 
 import singleton
 import watcher
@@ -23,37 +21,15 @@ import watcher
 class Main(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Main, self).__init__(parent)
-        self.style = style.KissyncStyle()
+        self.style = KissyncStyle()
 
-        self.config = ConfigParser.RawConfigParser()  # configuration parser
-
-        self.kissyncDirectory = os.path.join(os.path.expanduser("~"), "Kissync")
+        self.syncDirectory = os.path.join(os.path.expanduser("~"), "Kissync")
         self.workingDirectory = os.path.join(os.path.expanduser("~"), ".kissync")
         self.settingsFile = os.path.join(os.path.expanduser("~"), ".kissync", "configuration.cfg")
 
-        if not os.path.exists(self.workingDirectory):
-            os.makedirs(self.workingDirectory)
+        self.directorySetup()
 
-        if not os.path.exists(self.kissyncDirectory):
-            os.makedirs(self.kissyncDirectory)
-
-        try:
-            with open(self.settingsFile):
-                pass
-        except IOError:
-            self.config.add_section('Login')
-            self.config.set('Login', 'username', None)
-            self.config.set('Login', 'password', None)
-            self.config.add_section('LocalSettings')
-            self.config.set('LocalSettings', 'first-run', True)
-            self.config.set('LocalSettings', 'network-timeout', 30)
-            self.config.set('LocalSettings', 'notifications', True)
-            self.config.set('LocalSettings', 'sync-offline', False)
-            self.config.set('LocalSettings', 'sync-dir', None)
-            with open(self.settingsFile, 'wb') as configfile:
-                self.config.write(configfile)
-        else:
-            self.config.read(self.settingsFile)
+        self.configuration = Configuration(self.settingsFile)
 
         #################MAIN WINDOW GUI#####################
         self.setWindowTitle('Keep It Simple Sync')
@@ -65,7 +41,7 @@ class Main(QtGui.QWidget):
         fontDatabase = QtGui.QFontDatabase()
         #fontfile = QtCore.QFile(os.path.dirname(os.path.realpath(__file__)) + "resources/Roboto-Light-webfont.ttf")
         fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-        #os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
+
         palette = QtGui.QPalette()
         #palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 
@@ -92,15 +68,11 @@ class Main(QtGui.QWidget):
         self.smartfile = None  # we don't want to init yet, so we can handle errors later on login
         #login screen
         self.database = FileDatabase(self)
-
         #setup window for initial user configuration
         self.setupwizard = SetupWizard(self)
-
         self.loginwindow = LoginWindow(self)
         #runs the authentication process that connects self.smartfile with a smartfile client
-
         self.tray = SystemTrayIcon(self)  # tray icon
-        self.tray.show()
         self.tray.notification("Kissync Enterprise", "Starting up....")
 
         self.authenticator = Authenticator(self)  # login in
@@ -125,6 +97,13 @@ class Main(QtGui.QWidget):
         self.grid.addWidget(self.titlewidget, 0, 0)
         self.grid.addWidget(self.accountwidget, 0, 1, 1, 1, QtCore.Qt.AlignRight)
         self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
+
+    def directorySetup(self):
+        if not os.path.exists(self.workingDirectory):
+            os.makedirs(self.workingDirectory)
+
+        if not os.path.exists(self.syncDirectory):
+            os.makedirs(self.syncDirectory)
 
     def closeEvent(self, event):
         event.ignore()

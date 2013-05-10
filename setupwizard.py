@@ -67,23 +67,23 @@ class SetupWizard(QtGui.QWidget):
         self.centerOnScreen()
 
     def saveSettings(self):
-        self.parent.config.set('LocalSettings', 'sync-offline', True)
+        self.parent.configuration.set('LocalSettings', 'sync-offline', True)
 
         if(self.checkboxNotifications.isChecked()):
-            self.parent.config.set('LocalSettings', 'notifications', True)
+            self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
-            self.parent.config.set('LocalSettings', 'notifications', False)
+            self.parent.configuration.set('LocalSettings', 'notifications', False)
 
         directory = os.path.expanduser("~") + "/Kissync"
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        self.parent.config.set('LocalSettings', 'sync-dir', directory)
+        self.parent.configuration.set('LocalSettings', 'sync-dir', directory)
 
-        self.parent.config.set('LocalSettings', 'first-run', False)
+        self.parent.configuration.set('LocalSettings', 'first-run', False)
         self.hide()
         with open(self.parent.settingsFile, 'wb') as configfile:
-            self.parent.config.write(configfile)
+            self.parent.configuration.write(configfile)
         self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
         self.parent.show()
         self.parent.start()

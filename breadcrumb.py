@@ -1,6 +1,7 @@
 import math
 import os
 import sys
+
 from PyQt4 import QtCore, QtGui
 
 import style
