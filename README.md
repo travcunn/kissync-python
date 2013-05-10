@@ -5,37 +5,20 @@ Kissync (SmartFile Client)
 
 A file synchronization and browsing tool for SmartFile in Python
 
-To synchronize files, upload using the Kissync client
-
 
 Running Kissync
 ===================
 
-If you are on Ubuntu or Debian:
 
-1) Go to [Kissync](http://kissync.com).
-
-2) Click the download for Ubuntu Button.
-
-3) Enjoy!
-
-or...
-
-1) Download all the program files.
-
-2) Make sure you have python installed ( We used python 2.7 )
-
-3) Run main.py from the command line (Below) or use any given python 2.7 IDE.
-```
-python main.py
-```
-OR
+    $ git clone https://github.com/kissync/kissync-python.git kissync
+    $ cd kissync
+    $ python main.py
 
 
 Using Kissync
 ===============
 
-The kissync client is used to view your files on the smartfile servers. We access your files using a secure authentication method called Oauth. 
+The Kissync client is used to view your files on the Smartfile servers. All file access is done over SSL. 
 
 ####Bottom Bar ( Delete, move, rename, etc... )
 Single click on your file. The panel at the bottom should appear. From there just select the opperation you wish to occur and then follow the on screen instructions.
