@@ -25,13 +25,11 @@ class FileDatabaseTest(unittest.TestCase):
 
 
 class ConfigurationTest(unittest.TestCase):
-    def test_blank_config_file(self):
-        self.assertRaises(Configuration())
-
     def test_initial_setup(self):
         if not os.path.exists(os.path.join(os.path.expanduser("~"), ".kissync")):
             os.makedirs(os.path.join(os.path.expanduser("~"), ".kissync"))
         Configuration(os.path.join(os.path.expanduser("~"), ".kissync", "configuration.cfg"))
+
 
 if __name__ == '__main__':
     unittest.main()
