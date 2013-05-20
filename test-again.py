@@ -10,7 +10,7 @@ def main():
         print client_token
         client_verification = raw_input("What was the verification? :")
         api.get_access_token(None, client_verification)
-        print(api.get('/path/info', children = True))
+        print(api.get('/path/info', children=True))
     except:
         #"There was an error connecting with OAuth"
         raise

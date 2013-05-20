@@ -29,7 +29,7 @@ class LoginWindow(QtGui.QWidget):
         detailsText.setFont(fontsmall)
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF;")
-        
+
         self.htmlView = AuthBrowser(self)
 
         #window size constraints
@@ -42,7 +42,7 @@ class LoginWindow(QtGui.QWidget):
         self.neterrorText.setStyleSheet("color: #FF0000;")
         self.neterrorText.setFont(fonterror)
         self.neterrorText.hide()
-        
+
         cloud = CloudWidget()
         grid = QtGui.QGridLayout()
         gridleft = QtGui.QGridLayout()
@@ -78,6 +78,7 @@ class LoginWindow(QtGui.QWidget):
         #if the user closes the login window, close the entire app...
         sys.exit()
 
+
 class CloudWidget(QtGui.QWidget):
     def __init__(self):
         QtGui.QWidget.__init__(self)
@@ -97,7 +98,7 @@ class CloudWidget(QtGui.QWidget):
         self.icon = QtGui.QImage()
 
         self.icon.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icons", "icon.xpm"))
-        
+
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 
     #this is called every time something needs to be repainted

@@ -29,7 +29,7 @@ class Authenticator(object):
                 authUrl = self.parent.smartfile.get_authorization_url()
                 token = authUrl.replace("https://app.smartfile.com/oauth/authorize/?oauth_token=", "")
                 self.parent.configuration.set("Login", "token", token)
-    
+
                 self.parent.loginwindow.htmlView.load(QtCore.QUrl(authUrl))
                 self.parent.loginwindow.show()
 
