@@ -1,6 +1,7 @@
 import os
 import sys
 from PyQt4 import QtCore, QtGui
+from tendo.singleton import SingleInstance
 
 from accountwidget import AccountWidget
 from authenticator import Authenticator
@@ -14,7 +15,6 @@ from setupwizard import SetupWizard
 from style import KissyncStyle
 from tray import SystemTrayIcon
 
-import singleton
 import watcher
 
 
@@ -113,7 +113,7 @@ class Main(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    me = singleton.SingleInstance()
+    me = SingleInstance()
     app = QtGui.QApplication(sys.argv)
     mainwindow = Main()
     sys.exit(app.exec_())

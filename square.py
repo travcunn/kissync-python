@@ -31,7 +31,6 @@ class AvatarWidget(QtGui.QWidget):
         elif(extension is None or extension == ""):
             extension = "unknown"
         else:
-            ##print "Meh: " + extension
             extension = extension[1:]
 
         if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")):
@@ -46,13 +45,9 @@ class AvatarWidget(QtGui.QWidget):
 
     #this is called every time something needs to be repainted
     def paintEvent(self, e):
-        #Start Painter
         painter = QtGui.QPainter()
         painter.begin(self)
-        # Draw Item Thumbnail.
         painter.drawImage(self.icontarget, self.icon)
-
-        #End Painter
         painter.end()
 
 
@@ -155,16 +150,12 @@ class ItemObject(QtGui.QWidget):
         else:
             self.opacity = 1.0
 
-    #this is called every time something needs to be repainted
     def paintEvent(self, e):
-        #Start Painter
         painter = QtGui.QPainter()
         painter.begin(self)
         #Set Opacity
         painter.setOpacity(self.opacity)
-        #Draw Background Color
         self.draw(painter)
-        #End Painter
         painter.end()
 
     def draw(self, painter):
@@ -184,7 +175,6 @@ class ItemObject(QtGui.QWidget):
 
     def mousePressEvent(self, event):
         if not(self.panelView):
-            ##print("Clicked")
             if not(self.isActive):
                 self.isActive = True
                 self.opacity = 1.0

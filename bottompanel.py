@@ -1,6 +1,5 @@
 import math
 import os
-import sys
 from PyQt4 import QtCore, QtGui
 from square import ItemObject
 from panelbutton import PanelButton

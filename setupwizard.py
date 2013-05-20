@@ -9,12 +9,9 @@ class SetupWizard(QtGui.QWidget):
         self.setWindowTitle('Setup')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
+        self.setFixedSize(465, 325)
 
-        #fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-        #fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-        #os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf"
         palette = QtGui.QPalette()
-        #palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
@@ -25,12 +22,8 @@ class SetupWizard(QtGui.QWidget):
         topText.setFont(font)
         topText.setPalette(palette)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        #topText.setStyleSheet("color: #FFFFFF;")
 
         grid = QtGui.QGridLayout()
-
-        #window size constraints
-        self.setFixedSize(465, 325)
 
         spacer = QtGui.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)

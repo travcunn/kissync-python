@@ -43,7 +43,7 @@ class LoginWindow(QtGui.QWidget):
         self.neterrorText.setFont(fonterror)
         self.neterrorText.hide()
 
-        cloud = CloudWidget()
+        cloud = CloudIconWidget()
         grid = QtGui.QGridLayout()
         gridleft = QtGui.QGridLayout()
         gridleft.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -79,7 +79,7 @@ class LoginWindow(QtGui.QWidget):
         sys.exit()
 
 
-class CloudWidget(QtGui.QWidget):
+class CloudIconWidget(QtGui.QWidget):
     def __init__(self):
         QtGui.QWidget.__init__(self)
 
@@ -89,27 +89,15 @@ class CloudWidget(QtGui.QWidget):
         self.setMinimumSize(64, 64)
         self.setMaximumSize(64, 64)
 
-        self.gridlayout = QtGui.QGridLayout()
-
-        self.setLayout(self.gridlayout)
-        self.addIcon()
-
-    def addIcon(self):
         self.icon = QtGui.QImage()
-
         self.icon.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icons", "icon.xpm"))
 
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 
-    #this is called every time something needs to be repainted
     def paintEvent(self, e):
-        #Start Painter
         painter = QtGui.QPainter()
         painter.begin(self)
-        # Draw Item Thumbnail.
         painter.drawImage(self.icontarget, self.icon)
-
-        #End Painter
         painter.end()
 
 
