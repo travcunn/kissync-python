@@ -24,24 +24,28 @@ class Configuration(ConfigParser.RawConfigParser):
         else:
             self.configuration.read(self.configFile)
 
+    def save(self):
+        with open(self.configFile, 'wb') as configurationFile:
+            self.configuration.write(configurationFile)
+
     def setupConfig(self):
         self.configuration.add_section('Login')
-        self.configuration.set('Login', 'username', None)
-        self.configuration.set('Login', 'password', None)
+        self.configuration.set('Login', 'token', None)
+        self.configuration.set('Login', 'verifier', None)
         self.configuration.add_section('LocalSettings')
         self.configuration.set('LocalSettings', 'first-run', True)
         self.configuration.set('LocalSettings', 'network-timeout', 30)
         self.configuration.set('LocalSettings', 'notifications', True)
         self.configuration.set('LocalSettings', 'sync-offline', False)
         self.configuration.set('LocalSettings', 'sync-dir', None)
-        with open(self.configFile, 'wb') as configuration:
-            self.configuration.write(configuration)
+        self.save()
 
     def get(self, section, key):
         return self.configuration.get(section, key)
 
     def set(self, section, key, value):
         self.configuration.set(section, key, value)
+        self.save()
 
 
 class ConfigException(Exception):

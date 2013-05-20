@@ -73,7 +73,6 @@ class Main(QtGui.QWidget):
         self.loginwindow = LoginWindow(self)
         #runs the authentication process that connects self.smartfile with a smartfile client
         self.tray = SystemTrayIcon(self)  # tray icon
-        self.tray.notification("Kissync Enterprise", "Starting up....")
 
         self.authenticator = Authenticator(self)  # login in
 

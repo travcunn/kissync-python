@@ -19,9 +19,6 @@ class TrayMenu(QtGui.QMenu):
     def openmain(self):
         self.parent.parent.show()
 
-    def notification(self):
-        self.parent.notification("Kissync", "hello")
-
     def exit(self):
         self.parent.parent.exit()
 

@@ -136,6 +136,7 @@ class AccountWidget(QtGui.QWidget):
         self.setStyleSheet("QWidget { border: 0px; }")
 
         #Call API to get full name and email address.
+        print "calling home..."
         try:
             tree = self.parent.smartfile.get('/whoami', '/')
             if 'user' not in tree:

@@ -82,8 +82,7 @@ class SetupWizard(QtGui.QWidget):
 
         self.parent.configuration.set('LocalSettings', 'first-run', False)
         self.hide()
-        with open(self.parent.settingsFile, 'wb') as configfile:
-            self.parent.configuration.write(configfile)
+        self.parent.configuration.save()
         self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
         self.parent.show()
         self.parent.start()

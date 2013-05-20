@@ -1,6 +1,8 @@
 from PyQt4 import QtCore, QtGui
+from authbrowser import AuthBrowser
 
 import sys
+import os
 
 
 class LoginWindow(QtGui.QWidget):
@@ -11,96 +13,54 @@ class LoginWindow(QtGui.QWidget):
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
 
-        #fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-        #fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-        palette = QtGui.QPalette()
-        #palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
-
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
         topText = QtGui.QLabel('Login to Kissync')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
+        font = QtGui.QFont("Roboto", 24, QtGui.QFont.Light, False)
         topText.setFont(font)
-        topText.setPalette(palette)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF
 
         detailsText = QtGui.QLabel('using your Smartfile acount')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        fontsmall = QtGui.QFont("Roboto", 14, QtGui.QFont.Normal, False)
+        fontsmall = QtGui.QFont("Roboto", 14, QtGui.QFont.Light, False)
         detailsText.setFont(fontsmall)
-        detailsText.setPalette(palette)
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF;")
-
-        grid = QtGui.QGridLayout()
+        
+        self.htmlView = AuthBrowser(self)
 
         #window size constraints
-        self.setFixedSize(465, 325)
+        self.setFixedSize(800, 550)
 
-        spacer = QtGui.QWidget()
-        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        #file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-
-        formwidget = QtGui.QWidget()
-        formgrid = QtGui.QFormLayout()
-        formwidget.setLayout(formgrid)
-
-        fontform = QtGui.QFont("Roboto", 12, QtGui.QFont.Normal, False)
         fonterror = QtGui.QFont("Roboto", 18, QtGui.QFont.Normal, False)
-
-        self.errorText = QtGui.QLabel('Invalid Username or Password')
-        self.errorText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        self.errorText.setStyleSheet("color: #FF0000;")
-        self.errorText.setFont(fonterror)
-        self.errorText.hide()
 
         self.neterrorText = QtGui.QLabel('Error Connecting to SmartFile')
         self.neterrorText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.neterrorText.setStyleSheet("color: #FF0000;")
         self.neterrorText.setFont(fonterror)
         self.neterrorText.hide()
+        
+        cloud = CloudWidget()
+        grid = QtGui.QGridLayout()
+        gridleft = QtGui.QGridLayout()
+        gridleft.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
-        usernameText = QtGui.QLabel('Username:')
-        usernameText.setFont(fontform)
-        self.usernameField = QtGui.QLineEdit()
-        passwordText = QtGui.QLabel('Password:')
-        passwordText.setFont(fontform)
-        self.passwordField = QtGui.QLineEdit()
-        self.passwordField.setEchoMode(QtGui.QLineEdit.Password)
-        loginButton = QtGui.QPushButton('Login')
-        loginButton.clicked.connect(self.tryLogin)
-
-        formgrid.addRow(usernameText, self.usernameField)
-        formgrid.addRow(passwordText, self.passwordField)
-        formgrid.addRow(loginButton)
-
+        leftPanel = QtGui.QWidget()
+        leftPanel.setLayout(gridleft)
         #add the objects to the grid
-        grid.addWidget(spacer, 0, 0)
-        grid.addWidget(spacer, 0, 2)
-        grid.addWidget(topText, 0, 1)
-        grid.addWidget(detailsText, 1, 1)
-        grid.addWidget(self.errorText, 2, 1)
-        grid.addWidget(self.neterrorText, 3, 1)
-        grid.addWidget(formwidget, 4, 1)
-        #grid.addWidget(loading, 1, 1)
-        grid.addWidget(spacer, 10, 1)
+        gridleft.addWidget(topText, 0, 0)
+        gridleft.addWidget(detailsText, 1, 0)
+        gridleft.addWidget(cloud, 2, 0, 1, 1, QtCore.Qt.AlignHCenter)
+        grid.addWidget(leftPanel, 0, 0, 1, 1)
+        grid.addWidget(self.htmlView, 0, 1)
         #set the layout to grid layout
         self.setLayout(grid)
         self.centerOnScreen()
 
-    def tryLogin(self):
-        self.hide()
-        self.parent.configuration.set('Login', 'username', str(self.usernameField.text()))
-        self.parent.configuration.set('Login', 'password', str(self.passwordField.text()))
-        with open(self.parent.settingsFile, 'wb') as configfile:
-            self.parent.configuration.write(configfile)
-
-        self.parent.authenticator.go()
-
-    def networkerror(self):
+    def networkError(self):
         self.neterrorText.show()
         self.errorText.hide()
         self.show()
@@ -117,3 +77,43 @@ class LoginWindow(QtGui.QWidget):
     def closeEvent(self, event):
         #if the user closes the login window, close the entire app...
         sys.exit()
+
+class CloudWidget(QtGui.QWidget):
+    def __init__(self):
+        QtGui.QWidget.__init__(self)
+
+        ##get rid of the widget border
+        self.setStyleSheet("QWidget { border: 0px; }")
+
+        self.setMinimumSize(64, 64)
+        self.setMaximumSize(64, 64)
+
+        self.gridlayout = QtGui.QGridLayout()
+
+        self.setLayout(self.gridlayout)
+        self.addIcon()
+
+    def addIcon(self):
+        self.icon = QtGui.QImage()
+
+        self.icon.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icons", "icon.xpm"))
+        
+        self.icontarget = QtCore.QRectF(0, 0, 64, 64)
+
+    #this is called every time something needs to be repainted
+    def paintEvent(self, e):
+        #Start Painter
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        # Draw Item Thumbnail.
+        painter.drawImage(self.icontarget, self.icon)
+
+        #End Painter
+        painter.end()
+
+
+if __name__ == "__main__":
+    app = QtGui.QApplication(sys.argv)
+    loginwindow = LoginWindow()
+    loginwindow.show()
+    sys.exit(app.exec_())

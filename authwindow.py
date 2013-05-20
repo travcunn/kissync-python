@@ -98,7 +98,7 @@ class LoginWindow(QtGui.QWidget):
         #hide the widget contents until the page loads, to add a loading html view
         self.htmlView.hide()
 
-    def networkerror(self):
+    def networkError(self):
         self.htmlView.hide()
         self.loginText.hide()
         self.networkErrorText.show()
@@ -195,13 +195,13 @@ class Browser(QtWebKit.QWebView):
     def netwatch(self, value):
         if (value == 1.0):
             self.stop()
-            self.parent.networkerror()
+            self.parent.networkError()
 
 
 class AuthenticationClient(object):
     def __init__(self):
         #print "Loading the OAuth client..."
-        self.api = OAuthClient("cBEd1e6022bPTJ3ygpGzQgkLLvEnTS", "LIIWruPvUTJGhBNtgoJM2SIghTyH5P")
+        self.api = OAuthClient("kyGhLLeo8YhkmPwNC5EEnR6Q2VcYnL", "yjEWkB57jhTe3sY0OGFSjwciaAKNmC")
 
     def get_auth_url(self):
         try:
