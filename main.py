@@ -163,7 +163,6 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 if __name__ == "__main__":
     me = SingleInstance()
     app = QtGui.QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
 
     mainwindow = Main()
 

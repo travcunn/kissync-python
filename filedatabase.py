@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import os
+import errno
 import Queue
 import shutil
 import threading
@@ -96,12 +97,13 @@ class FileDatabase(object):
                 self.remoteFilesDictionaryTime = pickle.load(picklefiletime)
                 picklefiletime.close()
             except:
+                raise
                 self.loadRemoteListingFile()
             #subprocess.call(('xdg-open', openPath))
             #subprocess.call(('xdg-open', openPathTime))
 
     def generateRemoteListing(self):
-        tmpLocalPath = self.workingDirectory + "/.kissyncDBtmp"
+        tmpLocalPath = os.path.join(self.workingDirectory, ".kissyncDBtmp")
         try:
             os.remove(tmpLocalPath)
         except:
@@ -111,7 +113,7 @@ class FileDatabase(object):
             pickle.dump(self.localFilesDictionary, output)
             output.close()
 
-            tmpLocalPathTime = self.workingDirectory + "/.kissyncDBtmptime"
+            tmpLocalPathTime = os.path.join(self.workingDirectory, ".kissyncDBtmptime")
             try:
                 os.remove(tmpLocalPathTime)
             except:
@@ -140,34 +142,32 @@ class FileDatabase(object):
                 self.generateRemoteListing()
 
     def getServerListingFile(self):
-        filepath = "/.kissyncDBserver"
-        fullpath = self.workingDirectory + filepath
+        filepath = ".kissyncDBserver"
+        absolutePath = os.path.join(self.workingDirectory, filepath)
         try:
-            os.remove(fullpath)
+            os.remove(absolutePath)
         except:
             pass
-        realPath = self.workingDirectory + filepath
-        realPath = realPath.encode("utf-8")
+        absolutePath = absolutePath.encode("utf-8")
         serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHash)
-        output = open(realPath, 'wb')
+        output = open(absolutePath, 'wb')
         output.write(serverFile.read())
         output.close()
-        return realPath
+        return absolutePath
 
     def getServerListingFileTime(self):
-        filepath = "/.kissyncDBtimeserver"
-        fullpath = self.workingDirectory + filepath
+        filepath = ".kissyncDBtimeserver"
+        absolutePath = os.path.join(self.workingDirectory, filepath)
         try:
-            os.remove(fullpath)
+            os.remove(absolutePath)
         except:
             pass
-        realPath = self.workingDirectory + filepath
-        realPath = realPath.encode("utf-8")
+        absolutePath = absolutePath.encode("utf-8")
         serverFile = urllib2.urlopen("http://www.kissync.com/getindex?login_hash=%s" % self.authHashTimes)
-        output = open(realPath, 'wb')
+        output = open(absolutePath, 'wb')
         output.write(serverFile.read().replace('&amp', ''))
         output.close()
-        return realPath
+        return absolutePath
 
     def hashFile(self, filepath):
     ##Read files line by line instead of all at once (allows for large files to be hashes)
@@ -371,24 +371,21 @@ class Downloader(threading.Thread):
             #print self.queue.qsize()
 
     def downloadFile(self, filepath):
-        pathArray = filepath.split("/")
-        pathArray.pop(0)
-        pathArray.pop(len(pathArray) - 1)
-        pathToAdd = ""
-        #A BUG EXISTS IN THIS, PLEASE TEST THIS
-        for directory in pathArray:
-            if not os.path.exists(self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
-                os.makedirs(self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
-                pathToAdd = pathToAdd + directory + "/"
-                ##print pathToAdd
+        absolutePath = os.path.join(self.parent.parent.configuration.get('LocalSettings', 'sync-dir'), filepath)
+        self.checkDirsToCreate(absolutePath)
         try:
             f = self.parent.parent.smartfile.get('/path/data/', filepath)
-            realPath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + filepath
-            realPath = realPath.encode("utf-8")
-            with file(realPath, 'wb') as o:
+            with file(absolutePath, 'wb') as o:
                 shutil.copyfileobj(f, o)
         except:
-            pass
+            print "Could not download the file"
+    
+    def checkDirsToCreate(self, path):
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
 
 
 class Uploader(threading.Thread):

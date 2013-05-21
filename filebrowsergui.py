@@ -25,6 +25,9 @@ class FileBrowserGUI(QtGui.QWidget):
 
         self.setLayout(self.layoutgrid)
 
+        #show the folder panel by default (not selected any files)
+        self.folderpanel.show()
+
     def changePath(self, path):
         ####print "Changing path to " + path
         self.breadcrumb.setPath(path)
