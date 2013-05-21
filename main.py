@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 import sys
 from PyQt4 import QtCore, QtGui
@@ -139,15 +140,13 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
     #def loading(self):
         #self.setIcon(self.loadingIcon1)
 
-    if sys.platform == 'darwin':
-        def openSyncFolder(self):
-            subprocess.check_call(['open', '--', self.parent.syncDirectory])
-    elif sys.platform == 'linux2':
-        def openSyncFolder(self):
-            subprocess.check_call(['gnome-open', self.parent.syncDirectory])
-    elif sys.platform == 'windows':
-        def openSyncFolder(self):
-            subprocess.check_call(['explorer', self.parent.syncDirectory])
+    def openSyncFolder(self):
+        if platform.system() == 'Darwin':
+            subprocess.call(['open', '--', self.parent.syncDirectory])
+        elif platform.system() == 'Linux':
+            subprocess.call(['gnome-open', self.parent.syncDirectory])
+        elif platform.system() == 'Windows':
+            subprocess.call(['explorer', self.parent.syncDirectory])
 
     #def test(self):
         #print "clicked menu item"

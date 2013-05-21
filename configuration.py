@@ -41,6 +41,9 @@ class Configuration(ConfigParser.RawConfigParser):
         self.save()
 
     def get(self, section, key):
+        #weird bug on windows. Instead of storing None, the config stores "None"
+        if(self.configuration.get(section, key) == "None"):
+            return None
         return self.configuration.get(section, key)
 
     def set(self, section, key, value):

@@ -12,7 +12,6 @@ class AuthBrowser(QtWebKit.QWebView):
 
         self.timer = QtCore.QTimeLine()
         self.setMinimumWidth(500)
-        self.show()
 
     def checkUrl(self, ok):
         currentUrl = str(self.url().toString())

@@ -13,7 +13,7 @@ class Authenticator(object):
         configVerifier = self.parent.configuration.get("Login", "verifier")
         if(configToken) and (configVerifier) is not None:
             try:
-                self.parent.smartfile = OAuthClient("YCU0u0oC8lsE5QfZY2nzhl8NsVy2dY", "gCSZd2VnuFshGJhrs6DopkCJSRmcjJ", configToken, configVerifier)
+                self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq", configToken, configVerifier)
                 self.parent.smartfile.get('/path/info')
             except:
                 self.showLoginWindow()
@@ -21,7 +21,7 @@ class Authenticator(object):
                 self.success()
         else:
             try:
-                self.parent.smartfile = OAuthClient("YCU0u0oC8lsE5QfZY2nzhl8NsVy2dY", "gCSZd2VnuFshGJhrs6DopkCJSRmcjJ")
+                self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq")
             except:
                 self.networkError()
             else:

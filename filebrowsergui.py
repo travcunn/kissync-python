@@ -20,7 +20,6 @@ class FileBrowserGUI(QtGui.QWidget):
         self.layoutgrid.addWidget(self.fileview, 1, 0)
         self.layoutgrid.addWidget(self.bottompanel, 2, 0)
         self.layoutgrid.addWidget(self.folderpanel, 2, 0)
-        self.folderpanel.show()
 
         self.layoutgrid.setContentsMargins(0, 0, 0, 0)
 
