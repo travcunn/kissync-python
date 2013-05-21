@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 
 
+#this is imcomplete
 class ManageUserPermissions(QtGui.QWidget):
 
     def __init__(self, parent=None):
@@ -119,7 +120,7 @@ class ManageUserPermissions(QtGui.QWidget):
     def populateComboBox(self):
         tree = self.parent.parent.parent.smartfile.get('/user', '/')
         for i in tree:
-            print i['username']
+            #print i['username']
             self.comboUser.addItem(i['username'])
 
     def savePremissions(self):

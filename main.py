@@ -14,7 +14,6 @@ from filedatabase import RefreshThread
 from loginwindow import LoginWindow
 from setupwizard import SetupWizard
 from style import KissyncStyle
-from tray import SystemTrayIcon
 
 import watcher
 
@@ -68,6 +67,9 @@ class Main(QtGui.QWidget):
         self.loginwindow = LoginWindow(self)
         #runs the authentication process that connects self.smartfile with a smartfile client
         #self.tray = SystemTrayIcon(self)  # tray icon
+
+        self.tray = SystemTrayIcon(self)
+        self.tray.show()
 
         self.authenticator = Authenticator(self)  # login in
 
@@ -165,8 +167,5 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
 
     mainwindow = Main()
-
-    trayIcon = SystemTrayIcon(mainwindow)
-    trayIcon.show()
 
     sys.exit(app.exec_())
