@@ -379,7 +379,7 @@ class Downloader(threading.Thread):
                 shutil.copyfileobj(f, o)
         except:
             print "Could not download the file"
-    
+
     def checkDirsToCreate(self, path):
         try:
             os.makedirs(path)
