@@ -1,15 +1,10 @@
-PyYAML
-argparse
-beautifulsoup4
 coverage
 coveralls
-docopt
 oauthlib
 pathtools
 python-librsync
 requests
 requests-oauthlib
-sh
 tendo
 watchdog
 wsgiref
