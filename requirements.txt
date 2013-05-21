@@ -10,8 +10,6 @@ python-librsync
 requests
 requests-oauthlib
 sh
-smartfile
 tendo
 watchdog
 wsgiref
--e git://github.com/kissync/client-python.git#egg=smartfile
