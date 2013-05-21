@@ -21,9 +21,11 @@ class AuthBrowser(QtWebKit.QWebView):
         if(currentUrl.startswith("http://www.kissync.com/oauth?verifier=")):
             try:
                 verifier = currentUrl.replace("http://www.kissync.com/oauth?verifier=", "")
-                self.parent.parent.smartfile.get_access_token(None, verifier)
+                token, verifier = self.parent.parent.smartfile.get_access_token(None, verifier)
+                self.parent.parent.configuration.set("Login", "token", token)
                 self.parent.parent.configuration.set("Login", "verifier", verifier)
             except:
+                raise
                 #something happened after logging in successfully, but something happened with passing the verifier
                 self.parent.badLoginError()
             else:

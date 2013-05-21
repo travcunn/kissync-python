@@ -4,7 +4,7 @@ import sys
 import urllib
 import webbrowser
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui, QtCore
 
 
 class SettingsLabel(QtGui.QLabel):
@@ -132,11 +132,13 @@ class AccountWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.parent = parent
 
+        self.setMinimumSize(300, 80)
+        self.setMaximumSize(300, 80)
+
         ##get rid of the widget border
         self.setStyleSheet("QWidget { border: 0px; }")
 
         #Call API to get full name and email address.
-        print "calling home..."
         try:
             tree = self.parent.smartfile.get('/whoami', '/')
             if 'user' not in tree:
@@ -147,9 +149,6 @@ class AccountWidget(QtGui.QWidget):
         except:
             self.fullname = "Test FullName"
             self.email = "web@google.com"
-
-        self.setMinimumSize(300, 80)
-        self.setMaximumSize(300, 80)
 
         self.lbFullName = UsernameLabel(self, self.fullname)
         self.lbsettings = SettingsLabel(self)

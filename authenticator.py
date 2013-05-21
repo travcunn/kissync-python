@@ -6,7 +6,6 @@ class Authenticator(object):
     def __init__(self, parent=None):
         super(Authenticator, self).__init__()
         self.parent = parent
-
         self.go()
 
     def go(self):
@@ -15,8 +14,9 @@ class Authenticator(object):
         if(configToken) and (configVerifier) is not None:
             try:
                 self.parent.smartfile = OAuthClient("YCU0u0oC8lsE5QfZY2nzhl8NsVy2dY", "gCSZd2VnuFshGJhrs6DopkCJSRmcjJ", configToken, configVerifier)
+                self.parent.smartfile.get('/path/info')
             except:
-                raise
+                self.showLoginWindow()
             else:
                 self.success()
         else:
@@ -25,13 +25,14 @@ class Authenticator(object):
             except:
                 self.networkError()
             else:
-                self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
-                authUrl = self.parent.smartfile.get_authorization_url()
-                token = authUrl.replace("https://app.smartfile.com/oauth/authorize/?oauth_token=", "")
-                self.parent.configuration.set("Login", "token", token)
+                self.showLoginWindow()
 
-                self.parent.loginwindow.htmlView.load(QtCore.QUrl(authUrl))
-                self.parent.loginwindow.show()
+    def showLoginWindow(self):
+        self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
+        authUrl = self.parent.smartfile.get_authorization_url()
+
+        self.parent.loginwindow.htmlView.load(QtCore.QUrl(authUrl))
+        self.parent.loginwindow.show()
 
     def networkError(self):
         self.parent.loginwindow.networkError()

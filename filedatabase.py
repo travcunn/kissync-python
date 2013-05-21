@@ -27,8 +27,8 @@ class FileDatabase(object):
 
     def generateAuthHash(self):
         try:
-            username = self.parent.configuration.get('Login', 'username')
-            password = self.parent.configuration.get('Login', 'password')
+            username = self.parent.configuration.get('Login', 'token')
+            password = self.parent.configuration.get('Login', 'verifier')
         except:
             username = ""
             password = ""
@@ -415,8 +415,8 @@ class Uploader(threading.Thread):
             if 'site' in tree:
                 self.sitename = tree['site']['name'].encode("utf-8")
 
-                username = self.parent.parent.configuration.get('Login', 'username')
-                password = self.parent.parent.configuration.get('Login', 'password')
+                username = self.parent.parent.configuration.get('Login', 'token')
+                password = self.parent.parent.configuration.get('Login', 'verifier')
                 #while(True):
                 ftpaddress = self.sitename + ".smartfile.com"
                 #print ftpaddress

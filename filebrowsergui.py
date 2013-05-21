@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui, QtCore
 from fileview import FileView
 from breadcrumb import BreadCrumb
 from folderpanel import FolderPanel

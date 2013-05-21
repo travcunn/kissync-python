@@ -1,5 +1,5 @@
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui, QtCore
 from panelbutton import PanelButton
 import flowlayout
 import shutil

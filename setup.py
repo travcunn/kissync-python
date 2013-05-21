@@ -1,15 +1,14 @@
 #!/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name='kissync.py',
+    name='main.py',
     version="1.0",
     description='Kissync Desktop Client',
-    requires=[
+    install_requires=[
         'PyYAML',
         'argparse',
-        'beautifulsoup4',
         'coverage',
         'coveralls',
         'docopt',
@@ -21,10 +20,11 @@ setup(
         'sh',
         'smartfile',
         'tendo',
-        'watchdog'
+        'watchdog',
         'wsgiref'
     ],
-    author='Kissync',
+    dependency_links=['https://github.com/kissync/client-python/tarball/master#egg=smartfile'],
+    author='Travis Cunningham and Taylor Brazelton',
     author_email='travcunn@umail.iu.edu',
     license='GPLv2',
 )

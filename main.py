@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from PyQt4 import QtCore, QtGui
 from tendo.singleton import SingleInstance
@@ -37,11 +38,6 @@ class Main(QtGui.QWidget):
         self.setGeometry(200, 200, 870, 600)
         self.setMinimumSize(900, 600)
 
-        #Load font for the title text
-        fontDatabase = QtGui.QFontDatabase()
-        #fontfile = QtCore.QFile(os.path.dirname(os.path.realpath(__file__)) + "resources/Roboto-Light-webfont.ttf")
-        fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-
         palette = QtGui.QPalette()
         #palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
 
@@ -51,7 +47,6 @@ class Main(QtGui.QWidget):
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         topText.setFont(font)
         topText.setPalette(palette)
-        #topText.setStyleSheet("color: #FFFFFF;")
 
         #Title Text Widget
         self.titlewidget = QtGui.QWidget()
@@ -72,30 +67,30 @@ class Main(QtGui.QWidget):
         self.setupwizard = SetupWizard(self)
         self.loginwindow = LoginWindow(self)
         #runs the authentication process that connects self.smartfile with a smartfile client
-        self.tray = SystemTrayIcon(self)  # tray icon
+        #self.tray = SystemTrayIcon(self)  # tray icon
 
         self.authenticator = Authenticator(self)  # login in
 
         #self.filewatcher = watcher.Watcher(self)
 
     def start(self):
-        self.database.generateAuthHash()
-        self.database.indexLocalFiles()
-        self.database.loadRemoteListingFile()
-
-        self.filewatcher = watcher.Watcher(self)
-
-        self.synchronizer = Synchronizer(self)
-        self.synchronizer.start()
-
-        self.rt = RefreshThread(self)
-        self.rt.start()
-
         self.filebrowsergui = FileBrowserGUI(self)
         self.accountwidget = AccountWidget(self)
         self.grid.addWidget(self.titlewidget, 0, 0)
         self.grid.addWidget(self.accountwidget, 0, 1, 1, 1, QtCore.Qt.AlignRight)
         self.grid.addWidget(self.filebrowsergui, 1, 0, 1, 2)
+
+        #self.database.generateAuthHash()
+        #self.database.indexLocalFiles()
+        #self.database.loadRemoteListingFile()
+
+        #self.filewatcher = watcher.Watcher(self)
+
+        #self.synchronizer = Synchronizer(self)
+        #self.synchronizer.start()
+
+        #self.rt = RefreshThread(self)
+        #self.rt.start()
 
     def directorySetup(self):
         if not os.path.exists(self.workingDirectory):
@@ -112,8 +107,66 @@ class Main(QtGui.QWidget):
         os._exit(-1)
 
 
+class SystemTrayIcon(QtGui.QSystemTrayIcon):
+
+    def __init__(self, parent=None):
+        QtGui.QSystemTrayIcon.__init__(self, parent)
+        self.parent = parent
+        menu = QtGui.QMenu(parent)
+        self.setIcon(QtGui.QIcon("icons/menuicon.png"))
+
+        startAction = menu.addAction("Browse Kissync Folder")
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+        self.setContextMenu(menu)
+
+        #startAction = menu.addAction("Settings")
+        #self.connect(startAction, QtCore.SIGNAL("triggered()"), self.test)
+        #self.setContextMenu(menu)
+
+        menu.addSeparator()
+
+        exitAction = menu.addAction("Exit")
+        self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.exit)
+        self.setContextMenu(menu)
+
+        self.loadingIcon1 = QtGui.QIcon("icons/menuicon1.png")
+        self.loadingIcon2 = QtGui.QIcon("icons/menuicon2.png")
+        self.loadingIcon3 = QtGui.QIcon("icons/menuicon3.png")
+        self.loadingIcon4 = QtGui.QIcon("icons/menuicon4.png")
+
+    #def loading(self):
+        #self.setIcon(self.loadingIcon1)
+
+    if sys.platform == 'darwin':
+        def openSyncFolder(self):
+            subprocess.check_call(['open', '--', self.parent.syncDirectory])
+    elif sys.platform == 'linux2':
+        def openSyncFolder(self):
+            subprocess.check_call(['gnome-open', self.parent.syncDirectory])
+    elif sys.platform == 'windows':
+        def openSyncFolder(self):
+            subprocess.check_call(['explorer', self.parent.syncDirectory])
+
+    #def test(self):
+        #print "clicked menu item"
+
+    def exit(self):
+        sys.exit(0)
+
+    def notification(self, title, message):
+        #enum MessageIcon { NoIcon, Information, Warning, Critical }
+        if(self.parent.configuration.get('LocalSettings', 'notifications')):
+            self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)
+
+
 if __name__ == "__main__":
     me = SingleInstance()
     app = QtGui.QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
+
     mainwindow = Main()
+
+    trayIcon = SystemTrayIcon(mainwindow)
+    trayIcon.show()
+
     sys.exit(app.exec_())
