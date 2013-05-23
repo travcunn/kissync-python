@@ -1,6 +1,5 @@
 from smartfile import OAuthClient
 from configuration import Configuration
-from filedatabase import FileDatabase
 
 import os
 import unittest
