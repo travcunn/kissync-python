@@ -6,11 +6,12 @@ from tendo.singleton import SingleInstance
 from authenticator import Authenticator
 from configuration import Configuration
 from filedatabase import FileDatabase
-from loginwindow import LoginWindow
-from setupwizard import SetupWizard
-from style import KissyncStyle
-from tray import SystemTrayIcon
 from watcher import Watcher
+
+from ui.loginwindow import LoginWindow
+from ui.setupwizard import SetupWizard
+from ui.style import KissyncStyle
+from ui.tray import SystemTrayIcon
 
 
 class Main(QtGui.QWidget):

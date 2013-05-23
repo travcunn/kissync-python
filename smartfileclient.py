@@ -52,7 +52,7 @@ class OAuthClient(SmartFileClient):
                                 signature_method=SIGNATURE_PLAINTEXT)
         return super(OAuthClient, self)._do_request(*args, **kwargs)
 
-    def _resource_path(self, relative):
+    def resource_path(self, relative):
         return os.path.join(getattr(sys, '_MEIPASS', os.path.abspath(".")), relative)
 
     def get_request_token(self, callback=None):
@@ -63,7 +63,7 @@ class OAuthClient(SmartFileClient):
                        client_secret=self._client.secret,
                        callback_uri=callback,
                        signature_method=SIGNATURE_PLAINTEXT)
-        cert_path = self._resource_path('cacert.pem')
+        cert_path = self.resource_path('cacert.pem')
         r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=cert_path)
         credentials = urlparse.parse_qs(r.text)
         self.__request = OAuthToken(credentials.get('oauth_token')[0],

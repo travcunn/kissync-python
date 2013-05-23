@@ -35,7 +35,7 @@ class SetupWizard(QtGui.QWidget):
 
         #self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
+        font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
         #self.checkboxOfflineMode.setFont(font)
         self.checkboxNotifications.setFont(font)
         #self.checkboxOfflineMode.toggle()
@@ -77,7 +77,6 @@ class SetupWizard(QtGui.QWidget):
         self.hide()
         self.parent.configuration.save()
         self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
-        self.parent.show()
         self.parent.start()
 
     def centerOnScreen(self):
