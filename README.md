@@ -21,7 +21,7 @@ Using Kissync
 The Kissync client is used to view your files on the Smartfile servers. All file access is done over SSL. 
 
 ####Bottom Bar ( Delete, move, rename, etc... )
-Single click on your file. The panel at the bottom should appear. From there just select the opperation you wish to occur and then follow the on screen instructions.
+Single click on your file. The panel at the bottom should appear. From there just select the operation you wish to occur and then follow the on screen instructions.
 
 If you generated a link to the file to share, then the URL should be automatically placed onto your clipboard so you can just Right Click and select Paste where you need to place the link.
 
