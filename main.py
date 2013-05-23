@@ -10,8 +10,7 @@ from loginwindow import LoginWindow
 from setupwizard import SetupWizard
 from style import KissyncStyle
 from tray import SystemTrayIcon
-
-import watcher
+from watcher import Watcher
 
 
 class Main(QtGui.QWidget):
@@ -19,13 +18,20 @@ class Main(QtGui.QWidget):
         super(Main, self).__init__(parent)
         self.style = KissyncStyle()
 
-        self.syncDirectory = os.path.join(os.path.expanduser("~"), "Kissync")
-        self.workingDirectory = os.path.join(os.path.expanduser("~"), ".kissync")
+        self.syncDir = os.path.join(os.path.expanduser("~"), "Kissync")
+        self.settingsDir = os.path.join(os.path.expanduser("~"), ".kissync")
         self.settingsFile = os.path.join(os.path.expanduser("~"), ".kissync", "configuration.cfg")
 
-        self.directorySetup()
+        self.directorySetup()  # create the directories that will be needed
 
-        self.configuration = Configuration(self.settingsFile)
+        self.configuration = Configuration(self.settingsFile)  # initialize the configuration
+
+        self.smartfile = None  # this will be initiated later in Authenticator()
+        self.database = FileDatabase(self)  # initiate local and remote file database
+        self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
+        self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
+        self.tray = SystemTrayIcon(self)  # initiate the system tray
+        self.tray.show()
 
         #################MAIN WINDOW GUI#####################
         self.setWindowTitle('Keep It Simple Sync')
@@ -33,15 +39,9 @@ class Main(QtGui.QWidget):
         self.setGeometry(200, 200, 870, 600)
         self.setMinimumSize(900, 600)
 
-        palette = QtGui.QPalette()
-        #palette.setColor(QtGui.QPalette.Foreground,QtGui.QColor("#FFFFFF"))
-
-        #Title Text Font
         topText = QtGui.QLabel('Kissync Enterprise')
-        #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         topText.setFont(font)
-        topText.setPalette(palette)
 
         #Title Text Widget
         self.titlewidget = QtGui.QWidget()
@@ -54,37 +54,20 @@ class Main(QtGui.QWidget):
         self.grid.setContentsMargins(0, 10, 10, 0)
         self.setLayout(self.grid)
 
-        #connects directly to the smartfile api, but relies upon self.authenticator	to create
-        self.smartfile = None  # we don't want to init yet, so we can handle errors later on login
-        #login screen
-        self.database = FileDatabase(self)
-        #setup window for initial user configuration
-        self.setupwizard = SetupWizard(self)
-        self.loginwindow = LoginWindow(self)
-        #runs the authentication process that connects self.smartfile with a smartfile client
-        #self.tray = SystemTrayIcon(self)  # tray icon
-
-        self.tray = SystemTrayIcon(self)
-        self.tray.show()
-
-        self.authenticator = Authenticator(self)  # login in
+        self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
 
     def start(self):
-        self.filewatcher = watcher.Watcher(self)
-        self.filewatcher.start()
-
-        #self.synchronizer = Synchronizer(self)
-        #self.synchronizer.start()
-
-        #self.rt = RefreshThread(self)
-        #self.rt.start()
+        '''Called if the authentication is successful'''
+        self.localFileWatcher = Watcher(self)
+        self.localFileWatcher.start()
 
     def directorySetup(self):
-        if not os.path.exists(self.workingDirectory):
-            os.makedirs(self.workingDirectory)
+        '''Checks for sync and settings folder and creates if needed'''
+        if not os.path.exists(self.settingsDir):
+            os.makedirs(self.settingsDir)
 
-        if not os.path.exists(self.syncDirectory):
-            os.makedirs(self.syncDirectory)
+        if not os.path.exists(self.syncDir):
+            os.makedirs(self.syncDir)
 
     def closeEvent(self, event):
         event.ignore()

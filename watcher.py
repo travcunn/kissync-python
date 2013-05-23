@@ -1,8 +1,5 @@
-import logging
-import os
 import threading
 import time
-import string
 from ftplib import FTP
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
@@ -82,7 +79,7 @@ class EventHandler(FileSystemEventHandler):
                     self.parent.database.generateRemoteListing()
         ##print event.event_type
         ##print event.src_path
-    
+
     def localToServerPath(self, path):
         pathOnServer = path.replace(self.syncdirPath, '')
         if(pathOnServer.startswith("/")):
