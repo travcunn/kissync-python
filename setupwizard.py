@@ -67,7 +67,7 @@ class SetupWizard(QtGui.QWidget):
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
 
-        directory = os.path.expanduser("~") + "/Kissync"
+        directory = os.path.join(os.path.expanduser("~"), "Kissync")
         if not os.path.exists(directory):
             os.makedirs(directory)
 

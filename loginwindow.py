@@ -12,6 +12,7 @@ class LoginWindow(QtGui.QWidget):
         self.setWindowTitle('Login to Kissync')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
+        self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
 
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
