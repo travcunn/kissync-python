@@ -13,17 +13,6 @@ class LoginTestCase(unittest.TestCase):
         api.get_authorization_url()
 
 
-class FileDatabaseTest(unittest.TestCase):
-    def setUp(self):
-        self.database = FileDatabase(self)
-
-    def test_database_indexlocalfiles(self):
-        self.assertTrue(self.database.indexLocalFiles())
-
-    def test_database_loadremotelisting(self):
-        self.database.loadRemoteListingFile()
-
-
 class ConfigurationTest(unittest.TestCase):
     def test_initial_setup(self):
         if not os.path.exists(os.path.join(os.path.expanduser("~"), ".kissync")):
