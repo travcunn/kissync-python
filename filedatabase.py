@@ -81,7 +81,6 @@ class Synchronizer(object):
         self.downloadQueue.join()
         self.uploadQueue.join()
 
-
         self.parent.database.loadRemoteListingFile()
         self.parent.database.generateRemoteListing()
 

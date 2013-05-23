@@ -82,7 +82,7 @@ class EventHandler(FileSystemEventHandler):
                     self.parent.database.generateRemoteListing()
         ##print event.event_type
         ##print event.src_path
-    
+
     def localToServerPath(self, path):
         pathOnServer = path.replace(self.syncdirPath, '')
         if(pathOnServer.startswith("/")):
