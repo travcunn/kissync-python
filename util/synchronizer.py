@@ -15,7 +15,7 @@ class Synchronizer(object):
         self.checkChangesQueue = Queue.Queue()
 
     def start(self):
-        self.dictDiffer = DictDiffer(self.parent.database.remoteFilesDictionary, self.parent.database.localFilesDictionary)
+        self.dictDiffer = DictDiffer(self.parent.database.localFilesDictionary, self.parent.database.remoteFilesDictionary)
 
         for i in self.dictDiffer.added():
             self.downloadQueue.put(i)

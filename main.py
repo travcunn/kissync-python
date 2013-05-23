@@ -5,8 +5,10 @@ from tendo.singleton import SingleInstance
 
 from authenticator import Authenticator
 from configuration import Configuration
-from filedatabase import FileDatabase
-from watcher import Watcher
+
+from util.filedatabase import FileDatabase
+from util.synchronizer import Synchronizer
+from util.watcher import Watcher
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
@@ -29,6 +31,7 @@ class Main(QtGui.QWidget):
 
         self.smartfile = None  # this will be initiated later in Authenticator()
         self.database = FileDatabase(self)  # initiate local and remote file database
+        self.localFileWatcher = Watcher(self)  # initiate the file system watcher
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
         self.tray = SystemTrayIcon(self)  # initiate the system tray
@@ -59,7 +62,6 @@ class Main(QtGui.QWidget):
 
     def start(self):
         '''Called if the authentication is successful'''
-        self.localFileWatcher = Watcher(self)
         self.localFileWatcher.start()
 
     def directorySetup(self):
