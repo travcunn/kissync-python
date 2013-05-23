@@ -3,3 +3,5 @@
 configuration.cfg
 *.settings
 *~
+.project
+.pydevproject
