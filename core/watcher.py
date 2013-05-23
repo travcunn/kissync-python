@@ -29,8 +29,8 @@ class EventHandler(FileSystemEventHandler):
         self.syncdirPath = self.parent.configuration.get('LocalSettings', 'sync-dir')
 
     def on_moved(self, event):
-        serverPath = self.localToServerPath(event.src_path)
-        serverPathNew = self.localToServerPath(event.src_path)
+        #serverPath = self.localToServerPath(event.src_path)
+        #serverPathNew = self.localToServerPath(event.src_path)
         try:
             #TODO: add file to the queue for smartifle operations
             #self.parent.smartfile.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
@@ -39,7 +39,7 @@ class EventHandler(FileSystemEventHandler):
             raise
 
     def on_created(self, event):
-        serverPath = self.localToServerPath(event.src_path)
+        #serverPath = self.localToServerPath(event.src_path)
         if not (event.is_directory):
             #TODO: add file to the upload queue here
             pass
@@ -52,7 +52,7 @@ class EventHandler(FileSystemEventHandler):
                 raise
 
     def on_deleted(self, event):
-        serverPath = self.localToServerPath(event.src_path)
+        #serverPath = self.localToServerPath(event.src_path)
         try:
             #TODO: add file to the queue for smartifle operations
             #self.parent.smartfile.post('/path/oper/remove', path=event.src_path)
@@ -61,7 +61,7 @@ class EventHandler(FileSystemEventHandler):
             pass
 
     def on_modified(self, event):
-        serverPath = self.localToServerPath(event.src_path)
+        #serverPath = self.localToServerPath(event.src_path)
         if not (event.is_directory):
             #TODO: add file to the synchronize queue here
             pass

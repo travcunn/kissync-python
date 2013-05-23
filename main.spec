@@ -1,6 +1,5 @@
 # -*- mode: python -*-
 a = Analysis(['main.py'],
-             pathex=['/home/travis'],
              hiddenimports=[],
              hookspath=None)
 a.datas.append(('cacert.pem', 'cacert.pem', 'DATA'))

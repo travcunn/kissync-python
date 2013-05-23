@@ -2,10 +2,10 @@ from PyQt4 import QtGui, QtCore
 
 
 #this is imcomplete
-class ManageUserPermissions(QtGui.QWidget):
+class PermissionsWindow(QtGui.QWidget):
 
     def __init__(self, parent=None):
-        super(ManageUserPermissions, self).__init__()
+        super(PermissionsWindow, self).__init__()
         self.parent = parent
 
         self.path = None
@@ -44,7 +44,7 @@ class ManageUserPermissions(QtGui.QWidget):
         #Combo Box for User Selection.
         self.comboUser = QtGui.QComboBox(self)
         self.populateComboBox()
-        self.comboUser.activated[str].connect(self.onActivated)
+        #self.comboUser.activated[str].connect(self.onActivated)
 
         #self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
         self.cbWrite = QtGui.QCheckBox('Write', self)
@@ -81,77 +81,6 @@ class ManageUserPermissions(QtGui.QWidget):
         #set the layout to grid layout
         self.setLayout(grid)
         self.centerOnScreen()
-
-    def onActivated(self, text):
-        self.selectedUser = str(text)
-
-        if (self.cbView.isChecked()):
-            self.cbView.toggle()
-        if (self.cbRead.isChecked()):
-            self.cbRead.toggle()
-        if (self.cbDelete.isChecked()):
-            self.cbDelete.toggle()
-        if (self.cbWrite.isChecked()):
-            self.cbWrite.toggle()
-
-        tree = self.parent.parent.parent.smartfile.get('/access/path/' + self.path)
-        for i in tree['users']:
-            if (i['user'] == text):
-                if(i['acl']['list']):
-                    self.cbView.toggle()
-                else:
-                    pass
-
-                if(i['acl']['read']):
-                    self.cbRead.toggle()
-                else:
-                    pass
-
-                if(i['acl']['remove']):
-                    self.cbDelete.toggle()
-                else:
-                    pass
-
-                if(i['acl']['write']):
-                    self.cbWrite.toggle()
-                else:
-                    pass
-
-    def populateComboBox(self):
-        tree = self.parent.parent.parent.smartfile.get('/user', '/')
-        for i in tree:
-            #print i['username']
-            self.comboUser.addItem(i['username'])
-
-    def savePremissions(self):
-        #Save premissions based upon what is selected.
-        if (self.cbView.isChecked()):
-            Viewval = True
-        else:
-            Viewval = False
-        if (self.cbRead.isChecked()):
-            self.cbRead.toggle()
-            readval = True
-        else:
-            readval = False
-        if (self.cbDelete.isChecked()):
-            self.cbDelete.toggle()
-            Deleteval = True
-        else:
-            Deleteval = False
-        if (self.cbWrite.isChecked()):
-            self.cbWrite.toggle()
-            Writeval = True
-        else:
-            Writeval = False
-
-        print self.selectedUser
-        try:
-            tree = self.parent.parent.parent.smartfile.post('/access/user/', user=(self.selectedUser.encode('utf-8')), path=(self.path), read=(readval), list=(Viewval), remove=(Deleteval), write=(Writeval))
-        except:
-            pass
-        #Close Dialog...
-        self.close()
 
     def centerOnScreen(self):
         #Center window on screen!
