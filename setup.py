@@ -23,7 +23,6 @@ setup(
         'watchdog',
         'wsgiref'
     ],
-    dependency_links=['https://github.com/kissync/client-python/tarball/master#egg=smartfile'],
     author='Travis Cunningham and Taylor Brazelton',
     author_email='travcunn@umail.iu.edu',
     license='GPLv2',

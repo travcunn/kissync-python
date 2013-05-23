@@ -5,6 +5,7 @@ pathtools
 python-librsync
 requests
 requests-oauthlib
+smartfile
 tendo
 watchdog
 wsgiref

@@ -1,6 +1,5 @@
 import threading
 import time
-from ftplib import FTP
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -9,7 +8,6 @@ class Watcher(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.database = self.parent.database
 
     def run(self):
         self.path = self.parent.configuration.get('LocalSettings', 'sync-dir')
@@ -31,54 +29,42 @@ class EventHandler(FileSystemEventHandler):
         self.syncdirPath = self.parent.configuration.get('LocalSettings', 'sync-dir')
 
     def on_moved(self, event):
-        print event.src_path
+        serverPath = self.localToServerPath(event.src_path)
+        serverPathNew = self.localToServerPath(event.src_path)
         try:
-            self.parent.smartfile.post('/path/oper/move/', src=(event.src_path), dst=(event.dest_path))
+            #TODO: add file to the queue for smartifle operations
+            #self.parent.smartfile.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+            pass
         except:
             raise
 
     def on_created(self, event):
         serverPath = self.localToServerPath(event.src_path)
         if not (event.is_directory):
-            pathOnServer = event.src_path.replace(self.syncdirPath, '')
             #TODO: add file to the upload queue here
+            pass
         else:
             try:
-                self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
+                #TODO: add file to the queue for smartifle operations
+                #self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
+                pass
             except:
                 raise
 
     def on_deleted(self, event):
-        print event.src_path
+        serverPath = self.localToServerPath(event.src_path)
         try:
-            thepath = event.src_path
-            self.parent.smartfile.post('/path/oper/remove', path=thepath)
+            #TODO: add file to the queue for smartifle operations
+            #self.parent.smartfile.post('/path/oper/remove', path=event.src_path)
+            pass
         except:
             pass
 
     def on_modified(self, event):
-        print event.src_path
+        serverPath = self.localToServerPath(event.src_path)
         if not (event.is_directory):
-            ##print "Could not convert into utf-8, so make FTP connection"
-            tree = self.parent.smartfile.get('/whoami', '/')
-            if 'site' in tree:
-                self.sitename = tree['site']['name'].encode("utf-8")
-                ##print self.sitename
-
-                username = self.parent.configuration.get('Login', 'username')
-                password = self.parent.configuration.get('Login', 'password')
-
-                ftpaddress = self.sitename + ".smartfile.com"
-                ftp = FTP(ftpaddress, username, password)
-                pathOnServer = event.src_path.replace(self.syncdirPath, '')
-                try:
-                    ftp.storbinary('STOR ' + pathOnServer, open(event.src_path, 'rb'))
-                except:
-                    pass
-                else:
-                    self.parent.database.generateRemoteListing()
-        ##print event.event_type
-        ##print event.src_path
+            #TODO: add file to the synchronize queue here
+            pass
 
     def localToServerPath(self, path):
         pathOnServer = path.replace(self.syncdirPath, '')

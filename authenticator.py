@@ -1,5 +1,5 @@
 from PyQt4 import QtCore
-from smartfile import OAuthClient
+from smartfileclient import OAuthClient
 
 
 class Authenticator(object):
@@ -16,6 +16,7 @@ class Authenticator(object):
                 self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq", configToken, configVerifier)
                 self.parent.smartfile.get('/path/info')
             except:
+                raise
                 self.showLoginWindow()
             else:
                 self.success()
@@ -29,8 +30,8 @@ class Authenticator(object):
 
     def showLoginWindow(self):
         self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
-        authUrl = self.parent.smartfile.get_authorization_url()
 
+        authUrl = self.parent.smartfile.get_authorization_url()
         self.parent.loginwindow.htmlView.load(QtCore.QUrl(authUrl))
         self.parent.loginwindow.show()
 
