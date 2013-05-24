@@ -14,7 +14,7 @@ class Authenticator(object):
         if(configToken) and (configVerifier) is not None:
             try:
                 self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq", configToken, configVerifier)
-                self.parent.smartfile.get('/path/info')
+                self.parent.smartfile.get('/whoami')
             except:
                 raise
                 self.showLoginWindow()

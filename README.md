@@ -17,7 +17,7 @@ Running Kissync
 Links
 =============
 
-[Kissync](http://kissync.com)
+[Kissync](http://www.kissync.com)
 
 [GPL License](https://github.com/kissync/kissync-python/blob/master/LICENSE.GPL)
 

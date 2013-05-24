@@ -1,5 +1,5 @@
-from smartfile import OAuthClient
-from configuration import Configuration
+from core.smartfileclient import OAuthClient
+from core.configuration import Configuration
 
 import os
 import unittest

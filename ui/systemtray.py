@@ -4,7 +4,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 
 
-class SystemTrayIcon(QtGui.QSystemTrayIcon):
+class SystemTray(QtGui.QSystemTrayIcon):
 
     def __init__(self, parent=None):
         QtGui.QSystemTrayIcon.__init__(self, parent)
@@ -22,6 +22,8 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         exitAction = menu.addAction("Exit")
         self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.parent.exit)
         self.setContextMenu(menu)
+
+        self.show()
 
         #TODO: Create a method that cycles through loading images for the system tray on sync
         #self.loadingIcon1 = QtGui.QIcon("icons/menuicon1.png")

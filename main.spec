@@ -1,7 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['main.py'],
-             hiddenimports=[],
-             hookspath=None)
+a = Analysis(['main.py'], hiddenimports=[], hookspath=None)
 a.datas.append(('cacert.pem', 'cacert.pem', 'DATA'))
 pyz = PYZ(a.pure)
 exe = EXE(pyz,

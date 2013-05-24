@@ -3,17 +3,16 @@ import sys
 from PyQt4 import QtGui
 from tendo.singleton import SingleInstance
 
-from authenticator import Authenticator
-from configuration import Configuration
+from core.auth import Authenticator
+from core.configuration import Configuration
 
-from core.filedatabase import FileDatabase
-from core.synchronizer import Synchronizer
-from core.watcher import Watcher
+from sync.synchronizer import Synchronizer
+from sync.watcher import Watcher
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
 from ui.style import KissyncStyle
-from ui.tray import SystemTrayIcon
+from ui.systemtray import SystemTray
 
 
 class Main(QtGui.QWidget):
@@ -30,13 +29,13 @@ class Main(QtGui.QWidget):
         self.configuration = Configuration(self.settingsFile)  # initialize the configuration
 
         self.smartfile = None  # this will be initiated later in Authenticator()
-        self.database = FileDatabase(self)  # initiate local and remote file database
-        self.localFileWatcher = Watcher(self)  # initiate the file system watcher
         self.synchronizer = Synchronizer(self)  # initiate the synchronizer
+        self.localFileWatcher = Watcher(self)  # initiate the file system watcher
+
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
-        self.tray = SystemTrayIcon(self)  # initiate the system tray
-        self.tray.show()
+        self.tray = SystemTray(self)  # initiate the system tray
+        self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
 
         #################MAIN WINDOW GUI#####################
         self.setWindowTitle('Keep It Simple Sync')
@@ -59,11 +58,10 @@ class Main(QtGui.QWidget):
         self.grid.setContentsMargins(0, 10, 10, 0)
         self.setLayout(self.grid)
 
-        self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
-
     def start(self):
         '''Called if the authentication is successful'''
         self.localFileWatcher.start()
+        self.synchronizer.start()
 
     def directorySetup(self):
         '''Checks for sync and settings folder and creates if needed'''
