@@ -16,10 +16,24 @@ class Synchronizer(object):
     def start(self):
         self.localFilesList()
         self.remoteFilesList()
+        print "Local files:"
         for key, value in self.localFiles.iteritems():
             print key
+        print "Remote files:"
         for key, value in self.remoteFiles.iteritems():
             print key
+
+        self.compareListings()
+
+    def compareListings(self):
+        print "Comparison:"
+        for key, value in self.localFiles.iteritems():
+            if not key in self.remoteFiles.iterkeys():
+                print "Item [%s] not found in remote" % key
+            else:
+                pass
+                #remoteItem = self.remoteFiles.get(key)
+                #localItem = self.localFiles.get(key)
 
     def localFilesList(self, localPath=None):
         '''
@@ -33,7 +47,8 @@ class Synchronizer(object):
                 fileHash = self._getFileHash(discoveredFilePath)
                 modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
                 size = os.path.getsize(discoveredFilePath)
-                self.localFiles[discoveredFilePath.replace(localPath, '')] = modifiedTime, fileHash, size
+                isDir = os.path.isdir(discoveredFilePath)
+                self.localFiles[discoveredFilePath.replace(localPath, '')] = modifiedTime, fileHash, isDir, size
 
     def remoteFilesList(self, remotePath=None):
         '''

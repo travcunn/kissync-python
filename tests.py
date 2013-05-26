@@ -1,4 +1,3 @@
-from core.smartfileclient import OAuthClient
 from core.configuration import Configuration
 
 import os
