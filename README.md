@@ -2,7 +2,7 @@ Kissync (SmartFile Client)
 ==========================
 [![Build Status](https://travis-ci.org/kissync/kissync-python.png?branch=master)](https://travis-ci.org/kissync/kissync-python)
 
-A file synchronization and browsing tool for SmartFile in Python
+A cross platfom file synchronization tool for SmartFile
 
 
 Running Kissync
