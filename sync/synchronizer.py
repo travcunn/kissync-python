@@ -43,11 +43,10 @@ class Synchronizer(object):
             remotePath = "/"
         apiPath = '/path/info%s' % remotePath
         dirListing = self.parent.smartfile.get(apiPath, children=True)
-        for i in dirListing['children']:
-            if(i['isdir']):
-                self.remoteFilesList(i['path'])
-            else:
+        if "children" in dirListing:
+            for i in dirListing['children']:
                 path = i['path'].encode("utf-8")
+                isDir = i['isdir']
                 size = int(i['size'])
                 permissions = i['acl']
                 if 'kissyncmodified' in i['attributes']:
@@ -58,7 +57,9 @@ class Synchronizer(object):
                     fileHash = i['attributes']['md5'].encode("utf-8")
                 else:
                     fileHash = None
-                self.remoteFiles[path] = modifiedTime, fileHash, size, permissions
+                self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
+                if(i['isdir']):
+                    self.remoteFilesList(i['path'])
 
     def _getFileHash(self, filepath):
         '''
