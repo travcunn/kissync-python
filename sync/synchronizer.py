@@ -16,12 +16,14 @@ class Synchronizer(object):
     def start(self):
         self.localFilesList()
         self.remoteFilesList()
-        print "Local files:"
+        #print "Local files:"
         for key, value in self.localFiles.iteritems():
-            print key
-        print "Remote files:"
+            pass
+            #print key
+        #print "Remote files:"
         for key, value in self.remoteFiles.iteritems():
-            print key
+            pass
+            #print key
 
         self.compareListings()
 
@@ -29,11 +31,35 @@ class Synchronizer(object):
         print "Comparison:"
         for key, value in self.localFiles.iteritems():
             if not key in self.remoteFiles.iterkeys():
-                print "Item [%s] not found in remote" % key
+                print "Item not found in remote [%s]" % key
             else:
-                pass
-                #remoteItem = self.remoteFiles.get(key)
-                #localItem = self.localFiles.get(key)
+                print "Item found in remote [%s]" % key
+                remoteItem = self.remoteFiles.get(key)
+                localItem = self.localFiles.get(key)
+                self.compareFile(remoteItem, localItem)
+
+        for key, value in self.remoteFiles.iteritems():
+            if not key in self.localFiles.iterkeys():
+                print "Item not found in local [%s]" % key
+            else:
+                print "Item found in local [%s]" % key
+                remoteItem = self.remoteFiles.get(key)
+                localItem = self.localFiles.get(key)
+                self.compareFile(remoteItem, localItem)
+    
+    def compareFile(self, remoteItem, localItem):
+        remoteHash = remoteItem[1]
+        localHash = localItem[1]
+        badChars = ':- '
+        remoteTime = int(str(remoteItem[0]).translate(None, ':- '))
+        localTime = int(str(localItem[0]).translate(None, ':- '))
+        if remoteHash is not localHash:
+            if remoteTime > localTime:
+                return FileStatus.newerRemote
+            elif remoteItem.date() > localItem.date():
+                return FileStatus.newerLocal
+            else:
+                return FileStatus.doNothing
 
     def localFilesList(self, localPath=None):
         '''
@@ -46,7 +72,7 @@ class Synchronizer(object):
                 discoveredFilePath = os.path.join(paths, item)
                 fileHash = self._getFileHash(discoveredFilePath)
                 modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
-                size = os.path.getsize(discoveredFilePath)
+                size = int(os.path.getsize(discoveredFilePath))
                 isDir = os.path.isdir(discoveredFilePath)
                 self.localFiles[discoveredFilePath.replace(localPath, '')] = modifiedTime, fileHash, isDir, size
 
@@ -64,8 +90,8 @@ class Synchronizer(object):
                 isDir = i['isdir']
                 size = int(i['size'])
                 permissions = i['acl']
-                if 'kissyncmodified' in i['attributes']:
-                    modifiedTime = i['attributes']['kissyncmodified'].encode("utf-8")
+                if 'modified' in i['attributes']:
+                    modifiedTime = i['attributes']['modified'].encode("utf-8").replace('T', ' ')
                 else:
                     modifiedTime = None
                 if 'md5' in i['attributes']:
@@ -88,3 +114,11 @@ class Synchronizer(object):
                 break
             md5.update(currentLine)
         return md5.hexdigest()
+
+
+class FileStatus:
+    newerRemote = 1
+    newerLocal = 2
+    notOnRemote = 3
+    notOnLocal = 4
+    doNothing = 5
