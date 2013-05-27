@@ -51,8 +51,8 @@ class Synchronizer(object):
         remoteHash = remoteItem[1]
         localHash = localItem[1]
         badChars = ':- '
-        remoteTime = int(str(remoteItem[0]).translate(None, ':- '))
-        localTime = int(str(localItem[0]).translate(None, ':- '))
+        remoteTime = int(str(remoteItem[0]).translate(None, badChars))
+        localTime = int(str(localItem[0]).translate(None, badChars))
         if remoteHash is not localHash:
             if remoteTime > localTime:
                 return FileStatus.newerRemote
