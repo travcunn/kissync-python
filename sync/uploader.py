@@ -19,6 +19,8 @@ class Uploader(threading.Thread):
         serverPath = path
         if path.startswith("/"):
             path = path.replace("/", "", 1)
+        elif path.startswith("\\"):
+            path = path.replace("\\", "", 1)
         absolutePath = os.path.join(self.syncDir, path)
         if not (os.path.isdir(absolutePath)):
             print "Uploading to %s from %s" % (path, absolutePath)

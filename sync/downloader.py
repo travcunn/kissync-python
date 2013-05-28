@@ -21,6 +21,8 @@ class Downloader(threading.Thread):
         serverPath = path
         if path.startswith("/"):
             path = path.replace("/", "", 1)
+        elif path.startswith("\\"):
+            path = path.replace("\\", "", 1)
         absolutePath = os.path.join(self.syncDir, path)
         self.checkDirsToCreate(os.path.dirname(os.path.realpath(absolutePath)))
         try:
