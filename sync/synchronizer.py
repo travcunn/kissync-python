@@ -41,7 +41,7 @@ class Synchronizer(threading.Thread):
         self.downloadQueue.join()
 
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
-        self.localFileWatcher = Watcher(self)
+        self.localFileWatcher = Watcher(self, self.parent.syncDir)
         self.localFileWatcher.start()
 
     def compareListing(self):
@@ -78,13 +78,15 @@ class Synchronizer(threading.Thread):
     def compareFile(self, remoteItem, localItem):
         remoteHash = remoteItem[1]
         localHash = localItem[1]
-        badChars = ':- '
+        badChars = ':-. '
+        if remoteItem[0] is None:
+            return FileStatus.newerRemote
         remoteTime = int(str(remoteItem[0]).translate(None, badChars))
         localTime = int(str(localItem[0]).translate(None, badChars))
         if remoteHash is not localHash:
             if remoteTime > localTime:
                 return FileStatus.newerRemote
-            elif remoteItem.date() > localItem.date():
+            elif remoteTime < localTime:
                 return FileStatus.newerLocal
             else:
                 return FileStatus.doNothing
@@ -114,21 +116,27 @@ class Synchronizer(threading.Thread):
         dirListing = self.parent.smartfile.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
-                path = i['path'].encode("utf-8")
-                isDir = i['isdir']
-                size = int(i['size'])
-                permissions = i['acl']
-                if 'modified' in i['attributes']:
-                    modifiedTime = i['attributes']['modified'].encode("utf-8").replace('T', ' ')
-                else:
-                    modifiedTime = None
-                if 'md5' in i['attributes']:
-                    fileHash = i['attributes']['md5'].encode("utf-8")
-                else:
-                    fileHash = None
-                self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
                 if(i['isdir']):
+                    path = i['path'].encode("utf-8")
+                    if path.startswith("/"):
+                        path = path.replace("/", "", 1)
+                    absolutePath = os.path.join(self.parent.syncDir, path)
+                    self.downloader.checkDirsToCreate(absolutePath)
                     self.remoteFilesList(i['path'])
+                else:
+                    path = i['path'].encode("utf-8")
+                    isDir = i['isdir']
+                    size = int(i['size'])
+                    permissions = i['acl']
+                    if 'modified' in i['attributes']:
+                        modifiedTime = i['attributes']['modified'].encode("utf-8").replace('T', ' ')
+                    else:
+                        modifiedTime = None
+                    if 'md5' in i['attributes']:
+                        fileHash = i['attributes']['md5'].encode("utf-8")
+                    else:
+                        fileHash = None
+                    self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
 
     def _getFileHash(self, filepath):
         '''

@@ -21,7 +21,8 @@ class Uploader(threading.Thread):
             path = path.replace("/", "", 1)
         absolutePath = os.path.join(self.syncDir, path)
         if not (os.path.isdir(absolutePath)):
-            self.smartfile.post("/path/data/", path, file=file(absolutePath, 'rb'))
+            print "Uploading to %s from %s" % (path, absolutePath)
+            self.smartfile.post("/path/data/", file=file(absolutePath, 'rb'))
         else:
             self.smartfile.post('/path/oper/mkdir/', serverPath)
             self.uploadFile(path)

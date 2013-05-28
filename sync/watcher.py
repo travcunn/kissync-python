@@ -5,15 +5,15 @@ from watchdog.events import FileSystemEventHandler
 
 
 class Watcher(threading.Thread):
-    def __init__(self, parent=None):
+    def __init__(self, parent, syncDir):
         threading.Thread.__init__(self)
         self.parent = parent
+        self.syncDir = syncDir
 
     def run(self):
-        self.path = self.parent.configuration.get('LocalSettings', 'sync-dir')
-        self.event_handler = EventHandler(self.parent)
+        self.event_handler = EventHandler(self)
         self.observer = Observer()
-        self.observer.schedule(self.event_handler, self.path, recursive=True)
+        self.observer.schedule(self.event_handler, self.syncDir, recursive=True)
         self.observer.start()
         try:
             while True:
@@ -26,7 +26,7 @@ class Watcher(threading.Thread):
 class EventHandler(FileSystemEventHandler):
     def __init__(self, parent=None):
         self.parent = parent
-        self.syncdirPath = self.parent.configuration.get('LocalSettings', 'sync-dir')
+        self.syncDir = self.parent.syncDir
 
     def on_moved(self, event):
         #serverPath = self.localToServerPath(event.src_path)
@@ -67,7 +67,7 @@ class EventHandler(FileSystemEventHandler):
             pass
 
     def localToServerPath(self, path):
-        pathOnServer = path.replace(self.syncdirPath, '')
+        pathOnServer = path.replace(self.syncDir, '')
         if(pathOnServer.startswith("/")):
             pathOnServer = pathOnServer.strip("/")
         elif(pathOnServer.startswith("\\")):
