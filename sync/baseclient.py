@@ -9,7 +9,7 @@ class BaseClient(object):
     def basePath(self, path):
         '''
         Returns the path of files in the sync folder
-        without the leading system folder separation 
+        without the leading system folder separation
         '''
         if path.startswith("/"):
             path = path.replace("/", "", 1)
