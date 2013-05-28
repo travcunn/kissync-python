@@ -7,7 +7,6 @@ from core.auth import Authenticator
 from core.configuration import Configuration
 
 from sync.synchronizer import Synchronizer
-from sync.watcher import Watcher
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
@@ -29,8 +28,6 @@ class Main(QtGui.QWidget):
         self.configuration = Configuration(self.settingsFile)  # initialize the configuration
 
         self.smartfile = None  # this will be initiated later in Authenticator()
-        self.synchronizer = Synchronizer(self)  # initiate the synchronizer
-        self.localFileWatcher = Watcher(self)  # initiate the file system watcher
 
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
@@ -60,7 +57,7 @@ class Main(QtGui.QWidget):
 
     def start(self):
         '''Called if the authentication is successful'''
-        self.localFileWatcher.start()
+        self.synchronizer = Synchronizer(self)  # initiate the synchronizer
         self.synchronizer.start()
 
     def directorySetup(self):

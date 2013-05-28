@@ -4,11 +4,12 @@ import shutil
 import threading
 
 
-class Download(threading.Thread):
-    def __init__(self, parent, queue):
+class Downloader(threading.Thread):
+    def __init__(self, queue, smartfile, syncDir):
         threading.Thread.__init__(self)
-        self.parent = parent
         self.queue = queue
+        self.smartfile = smartfile
+        self.syncDir = syncDir
 
     def run(self):
         while True:
@@ -16,11 +17,14 @@ class Download(threading.Thread):
             self.downloadFile(path)
             self.queue.task_done()
 
-    def downloadFile(self, filepath):
-        absolutePath = os.path.join(self.parent.parent.configuration.get('LocalSettings', 'sync-dir'), filepath)
-        self.checkDirsToCreate(absolutePath)
+    def downloadFile(self, path):
+        serverPath = path
+        if path.startswith("/"):
+            path = path.replace("/", "", 1)
+        absolutePath = os.path.join(self.syncDir, path)
+        self.checkDirsToCreate(os.path.dirname(os.path.realpath(absolutePath)))
         try:
-            f = self.parent.parent.smartfile.get('/path/data/', filepath)
+            f = self.smartfile.get('/path/data/', serverPath)
             with file(absolutePath, 'wb') as o:
                 shutil.copyfileobj(f, o)
         except:

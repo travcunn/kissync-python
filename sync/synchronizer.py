@@ -1,52 +1,80 @@
 import datetime
 import hashlib
 import os
+import threading
 from Queue import Queue
 
+from downloader import Downloader
+from uploader import Uploader
+from watcher import Watcher
 
-class Synchronizer(object):
+
+class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
-        object.__init__(self)
+        threading.Thread.__init__(self)
         self.parent = parent
 
         self.localFiles = {}
         self.remoteFiles = {}
-        self.taskQueue = Queue()
 
-    def start(self):
+        self.uploadQueue = Queue()
+        self.downloadQueue = Queue()
+        self.syncUpQueue = Queue()
+        self.syncDownQueue = Queue()
+
+        self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
+        self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
+
+        self.setDaemon(True)
+
+    def run(self):
+        #Initially, get the local and remote file listing
         self.localFilesList()
         self.remoteFilesList()
-        #print "Local files:"
-        for key, value in self.localFiles.iteritems():
-            pass
-            #print key
-        #print "Remote files:"
-        for key, value in self.remoteFiles.iteritems():
-            pass
-            #print key
+        #Now compare the lists and populate task queues for differences
+        self.compareListing()
 
-        self.compareListings()
+        self.uploader.start()
+        self.downloader.start()
+        #Wait for the uploading and downloading tasks to finish
+        self.uploadQueue.join()
+        self.downloadQueue.join()
 
-    def compareListings(self):
-        print "Comparison:"
-        for key, value in self.localFiles.iteritems():
-            if not key in self.remoteFiles.iterkeys():
-                print "Item not found in remote [%s]" % key
+        #after uploading, downloading, and synchronizing are finished, start the watcher thread
+        self.localFileWatcher = Watcher(self)
+        self.localFileWatcher.start()
+
+    def compareListing(self):
+        for file, properties in self.localFiles.iteritems():
+            #If local file is not in the remote files dict, add upload task
+            if not file in self.remoteFiles.iterkeys():
+                self.uploadQueue.put(file)
             else:
-                print "Item found in remote [%s]" % key
-                remoteItem = self.remoteFiles.get(key)
-                localItem = self.localFiles.get(key)
-                self.compareFile(remoteItem, localItem)
+                #Otherwise, determine which way we should synchronize the file
+                #...and add a task accordingly...
+                remoteItem = self.remoteFiles.get(file)
+                localItem = properties
+                status = self.compareFile(remoteItem, localItem)
+                if status is FileStatus.newerRemote:
+                    self.syncDownQueue.put(file)
+                elif status is FileStatus.newerLocal:
+                    self.syncUpQueue.put(file)
 
-        for key, value in self.remoteFiles.iteritems():
-            if not key in self.localFiles.iterkeys():
-                print "Item not found in local [%s]" % key
+        for file, properties in self.remoteFiles.iteritems():
+             #If remote file is not in the local files dict, add download task
+            if not file in self.localFiles.iterkeys():
+                self.downloadQueue.put(file)
             else:
-                print "Item found in local [%s]" % key
-                remoteItem = self.remoteFiles.get(key)
-                localItem = self.localFiles.get(key)
-                self.compareFile(remoteItem, localItem)
-    
+                #Otherwise, determine which way we should synchronize the file
+                #...and add a task accordingly...
+                remoteItem = properties
+                localItem = self.localFiles.get(file)
+                status = self.compareFile(remoteItem, localItem)
+                if status is FileStatus.newerRemote:
+                    self.syncDownQueue.put(file)
+                elif status is FileStatus.newerLocal:
+                    self.syncUpQueue.put(file)
+
     def compareFile(self, remoteItem, localItem):
         remoteHash = remoteItem[1]
         localHash = localItem[1]
