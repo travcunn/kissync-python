@@ -20,7 +20,7 @@ class SettingsWindow(QtGui.QWidget):
         generalTab.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         color = self.style.BLUE
         generalTab.setStyleSheet("color: %s;" % color)
-        
+
         accountTab = AccountTab(self, False)
 
         grid = QtGui.QGridLayout()
