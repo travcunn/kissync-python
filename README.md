@@ -19,6 +19,6 @@ Links
 
 [Kissync](http://www.kissync.com)
 
-[GPL License](https://github.com/kissync/kissync-python/blob/master/LICENSE.GPL)
+[MIT License](https://github.com/kissync/kissync-python/blob/master/LICENSE.MIT)
 
 [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/83ebee1008a3caf7f74f8a98c5b44cea "githalytics.com")](http://githalytics.com/kissync/kissync-python)
