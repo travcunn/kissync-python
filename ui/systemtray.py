@@ -3,18 +3,27 @@ import subprocess
 import sys
 from PyQt4 import QtGui, QtCore
 
+from ui.settingswindow import SettingsWindow
+
 
 class SystemTray(QtGui.QSystemTrayIcon):
 
     def __init__(self, parent=None):
         QtGui.QSystemTrayIcon.__init__(self, parent)
         self.parent = parent
+        self.settingsWindow = SettingsWindow(parent)
+
         menu = QtGui.QMenu(parent)
+        #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setToolTip(QtCore.QString('Kissync'))
 
-        startAction = menu.addAction("Browse Kissync Folder")
+        startAction = menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+        self.setContextMenu(menu)
+
+        settingsAction = menu.addAction("Settings")
+        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
         self.setContextMenu(menu)
 
         menu.addSeparator()
@@ -41,6 +50,9 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['gnome-open', self.parent.syncDir])
         elif platform.system() == 'Windows':
             subprocess.call(['explorer', self.parent.syncDir])
+
+    def openSettings(self):
+        self.settingsWindow.show()
 
     def exit(self):
         sys.exit(0)
