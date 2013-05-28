@@ -1,5 +1,6 @@
 [run]
 omit =
     tests.py
-include = 
-    *.py
+include =
+    core/*.py
+    sync/*.py
