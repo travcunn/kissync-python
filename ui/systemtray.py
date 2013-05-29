@@ -51,7 +51,10 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
+        self.settingsWindow.setWindowState(self.settingsWindow.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        self.settingsWindow.activateWindow()
         self.settingsWindow.show()
+        self.settingsWindow.raise_()
 
     def exit(self):
         sys.exit(0)
@@ -85,13 +88,15 @@ class SystemTray(QtGui.QSystemTrayIcon):
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
 
-        settingsAction = self.menu.addAction("Settings")
-        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
-
         self.menu.addSeparator()
 
         quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
         quota.setEnabled(False)
+
+        self.menu.addSeparator()
+
+        settingsAction = self.menu.addAction("Settings")
+        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
 
         self.menu.addSeparator()
 
