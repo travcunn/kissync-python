@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PySide import QtGui
 
 
 class KissyncStyle(object):

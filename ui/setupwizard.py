@@ -1,5 +1,5 @@
 import os
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 
 class SetupWizard(QtGui.QWidget):

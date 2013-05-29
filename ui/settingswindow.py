@@ -1,4 +1,4 @@
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from ui.accountwidget import AccountWidget
 from ui.style import KissyncStyle

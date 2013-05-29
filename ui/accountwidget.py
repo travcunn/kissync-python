@@ -4,7 +4,7 @@ import sys
 import urllib
 import webbrowser
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 
 class SettingsLabel(QtGui.QLabel):
