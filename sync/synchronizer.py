@@ -2,6 +2,8 @@ import datetime
 import hashlib
 import os
 import threading
+import common
+
 from Queue import Queue
 
 from downloader import Downloader
@@ -48,7 +50,10 @@ class Synchronizer(threading.Thread):
         for file, properties in self.localFiles.iteritems():
             #If local file is not in the remote files dict, add upload task
             if not file in self.remoteFiles.iterkeys():
-                self.uploadQueue.put(file)
+                modifiedTime = properties[0]
+                fileHash = properties[1]
+                task = (file, modifiedTime, fileHash)
+                self.uploadQueue.put(task)
             else:
                 #Otherwise, determine which way we should synchronize the file
                 #...and add a task accordingly...
@@ -121,7 +126,7 @@ class Synchronizer(threading.Thread):
                     if path.startswith("/"):
                         path = path.replace("/", "", 1)
                     absolutePath = os.path.join(self.parent.syncDir, path)
-                    self.downloader.checkDirsToCreate(absolutePath)
+                    common.createLocalDirs(absolutePath)
                     self.remoteFilesList(i['path'])
                 else:
                     path = i['path'].encode("utf-8")

@@ -11,7 +11,6 @@ class SystemTray(QtGui.QSystemTrayIcon):
     def __init__(self, parent=None):
         QtGui.QSystemTrayIcon.__init__(self, parent)
         self.parent = parent
-        self.settingsWindow = SettingsWindow(parent)
 
         menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
@@ -52,6 +51,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
+        self.settingsWindow = SettingsWindow(self.parent)
         self.settingsWindow.show()
 
     def exit(self):
