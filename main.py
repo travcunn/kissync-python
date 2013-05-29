@@ -33,6 +33,10 @@ class Main(QtGui.QWidget):
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
         self.tray = SystemTray(self)  # initiate the system tray
         self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
+        self.authenticator.login.connect(self.login)
+        self.authenticator.done.connect(self.start)
+        self.authenticator.setup.connect(self.setup)
+        self.authenticator.start()
 
         #################MAIN WINDOW GUI#####################
         self.setWindowTitle('Keep It Simple Sync')
@@ -60,6 +64,15 @@ class Main(QtGui.QWidget):
         self.synchronizer = Synchronizer(self)  # initiate the synchronizer
         self.synchronizer.start()
         self.tray.updateQuota()
+
+    def login(self, qturl):
+        self.loginwindow.htmlView.load(qturl)
+        self.loginwindow.show()
+
+    def setup(self):
+        '''First Run: Called if the authentication is successful'''
+        self.setupwizard.show()
+        self.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
 
     def directorySetup(self):
         '''Checks for sync and settings folder and creates if needed'''

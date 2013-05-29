@@ -18,7 +18,7 @@ class SettingsWindow(QtGui.QWidget):
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         settingsLabel.setFont(font)
         settingsLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        color = self.style.BLUE
+        #color = self.style.BLUE
         #settingsLabel.setStyleSheet("color: %s;" % color)
 
         grid = QtGui.QGridLayout()

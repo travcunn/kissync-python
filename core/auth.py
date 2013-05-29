@@ -2,13 +2,17 @@ from PyQt4 import QtCore
 from smartfileclient import OAuthClient
 
 
-class Authenticator(object):
-    def __init__(self, parent=None):
-        super(Authenticator, self).__init__()
-        self.parent = parent
-        self.go()
+class Authenticator(QtCore.QThread):
 
-    def go(self):
+    login = QtCore.pyqtSignal(object)
+    done = QtCore.pyqtSignal(object)
+    setup = QtCore.pyqtSignal(object)
+
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.parent = parent
+
+    def run(self):
         configToken = self.parent.configuration.get("Login", "token")
         configVerifier = self.parent.configuration.get("Login", "verifier")
         if(configToken) and (configVerifier) is not None:
@@ -32,17 +36,16 @@ class Authenticator(object):
         self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
 
         authUrl = self.parent.smartfile.get_authorization_url()
-        self.parent.loginwindow.htmlView.load(QtCore.QUrl(authUrl))
-        self.parent.loginwindow.show()
+        self.login.emit(QtCore.QUrl(authUrl))
 
     def networkError(self):
+        #TODO: make this work
         self.parent.loginwindow.networkError()
 
     def success(self):
         #Successfully logged in
         if(self.parent.configuration.get('LocalSettings', 'first-run')) is True:
-            self.parent.setupwizard.show()
-            self.parent.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
+            self.setup.emit('done')
         else:
-            self.parent.start()
+            self.done.emit('done')
             #self.parent.filewatcher.start()

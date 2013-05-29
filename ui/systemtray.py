@@ -22,8 +22,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
 
-        settingsAction = self.menu.addAction("Settings")
-        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
+        startingup = self.menu.addAction("starting up...")
+        startingup.setEnabled(False)
 
         self.menu.addSeparator()
 
@@ -51,13 +51,13 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
-        self.settingsWindow = SettingsWindow(self.parent)
         self.settingsWindow.show()
 
     def exit(self):
         sys.exit(0)
 
     def updateQuota(self):
+        self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")
         usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
         bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
