@@ -8,6 +8,7 @@ from Queue import Queue
 
 from downloader import Downloader
 from uploader import Uploader
+from sync import SyncUp, SyncDown
 from watcher import Watcher
 
 
@@ -26,6 +27,8 @@ class Synchronizer(threading.Thread):
 
         self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
+        self.syncUp = SyncUp(self.downloadQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self.syncDown = SyncUp(self.downloadQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         self.setDaemon(True)
 
@@ -38,9 +41,13 @@ class Synchronizer(threading.Thread):
 
         self.uploader.start()
         self.downloader.start()
+        self.syncUp.start()
+        self.syncDown.start()
         #Wait for the uploading and downloading tasks to finish
         self.uploadQueue.join()
         self.downloadQueue.join()
+        self.syncUpQueue.join()
+        self.syncDownQueue.join()
 
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
         self.localFileWatcher = Watcher(self, self.parent.syncDir)
