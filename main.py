@@ -64,7 +64,7 @@ class Main(QtGui.QWidget):
         '''Called if the authentication is successful'''
         self.synchronizer = Synchronizer(self)  # initiate the synchronizer
         self.synchronizer.start()
-        self.tray.updateQuota()
+        self.tray.onLogin()
 
     def login(self, qturl):
         '''Opens the login window'''
