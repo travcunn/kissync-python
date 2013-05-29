@@ -43,6 +43,9 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #self.setIcon(self.loadingIcon1)
 
     def openSyncFolder(self):
+        '''
+        Opens a file browser depending on the system
+        '''
         if platform.system() == 'Darwin':
             subprocess.call(['open', '--', self.parent.syncDir])
         elif platform.system() == 'Linux':
@@ -51,6 +54,9 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
+        '''
+        Opens the settings window and brings it into focus
+        '''
         self.settingsWindow.setWindowState(self.settingsWindow.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
         self.settingsWindow.activateWindow()
         self.settingsWindow.show()
@@ -59,7 +65,10 @@ class SystemTray(QtGui.QSystemTrayIcon):
     def exit(self):
         sys.exit(0)
 
-    def updateQuota(self):
+    def onLogin(self):
+        '''
+        After auth finishes, create the settings window and update the system tray to display disk usage quota
+        '''
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")
         usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
@@ -106,6 +115,6 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setContextMenu(self.menu)
 
     def notification(self, title, message):
-        #enum MessageIcon { NoIcon, Information, Warning, Critical }
+        '''Shows a system tray notification'''
         if(self.parent.configuration.get('LocalSettings', 'notifications')):
             self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)

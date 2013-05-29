@@ -1,5 +1,4 @@
 import os
-import shutil
 import threading
 
 import common
@@ -24,7 +23,7 @@ class SyncUp(threading.Thread):
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
         try:
-            sync.upload(absolutePath, serverPath)
+            self.sync.upload(absolutePath, serverPath)
             #TODO: Add modifiedTime and fileHash attributes here
         except:
             raise
@@ -49,6 +48,6 @@ class SyncDown(threading.Thread):
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
         try:
-            sync.download(absolutePath, serverPath)
+            self.sync.download(absolutePath, serverPath)
         except:
             raise

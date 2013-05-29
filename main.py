@@ -67,6 +67,7 @@ class Main(QtGui.QWidget):
         self.tray.updateQuota()
 
     def login(self, qturl):
+        '''Opens the login window'''
         self.loginwindow.htmlView.load(qturl)
         self.loginwindow.show()
 

@@ -15,6 +15,7 @@ def basePath(path):
 
 
 def createLocalDirs(path):
+    '''Tries to create local directories'''
     try:
         os.makedirs(path)
     except OSError as e:

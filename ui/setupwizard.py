@@ -17,7 +17,6 @@ class SetupWizard(QtGui.QWidget):
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
         topText = QtGui.QLabel('Setting Up Kissync')
-        #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         topText.setFont(font)
         topText.setPalette(palette)
@@ -27,24 +26,20 @@ class SetupWizard(QtGui.QWidget):
 
         spacer = QtGui.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        #file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
 
         formwidget = QtGui.QWidget()
         formgrid = QtGui.QFormLayout()
         formwidget.setLayout(formgrid)
 
-        #self.checkboxOfflineMode = QtGui.QCheckBox('Store All Files Offline', self)
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
         font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
-        #self.checkboxOfflineMode.setFont(font)
+
         self.checkboxNotifications.setFont(font)
-        #self.checkboxOfflineMode.toggle()
         self.checkboxNotifications.toggle()
 
         finishButton = QtGui.QPushButton('Finish Setup')
         finishButton.clicked.connect(self.saveSettings)
 
-        #formgrid.addRow(self.checkboxOfflineMode)
         formgrid.addRow(self.checkboxNotifications)
         formgrid.addRow(spacer)
         formgrid.addRow(finishButton)
@@ -55,11 +50,13 @@ class SetupWizard(QtGui.QWidget):
         grid.addWidget(topText, 0, 1)
         grid.addWidget(formwidget, 2, 1)
         grid.addWidget(spacer, 5, 1)
+
         #set the layout to grid layout
         self.setLayout(grid)
         self.centerOnScreen()
 
     def saveSettings(self):
+        '''Saves the settings based upon values in the setup'''
         self.parent.configuration.set('LocalSettings', 'sync-offline', True)
 
         if(self.checkboxNotifications.isChecked()):
@@ -89,5 +86,3 @@ class SetupWizard(QtGui.QWidget):
             event.accept()
         else:
             event.ignore()
-            #self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
-            #self.parent.show()

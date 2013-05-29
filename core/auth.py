@@ -36,6 +36,7 @@ class Authenticator(QtCore.QThread):
                 self.showLoginWindow()
 
     def showLoginWindow(self):
+        '''Sends a signal to the Main class to open the login window with the login url'''
         self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
 
         authUrl = self.parent.smartfile.get_authorization_url()
@@ -46,7 +47,7 @@ class Authenticator(QtCore.QThread):
         self.parent.loginwindow.networkError()
 
     def success(self):
-        #Successfully logged in
+        '''When the login is successful, send a signal to the setup window or the main class'''
         if(self.parent.configuration.get('LocalSettings', 'first-run')) is True:
             self.setup.emit('done')
         else:

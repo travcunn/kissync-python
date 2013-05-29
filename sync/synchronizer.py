@@ -28,7 +28,7 @@ class Synchronizer(threading.Thread):
         self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
         self.syncUp = SyncUp(self.downloadQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
-        self.syncDown = SyncUp(self.downloadQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self.syncDown = SyncDown(self.downloadQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         self.setDaemon(True)
 
