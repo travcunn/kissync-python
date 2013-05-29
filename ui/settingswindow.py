@@ -19,7 +19,7 @@ class SettingsWindow(QtGui.QWidget):
         settingsLabel.setFont(font)
         settingsLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         color = self.style.BLUE
-        settingsLabel.setStyleSheet("color: %s;" % color)
+        #settingsLabel.setStyleSheet("color: %s;" % color)
 
         grid = QtGui.QGridLayout()
         spacer = QtGui.QWidget()
@@ -28,7 +28,9 @@ class SettingsWindow(QtGui.QWidget):
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
         font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
         self.checkboxNotifications.setFont(font)
-        self.checkboxNotifications.toggle()
+        if self.parent.configuration.get('LocalSettings', 'notifications'):
+            if not self.checkboxNotifications.isChecked():
+                self.checkboxNotifications.toggle()
 
         saveButton = QtGui.QPushButton('Save')
         saveButton.clicked.connect(self.saveSettings)

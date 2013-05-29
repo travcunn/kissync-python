@@ -30,5 +30,6 @@ class Uploader(threading.Thread):
 
             #the actual uploading of the file
             self.smartfile.post(apiPath, file=file(absolutePath, 'rb'))
+            #TODO: Add modifiedTime and fileHash attributes here
         else:
             self.smartfile.put('/path/oper/mkdir/', path)
