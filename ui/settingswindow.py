@@ -10,9 +10,9 @@ class SettingsWindow(QtGui.QWidget):
         self.parent = parent
         self.style = KissyncStyle()
 
-        self.setWindowTitle('Kissync Settings')
+        self.setWindowTitle('Kissync Folder Sync Settings')
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
-        self.setFixedSize(520, 200)
+        self.setFixedSize(520, 180)
 
         settingsLabel = QtGui.QLabel('settings')
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)

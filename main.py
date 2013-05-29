@@ -59,6 +59,7 @@ class Main(QtGui.QWidget):
         '''Called if the authentication is successful'''
         self.synchronizer = Synchronizer(self)  # initiate the synchronizer
         self.synchronizer.start()
+        self.tray.updateQuota()
 
     def directorySetup(self):
         '''Checks for sync and settings folder and creates if needed'''

@@ -1,3 +1,4 @@
+import math
 import platform
 import subprocess
 import sys
@@ -12,25 +13,24 @@ class SystemTray(QtGui.QSystemTrayIcon):
         QtGui.QSystemTrayIcon.__init__(self, parent)
         self.parent = parent
 
-        menu = QtGui.QMenu(parent)
+        #menu before logging into Smartfile
+        self.menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setToolTip(QtCore.QString('Kissync'))
 
-        startAction = menu.addAction("Open Kissync Folder")
+        startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
-        self.setContextMenu(menu)
 
-        settingsAction = menu.addAction("Settings")
+        settingsAction = self.menu.addAction("Settings")
         self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
-        self.setContextMenu(menu)
 
-        menu.addSeparator()
+        self.menu.addSeparator()
 
-        exitAction = menu.addAction("Exit")
+        exitAction = self.menu.addAction("Exit")
         self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.parent.exit)
-        self.setContextMenu(menu)
 
+        self.setContextMenu(self.menu)
         self.show()
 
         #TODO: Create a method that cycles through loading images for the system tray on sync
@@ -56,6 +56,49 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
     def exit(self):
         sys.exit(0)
+
+    def updateQuota(self):
+        whoami = self.parent.smartfile.get("/whoami/")
+        usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
+        bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
+        percentUsed = usedBytes / bytesLimit
+
+        spaceLimit = bytesLimit
+        if(spaceLimit < 1024):
+            measurement = "bytes"
+        elif(spaceLimit < int(math.pow(1024, 2))):
+            spaceLimit = spaceLimit / 1024
+            measurement = "KB"
+        elif(spaceLimit < int(math.pow(1024, 3))):
+            spaceLimit = spaceLimit / int(math.pow(1024, 2))
+            measurement = "MB"
+        else:
+            spaceLimit = spaceLimit / int(math.pow(1024, 3))
+            measurement = "GB"
+
+        #menu after logging into Smartfile
+        self.menu = QtGui.QMenu(self.parent)
+        #TODO: Update this resource to be packaged with other resources
+        self.setIcon(QtGui.QIcon("icons/menuicon.png"))
+        self.setToolTip(QtCore.QString('Kissync'))
+
+        startAction = self.menu.addAction("Open Kissync Folder")
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+
+        settingsAction = self.menu.addAction("Settings")
+        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
+
+        self.menu.addSeparator()
+
+        quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
+        quota.setEnabled(False)
+
+        self.menu.addSeparator()
+
+        exitAction = self.menu.addAction("Exit")
+        self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.parent.exit)
+
+        self.setContextMenu(self.menu)
 
     def notification(self, title, message):
         #enum MessageIcon { NoIcon, Information, Warning, Critical }
