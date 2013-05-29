@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PySide import QtCore, QtGui, QtWebKit
 
 
 class AuthBrowser(QtWebKit.QWebView):

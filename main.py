@@ -1,6 +1,6 @@
 import os
 import sys
-from PyQt4 import QtGui
+from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from core.auth import Authenticator

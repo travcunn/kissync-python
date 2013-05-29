@@ -12,6 +12,7 @@ class SettingsWindow(QtGui.QWidget):
 
         self.setWindowTitle('Kissync Folder Sync Settings')
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
+        self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setFixedSize(520, 180)
 
         settingsLabel = QtGui.QLabel('settings')

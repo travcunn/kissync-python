@@ -25,5 +25,5 @@ setup(
     ],
     author='Travis Cunningham and Taylor Brazelton',
     author_email='travcunn@umail.iu.edu',
-    license='GPLv2',
+    license='MIT',
 )

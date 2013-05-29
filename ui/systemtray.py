@@ -2,7 +2,7 @@ import math
 import platform
 import subprocess
 import sys
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from ui.settingswindow import SettingsWindow
 
@@ -17,7 +17,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon("icons/menuicon.png"))
-        self.setToolTip(QtCore.QString('Kissync'))
+        self.setToolTip('Kissync')
 
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
@@ -80,7 +80,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.menu = QtGui.QMenu(self.parent)
         #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon("icons/menuicon.png"))
-        self.setToolTip(QtCore.QString('Kissync'))
+        self.setToolTip('Kissync')
 
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)

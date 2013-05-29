@@ -1,12 +1,12 @@
-from PyQt4 import QtCore
+from PySide import QtCore
 from smartfileclient import OAuthClient
 
 
 class Authenticator(QtCore.QThread):
 
-    login = QtCore.pyqtSignal(object)
-    done = QtCore.pyqtSignal(object)
-    setup = QtCore.pyqtSignal(object)
+    login = QtCore.Signal(object)
+    done = QtCore.Signal(object)
+    setup = QtCore.Signal(object)
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
