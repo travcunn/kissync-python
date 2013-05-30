@@ -9,7 +9,7 @@ Running Kissync
 ===================
 
 
-    $ git clone https://github.com/kissync/kissync-python.git kissync
+    $ git clone https://github.com/travcunn/kissync-python.git kissync
     $ cd kissync
     $ python main.py
 
