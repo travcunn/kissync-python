@@ -41,16 +41,18 @@ class Synchronizer(threading.Thread):
 
         self.uploader.start()
         self.downloader.start()
-        self.syncUp.start()
-        self.syncDown.start()
+        #self.syncUp.start()
+        #self.syncDown.start()
         #Wait for the uploading and downloading tasks to finish
         self.uploadQueue.join()
         self.downloadQueue.join()
-        self.syncUpQueue.join()
-        self.syncDownQueue.join()
+        print "Uploading/downloading done"
+        #self.syncUpQueue.join()
+        #self.syncDownQueue.join()
+        #print "Synchronizing done"
 
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
-        self.localFileWatcher = Watcher(self, self.parent.syncDir)
+        self.localFileWatcher = Watcher(self, self.parent.smartfile, self.parent.syncDir)
         self.localFileWatcher.start()
 
     def compareListing(self):
@@ -151,9 +153,7 @@ class Synchronizer(threading.Thread):
                     self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
 
     def _getFileHash(self, filepath):
-        '''
-        Returns the MD5 hash of a local file
-        '''
+        '''Returns the MD5 hash of a local file'''
         fileToHash = open(filepath)
         md5 = hashlib.md5()
         while(True):

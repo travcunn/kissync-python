@@ -24,6 +24,7 @@ class Uploader(threading.Thread):
             fileName = os.path.basename(path)
             inDir = path.replace(fileName, '')
             apiPath = "/path/data/%s" % inDir
+            print "putting: %s" % inDir
 
             #make sure the directory exists before uploading
             self.smartfile.put('/path/oper/mkdir/', inDir)
