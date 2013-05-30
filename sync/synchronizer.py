@@ -46,7 +46,6 @@ class Synchronizer(threading.Thread):
         #Wait for the uploading and downloading tasks to finish
         self.uploadQueue.join()
         self.downloadQueue.join()
-        print "Uploading/downloading done"
         #self.syncUpQueue.join()
         #self.syncDownQueue.join()
         #print "Synchronizing done"

@@ -9,7 +9,7 @@ def basePath(path):
     '''
     if path.startswith("/"):
         path = path.replace("/", "", 1)
-    elif path.startswith("\\"):
+    if path.startswith("\\"):
         path = path.replace("\\", "", 1)
     return path
 
