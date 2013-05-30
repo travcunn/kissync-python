@@ -22,7 +22,7 @@ class Uploader(threading.Thread):
         absolutePath = os.path.join(self.syncDir, path)
         if not (os.path.isdir(absolutePath)):
             fileName = os.path.basename(path)
-            inDir = path.replace(fileName, '')
+            inDir = path.replace(fileName, '').replace("\\", "/")
             apiPath = "/path/data/%s" % inDir
 
             #make sure the directory exists before uploading

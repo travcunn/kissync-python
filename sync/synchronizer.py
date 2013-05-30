@@ -27,8 +27,8 @@ class Synchronizer(threading.Thread):
 
         self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
-        self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
-        self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        #self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        #self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         self.setDaemon(True)
 
@@ -41,13 +41,13 @@ class Synchronizer(threading.Thread):
 
         self.uploader.start()
         self.downloader.start()
-        self.syncUp.start()
-        self.syncDown.start()
+        #self.syncUp.start()
+        #self.syncDown.start()
         #Wait for the uploading and downloading tasks to finish
         self.uploadQueue.join()
         self.downloadQueue.join()
-        self.syncUpQueue.join()
-        self.syncDownQueue.join()
+        #self.syncUpQueue.join()
+        #self.syncDownQueue.join()
 
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
         self.localFileWatcher = Watcher(self, self.parent.syncDir)
@@ -128,15 +128,14 @@ class Synchronizer(threading.Thread):
         dirListing = self.parent.smartfile.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
+                path = i['path'].encode("utf-8")
+                if path.startswith("/"):
+                    path = path.replace("/", "", 1)
                 if(i['isdir']):
-                    path = i['path'].encode("utf-8")
-                    if path.startswith("/"):
-                        path = path.replace("/", "", 1)
                     absolutePath = os.path.join(self.parent.syncDir, path)
                     common.createLocalDirs(absolutePath)
                     self.remoteFilesList(i['path'])
                 else:
-                    path = i['path'].encode("utf-8")
                     isDir = i['isdir']
                     size = int(i['size'])
                     permissions = i['acl']
