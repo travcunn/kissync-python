@@ -89,6 +89,7 @@ class Main(QtGui.QWidget):
         self.hide()
 
     def exit(self):
+        self.tray.hide()
         os._exit(-1)
 
 

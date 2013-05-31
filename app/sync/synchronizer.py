@@ -2,6 +2,8 @@ import datetime
 import hashlib
 import os
 import threading
+import time
+
 import common
 
 from Queue import Queue
@@ -33,23 +35,31 @@ class Synchronizer(threading.Thread):
         self.setDaemon(True)
 
     def run(self):
-        #Initially, get the local and remote file listing
-        self.localFilesList()
-        self.remoteFilesList()
-        #Now compare the lists and populate task queues for differences
-        self.compareListing()
+        self.synchronize()
 
-        self.uploader.start()
-        self.downloader.start()
-        #self.syncUp.start()
-        #self.syncDown.start()
-        #Wait for the uploading and downloading tasks to finish
-        self.uploadQueue.join()
-        self.downloadQueue.join()
-        #self.syncUpQueue.join()
-        #self.syncDownQueue.join()
-        #print "Synchronizing done"
-
+    def synchronize(self):
+        try:
+            #Initially, get the local and remote file listing
+            self.localFilesList()
+            self.remoteFilesList()
+            #Now compare the lists and populate task queues for differences
+            self.compareListing()
+    
+            self.uploader.start()
+            self.downloader.start()
+            #self.syncUp.start()
+            #self.syncDown.start()
+            #Wait for the uploading and downloading tasks to finish
+            self.uploadQueue.join()
+            self.downloadQueue.join()
+            #self.syncUpQueue.join()
+            #self.syncDownQueue.join()
+            #print "Synchronizing done"
+        except:
+            time.sleep(30)
+            self.synchronize()
+    
+    def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
         self.localFileWatcher = Watcher(self, self.parent.smartfile, self.parent.syncDir)
         self.localFileWatcher.start()

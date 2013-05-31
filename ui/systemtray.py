@@ -43,9 +43,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #self.setIcon(self.loadingIcon1)
 
     def openSyncFolder(self):
-        '''
-        Opens a file browser depending on the system
-        '''
+        '''Opens a file browser depending on the system'''
         if platform.system() == 'Darwin':
             subprocess.call(['open', '--', self.parent.syncDir])
         elif platform.system() == 'Linux':
@@ -54,20 +52,13 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
-        '''
-        Opens the settings window and brings it into focus
-        '''
-        self.settingsWindow.setWindowState(self.settingsWindow.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
-        self.settingsWindow.activateWindow()
-        self.settingsWindow.show()
-        self.settingsWindow.raise_()
-
-    def exit(self):
-        sys.exit(0)
+        '''Opens the settings window and brings it into focus'''
+        self.settingsWindow.showSettings()
 
     def onLogin(self):
         '''
-        After auth finishes, create the settings window and update the system tray to display disk usage quota
+        After auth finishes, create the settings window 
+        and update the system tray to display disk usage quota
         '''
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")

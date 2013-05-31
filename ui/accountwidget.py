@@ -12,7 +12,7 @@ class SettingsLabel(QtGui.QLabel):
         QtGui.QLabel.__init__(self)
         self.parent = parent
         self.setText("        ")
-        font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
+        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Normal, False)
         self.setFont(font)
         self.setStyleSheet("color: #1BA1E2;")
 

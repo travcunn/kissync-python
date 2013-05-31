@@ -11,23 +11,31 @@ class SettingsWindow(QtGui.QWidget):
         self.style = KissyncStyle()
 
         self.setWindowTitle('Kissync Folder Sync Settings')
-        self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setFixedSize(520, 180)
+        self.setObjectName("settingswindow")
+        self.setStyleSheet("QWidget#settingswindow { background: #3c3c3c; }")
+        #blue color: 699afb
 
         settingsLabel = QtGui.QLabel('settings')
-        font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
+        font = QtGui.QFont("Vegur", 32, QtGui.QFont.Light, False)
         settingsLabel.setFont(font)
         settingsLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #color = self.style.BLUE
         #settingsLabel.setStyleSheet("color: %s;" % color)
+
+        titleBar = QtGui.QWidget()
+        titleBar.setObjectName("titlebar")
+        titleBar.setStyleSheet("QWidget#titlebar { background: #699afb; }")
+        titleBar.setMinimumSize(200, 60)
 
         grid = QtGui.QGridLayout()
         spacer = QtGui.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        font = QtGui.QFont("Roboto", 16, QtGui.QFont.Light, False)
+        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Light, False)
         self.checkboxNotifications.setFont(font)
         if self.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():
@@ -38,13 +46,13 @@ class SettingsWindow(QtGui.QWidget):
 
         self.accountWidget = AccountWidget(self.parent)
         #add the objects to the grid
-        grid.addWidget(spacer, 0, 0)
-        grid.addWidget(spacer, 0, 5)
-        grid.addWidget(settingsLabel, 0, 1)
-        grid.addWidget(self.accountWidget, 0, 2, 1, 2)
-        grid.addWidget(self.checkboxNotifications, 1, 1, 2, 2)
-        grid.addWidget(saveButton, 2, 3)
-        grid.addWidget(spacer, 5, 1)
+        grid.addWidget(titleBar, 0, 0, 1, 5)
+
+        grid.addWidget(settingsLabel, 1, 1)
+        grid.addWidget(self.accountWidget, 1, 2, 1, 2)
+        grid.addWidget(self.checkboxNotifications, 2, 1, 2, 2)
+        grid.addWidget(saveButton, 3, 3)
+
         #set the layout to grid layout
         self.setLayout(grid)
         self.centerOnScreen()
@@ -57,6 +65,22 @@ class SettingsWindow(QtGui.QWidget):
 
         self.hide()
         self.parent.configuration.save()
+
+    def showSettings(self):
+        self.centerOnScreen()
+        self.setWindowState(self.windowState() & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive | QtCore.Qt.FramelessWindowHint)
+        self.activateWindow()
+        self.show()
+        self.raise_()
+
+    def resizeEvent(self, event):
+        pixmap = QtGui.QPixmap(self.size())
+        pixmap.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(pixmap)
+        painter.setBrush(QtCore.Qt.black)
+        painter.drawRoundedRect(pixmap.rect(), 8, 8)
+        painter.end()
+        self.setMask(pixmap.mask())
 
     def centerOnScreen(self):
         resolution = QtGui.QDesktopWidget().screenGeometry()
