@@ -6,7 +6,6 @@ A cross platfom file synchronization tool for the SmartFile cloud
 =======
 
 A cross platfom file synchronization tool for SmartFile
->>>>>>> 7018e83309a7f4d973549e924f71edee5602ce96
 
 
 Running Kissync
