@@ -78,6 +78,8 @@ class UsernameLabel(QtGui.QLabel):
         self.setText(fullname)
         font = QtGui.QFont("Roboto", 12, QtGui.QFont.Light, False)
         self.setFont(font)
+        self.setStyleSheet("color: #FFFFFF;")
+        self.repaint()
 
     def mousePressEvent(self, event):
         webbrowser.open('https://app.smartfile.com/ftp/private/account/')

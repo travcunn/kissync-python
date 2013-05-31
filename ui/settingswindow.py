@@ -11,7 +11,6 @@ class SettingsWindow(QtGui.QWidget):
         self.style = KissyncStyle()
 
         self.setWindowTitle('Kissync Folder Sync Settings')
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setFixedSize(520, 180)
         self.setContentsMargins(0, 0, 0, 0)
@@ -45,15 +44,6 @@ class SettingsWindow(QtGui.QWidget):
         self.show()
         self.raise_()
 
-    def resizeEvent(self, event):
-        pixmap = QtGui.QPixmap(self.size())
-        pixmap.fill(QtCore.Qt.transparent)
-        painter = QtGui.QPainter(pixmap)
-        painter.setBrush(QtCore.Qt.black)
-        painter.drawRoundedRect(pixmap.rect(), 8, 8)
-        painter.end()
-        self.setMask(pixmap.mask())
-
     def centerOnScreen(self):
         resolution = QtGui.QDesktopWidget().screenGeometry()
         self.move((resolution.width() / 2) - (self.frameSize().width() / 2), (resolution.height() / 2) - (self.frameSize().height() / 2))
@@ -61,6 +51,20 @@ class SettingsWindow(QtGui.QWidget):
     def closeEvent(self, event):
         event.ignore()
         self.hide()
+
+    def paintEvent(self, e):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        self.draw(painter)
+        painter.end()
+
+    def draw(self, painter):
+        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
+
+        painter.setPen(penblank)
+
+        painter.setBrush(QtGui.QColor('#3c3c3c'))
+        painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
 
 
 class TitleBar(QtGui.QWidget):
@@ -111,8 +115,7 @@ class SettingsPanel(QtGui.QWidget):
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        self.checkboxNotifications.setObjectName("checkboxNotifications")
-        self.checkboxNotifications.setStyleSheet("QCheckBox#checkboxNotifications { color: #FFFFFF; }")
+        self.checkboxNotifications.setStyleSheet("color: #FFFFFF;")
         font = QtGui.QFont("Vegur", 16, QtGui.QFont.Light, False)
         self.checkboxNotifications.setFont(font)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
@@ -130,17 +133,3 @@ class SettingsPanel(QtGui.QWidget):
         grid.addWidget(saveButton, 3, 3)
 
         self.setLayout(grid)
-
-    def paintEvent(self, e):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        self.draw(painter)
-        painter.end()
-
-    def draw(self, painter):
-        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
-
-        painter.setPen(penblank)
-
-        painter.setBrush(QtGui.QColor('#3c3c3c'))
-        painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
