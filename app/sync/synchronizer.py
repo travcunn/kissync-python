@@ -44,7 +44,7 @@ class Synchronizer(threading.Thread):
             self.remoteFilesList()
             #Now compare the lists and populate task queues for differences
             self.compareListing()
-    
+
             self.uploader.start()
             self.downloader.start()
             #self.syncUp.start()
@@ -58,7 +58,7 @@ class Synchronizer(threading.Thread):
         except:
             time.sleep(30)
             self.synchronize()
-    
+
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
         self.localFileWatcher = Watcher(self, self.parent.smartfile, self.parent.syncDir)

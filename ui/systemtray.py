@@ -1,7 +1,6 @@
 import math
 import platform
 import subprocess
-import sys
 from PySide import QtGui, QtCore
 
 from ui.settingswindow import SettingsWindow
@@ -57,7 +56,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
     def onLogin(self):
         '''
-        After auth finishes, create the settings window 
+        After auth finishes, create the settings window
         and update the system tray to display disk usage quota
         '''
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide

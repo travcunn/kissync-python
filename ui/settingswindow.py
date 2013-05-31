@@ -16,7 +16,7 @@ class SettingsWindow(QtGui.QWidget):
         self.setFixedSize(520, 180)
         self.setContentsMargins(0, 0, 0, 0)
         #blue color: 699afb
-  
+
         self.settingsWidget = SettingsPanel(self)
 
         titleBar = TitleBar()
@@ -69,13 +69,15 @@ class TitleBar(QtGui.QWidget):
         self.parent = parent
         self.setMinimumSize(200, 60)
         self.setContentsMargins(0, 0, 0, 0)
-        
+        self.setStyleSheet("color: #FFFFFF;")
+        self.setStyleSheet("QWidget { border: 0px; }")
+
         settingsLabel = QtGui.QLabel('settings')
         font = QtGui.QFont("Vegur", 28, QtGui.QFont.Light, False)
         settingsLabel.setFont(font)
         #color = self.style.BLUE
         settingsLabel.setObjectName("settingsLabel")
-        settingsLabel.setStyleSheet("QLabel#settingsLabel { color: #FFFFFF; }")
+        settingsLabel.setStyleSheet("color: #FFFFFF;")
 
         titleBarGrid = QtGui.QGridLayout()
         titleBarGrid.addWidget(settingsLabel)
@@ -95,6 +97,7 @@ class TitleBar(QtGui.QWidget):
 
         painter.setBrush(QtGui.QColor('#699afb'))
         painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
+
 
 class SettingsPanel(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -141,4 +144,3 @@ class SettingsPanel(QtGui.QWidget):
 
         painter.setBrush(QtGui.QColor('#3c3c3c'))
         painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
-

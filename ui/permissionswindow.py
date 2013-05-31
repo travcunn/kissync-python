@@ -82,7 +82,7 @@ class PermissionsWindow(QtGui.QWidget):
         self.setLayout(grid)
         self.centerOnScreen()
 
-    def centerOnScreen(self):\
+    def centerOnScreen(self):
         resolution = QtGui.QDesktopWidget().screenGeometry()
         self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
                   (resolution.height() / 2) - (self.frameSize().height() / 2))
