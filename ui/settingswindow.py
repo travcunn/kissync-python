@@ -12,7 +12,7 @@ class SettingsWindow(QtGui.QWidget):
 
         self.setWindowTitle('Kissync Folder Sync Settings')
         self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
-        self.setFixedSize(520, 180)
+        self.setFixedSize(520, 200)
         self.setContentsMargins(0, 0, 0, 0)
         #blue color: 699afb
 
@@ -24,7 +24,6 @@ class SettingsWindow(QtGui.QWidget):
         maingrid.addWidget(titleBar)
         maingrid.addWidget(self.settingsWidget)
 
-        #set the layout to maingrid layout
         self.setLayout(maingrid)
         self.centerOnScreen()
 
@@ -60,9 +59,7 @@ class SettingsWindow(QtGui.QWidget):
 
     def draw(self, painter):
         penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
-
         painter.setPen(penblank)
-
         painter.setBrush(QtGui.QColor('#3c3c3c'))
         painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
 
@@ -79,7 +76,6 @@ class TitleBar(QtGui.QWidget):
         settingsLabel = QtGui.QLabel('settings')
         font = QtGui.QFont("Vegur", 28, QtGui.QFont.Light, False)
         settingsLabel.setFont(font)
-        #color = self.style.BLUE
         settingsLabel.setObjectName("settingsLabel")
         settingsLabel.setStyleSheet("color: #FFFFFF;")
 
@@ -96,9 +92,7 @@ class TitleBar(QtGui.QWidget):
 
     def draw(self, painter):
         penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
-
         painter.setPen(penblank)
-
         painter.setBrush(QtGui.QColor('#699afb'))
         painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
 
@@ -107,6 +101,7 @@ class SettingsPanel(QtGui.QWidget):
     def __init__(self, parent=None):
         super(SettingsPanel, self).__init__()
         self.parent = parent
+
         self.setMinimumSize(200, 80)
         self.setContentsMargins(0, 0, 0, 0)
 
@@ -122,8 +117,7 @@ class SettingsPanel(QtGui.QWidget):
             if not self.checkboxNotifications.isChecked():
                 self.checkboxNotifications.toggle()
 
-        saveButton = QtGui.QPushButton('Save')
-        saveButton.clicked.connect(self.parent.saveSettings)
+        saveButton = SaveButton(self, 'Save')
 
         self.accountWidget = AccountWidget(self.parent)
         #add the objects to the grid
@@ -133,3 +127,52 @@ class SettingsPanel(QtGui.QWidget):
         grid.addWidget(saveButton, 3, 3)
 
         self.setLayout(grid)
+
+
+class SaveButton(QtGui.QWidget):
+    def __init__(self, parent, text=None):
+        QtGui.QWidget.__init__(self)
+        self.parent = parent
+
+        self.squareWidth = 80
+        self.squareHeight = 30
+
+        self.setMaxSize()
+
+        #fontDatabase = QtGui.QFontDatabase()
+        #fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
+        #fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
+        #os.path.dirname(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
+
+        self.text = text
+        self.font = QtGui.QFont("Vegur", 14, QtGui.QFont.Bold, False)
+
+        self.initUI()
+
+    def setMaxSize(self):
+        self.setMaximumSize(self.squareWidth, self.squareHeight)
+        self.setMinimumSize(self.squareWidth, self.squareHeight)
+
+    def initUI(self):
+        self.repaint()
+
+    def paintEvent(self, e):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        self.drawBackground(painter)
+        self.drawText(e, painter)
+        painter.end()
+
+    def drawBackground(self, painter):
+        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
+        painter.setPen(penblank)
+        painter.setBrush(QtGui.QColor('#699afb'))
+        painter.drawRect(0, 0, self.squareWidth, self.squareHeight)
+
+    def drawText(self, event, painter):
+        painter.setPen(QtGui.QColor(255, 255, 255))
+        painter.setFont(self.font)
+        painter.drawText(event.rect(), QtCore.Qt.AlignCenter,self.text)
+
+    def mousePressEvent(self, event):
+        self.parent.parent.saveSettings()

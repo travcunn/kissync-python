@@ -13,6 +13,8 @@ class LoginWindow(QtGui.QWidget):
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
         self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
+        #window size constraints
+        self.setFixedSize(800, 550)
 
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
@@ -33,9 +35,6 @@ class LoginWindow(QtGui.QWidget):
 
         self.htmlView = AuthBrowser(self)
 
-        #window size constraints
-        self.setFixedSize(800, 550)
-
         fonterror = QtGui.QFont("Roboto", 18, QtGui.QFont.Normal, False)
 
         self.neterrorText = QtGui.QLabel('Error Connecting to SmartFile')
@@ -51,12 +50,14 @@ class LoginWindow(QtGui.QWidget):
 
         leftPanel = QtGui.QWidget()
         leftPanel.setLayout(gridleft)
+
         #add the objects to the grid
         gridleft.addWidget(topText, 0, 0)
         gridleft.addWidget(detailsText, 1, 0)
         gridleft.addWidget(cloud, 2, 0, 1, 1, QtCore.Qt.AlignHCenter)
         grid.addWidget(leftPanel, 0, 0, 1, 1)
         grid.addWidget(self.htmlView, 0, 1)
+
         #set the layout to grid layout
         self.setLayout(grid)
         self.centerOnScreen()
@@ -83,8 +84,6 @@ class LoginWindow(QtGui.QWidget):
 class CloudIconWidget(QtGui.QWidget):
     def __init__(self):
         QtGui.QWidget.__init__(self)
-
-        ##get rid of the widget border
         self.setStyleSheet("QWidget { border: 0px; }")
 
         self.setMinimumSize(64, 64)

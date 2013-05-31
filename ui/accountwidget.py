@@ -7,36 +7,12 @@ import webbrowser
 from PySide import QtGui, QtCore
 
 
-class SettingsLabel(QtGui.QLabel):
-    def __init__(self, parent=None):
-        QtGui.QLabel.__init__(self)
-        self.parent = parent
-        self.setText("        ")
-        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Normal, False)
-        self.setFont(font)
-        self.setStyleSheet("color: #1BA1E2;")
-
-    def mousePressEvent(self, event):
-        pass
-
-    def mouseDoubleClickEvent(self, event):
-        pass
-
-    def enterEvent(self, event):
-        self.setStyleSheet("color: #8CBF26;")
-        self.repaint()
-
-    def leaveEvent(self, event):
-        self.setStyleSheet("color: #1BA1E2;")
-        self.repaint()
-
-
 class LogoutLabel(QtGui.QLabel):
     def __init__(self, parent=None):
         QtGui.QLabel.__init__(self)
         self.parent = parent
         self.setText("Logout")
-        font = QtGui.QFont("Roboto", 16, QtGui.QFont.Normal, False)
+        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Normal, False)
         self.setFont(font)
         self.setStyleSheet("color: #1BA1E2;")
 
@@ -153,17 +129,14 @@ class AccountWidget(QtGui.QWidget):
             self.email = "web@google.com"
 
         self.lbFullName = UsernameLabel(self, self.fullname)
-        self.lbsettings = SettingsLabel(self)
         self.lblogout = LogoutLabel(self)
 
-        #Icon stuff
         self.icon = AvatarWidget(self, self.email)
 
         self.gridlayout = QtGui.QGridLayout()
 
         self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
         self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        #self.gridlayout.addWidget(self.lbsettings, 1, 1, 1, 1, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.setLayout(self.gridlayout)
