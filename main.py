@@ -3,10 +3,10 @@ import sys
 from PySide import QtGui
 from tendo.singleton import SingleInstance
 
-from core.auth import Authenticator
-from core.configuration import Configuration
+from app.core.auth import Authenticator
+from app.core.configuration import Configuration
 
-from sync.synchronizer import Synchronizer
+from app.sync.synchronizer import Synchronizer
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard

@@ -1,4 +1,4 @@
-from core.configuration import Configuration
+from app.core.configuration import Configuration
 
 import os
 import unittest
