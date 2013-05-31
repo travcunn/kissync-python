@@ -19,14 +19,14 @@ class LoginWindow(QtGui.QWidget):
 
         topText = QtGui.QLabel('Login to Kissync')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        font = QtGui.QFont("Roboto", 24, QtGui.QFont.Light, False)
+        font = QtGui.QFont("Vegur", 24, QtGui.QFont.Light, False)
         topText.setFont(font)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF
 
         detailsText = QtGui.QLabel('using your Smartfile acount')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        fontsmall = QtGui.QFont("Roboto", 14, QtGui.QFont.Light, False)
+        fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
         detailsText.setFont(fontsmall)
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF;")

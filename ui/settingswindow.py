@@ -14,51 +14,23 @@ class SettingsWindow(QtGui.QWidget):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
         self.setFixedSize(520, 180)
-        self.setObjectName("settingswindow")
-        self.setStyleSheet("QWidget#settingswindow { background: #3c3c3c; }")
+        self.setContentsMargins(0, 0, 0, 0)
         #blue color: 699afb
+  
+        self.settingsWidget = SettingsPanel(self)
 
-        settingsLabel = QtGui.QLabel('settings')
-        font = QtGui.QFont("Vegur", 32, QtGui.QFont.Light, False)
-        settingsLabel.setFont(font)
-        settingsLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        #color = self.style.BLUE
-        #settingsLabel.setStyleSheet("color: %s;" % color)
+        titleBar = TitleBar()
+        maingrid = QtGui.QGridLayout()
+        maingrid.setContentsMargins(0, 0, 0, 0)
+        maingrid.addWidget(titleBar)
+        maingrid.addWidget(self.settingsWidget)
 
-        titleBar = QtGui.QWidget()
-        titleBar.setObjectName("titlebar")
-        titleBar.setStyleSheet("QWidget#titlebar { background: #699afb; }")
-        titleBar.setMinimumSize(200, 60)
-
-        grid = QtGui.QGridLayout()
-        spacer = QtGui.QWidget()
-        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-
-        self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Light, False)
-        self.checkboxNotifications.setFont(font)
-        if self.parent.configuration.get('LocalSettings', 'notifications'):
-            if not self.checkboxNotifications.isChecked():
-                self.checkboxNotifications.toggle()
-
-        saveButton = QtGui.QPushButton('Save')
-        saveButton.clicked.connect(self.saveSettings)
-
-        self.accountWidget = AccountWidget(self.parent)
-        #add the objects to the grid
-        grid.addWidget(titleBar, 0, 0, 1, 5)
-
-        grid.addWidget(settingsLabel, 1, 1)
-        grid.addWidget(self.accountWidget, 1, 2, 1, 2)
-        grid.addWidget(self.checkboxNotifications, 2, 1, 2, 2)
-        grid.addWidget(saveButton, 3, 3)
-
-        #set the layout to grid layout
-        self.setLayout(grid)
+        #set the layout to maingrid layout
+        self.setLayout(maingrid)
         self.centerOnScreen()
 
     def saveSettings(self):
-        if(self.checkboxNotifications.isChecked()):
+        if(self.settingsWidget.checkboxNotifications.isChecked()):
             self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
@@ -89,3 +61,84 @@ class SettingsWindow(QtGui.QWidget):
     def closeEvent(self, event):
         event.ignore()
         self.hide()
+
+
+class TitleBar(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(TitleBar, self).__init__()
+        self.parent = parent
+        self.setMinimumSize(200, 60)
+        self.setContentsMargins(0, 0, 0, 0)
+        
+        settingsLabel = QtGui.QLabel('settings')
+        font = QtGui.QFont("Vegur", 28, QtGui.QFont.Light, False)
+        settingsLabel.setFont(font)
+        #color = self.style.BLUE
+        settingsLabel.setObjectName("settingsLabel")
+        settingsLabel.setStyleSheet("QLabel#settingsLabel { color: #FFFFFF; }")
+
+        titleBarGrid = QtGui.QGridLayout()
+        titleBarGrid.addWidget(settingsLabel)
+        self.setAutoFillBackground(True)
+        self.setLayout(titleBarGrid)
+
+    def paintEvent(self, e):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        self.draw(painter)
+        painter.end()
+
+    def draw(self, painter):
+        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
+
+        painter.setPen(penblank)
+
+        painter.setBrush(QtGui.QColor('#699afb'))
+        painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
+
+class SettingsPanel(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(SettingsPanel, self).__init__()
+        self.parent = parent
+        self.setMinimumSize(200, 80)
+        self.setContentsMargins(0, 0, 0, 0)
+
+        grid = QtGui.QGridLayout()
+        spacer = QtGui.QWidget()
+        spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+
+        self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
+        self.checkboxNotifications.setObjectName("checkboxNotifications")
+        self.checkboxNotifications.setStyleSheet("QCheckBox#checkboxNotifications { color: #FFFFFF; }")
+        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Light, False)
+        self.checkboxNotifications.setFont(font)
+        if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
+            if not self.checkboxNotifications.isChecked():
+                self.checkboxNotifications.toggle()
+
+        saveButton = QtGui.QPushButton('Save')
+        saveButton.clicked.connect(self.parent.saveSettings)
+
+        self.accountWidget = AccountWidget(self.parent)
+        #add the objects to the grid
+
+        grid.addWidget(self.accountWidget, 1, 2, 1, 2)
+        grid.addWidget(self.checkboxNotifications, 2, 1, 2, 2)
+        grid.addWidget(saveButton, 3, 3)
+
+        self.setLayout(grid)
+
+    def paintEvent(self, e):
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        self.draw(painter)
+        painter.end()
+
+    def draw(self, painter):
+        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
+
+        painter.setPen(penblank)
+
+        painter.setBrush(QtGui.QColor('#3c3c3c'))
+        painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
+
