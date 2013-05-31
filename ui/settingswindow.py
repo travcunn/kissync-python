@@ -172,7 +172,7 @@ class SaveButton(QtGui.QWidget):
     def drawText(self, event, painter):
         painter.setPen(QtGui.QColor(255, 255, 255))
         painter.setFont(self.font)
-        painter.drawText(event.rect(), QtCore.Qt.AlignCenter,self.text)
+        painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self.text)
 
     def mousePressEvent(self, event):
         self.parent.parent.saveSettings()
