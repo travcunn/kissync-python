@@ -51,18 +51,6 @@ class SettingsWindow(QtGui.QWidget):
         event.ignore()
         self.hide()
 
-    def paintEvent(self, e):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        self.draw(painter)
-        painter.end()
-
-    def draw(self, painter):
-        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
-        painter.setPen(penblank)
-        painter.setBrush(QtGui.QColor('#3c3c3c'))
-        painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
-
 
 class TitleBar(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -110,8 +98,7 @@ class SettingsPanel(QtGui.QWidget):
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        self.checkboxNotifications.setStyleSheet("color: #FFFFFF;")
-        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Light, False)
+        font = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
         self.checkboxNotifications.setFont(font)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():

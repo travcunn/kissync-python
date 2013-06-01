@@ -48,7 +48,7 @@ class UsernameLabel(QtGui.QLabel):
         self.setText(fullname)
         font = QtGui.QFont("Roboto", 12, QtGui.QFont.Light, False)
         self.setFont(font)
-        self.setStyleSheet("color: #FFFFFF;")
+        self.setStyleSheet("color: #000000;")
         self.repaint()
 
     def mousePressEvent(self, event):
