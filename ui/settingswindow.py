@@ -121,9 +121,8 @@ class SettingsPanel(QtGui.QWidget):
 
         self.accountWidget = AccountWidget(self.parent)
         #add the objects to the grid
-
+        grid.addWidget(self.checkboxNotifications, 1, 1, 2, 2)
         grid.addWidget(self.accountWidget, 1, 2, 1, 2)
-        grid.addWidget(self.checkboxNotifications, 2, 1, 2, 2)
         grid.addWidget(saveButton, 3, 3)
 
         self.setLayout(grid)
