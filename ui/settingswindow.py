@@ -1,3 +1,4 @@
+import os
 from PySide import QtGui, QtCore
 
 from ui.accountwidget import AccountWidget
@@ -21,8 +22,8 @@ class SettingsWindow(QtGui.QWidget):
         titleBar = TitleBar()
         maingrid = QtGui.QGridLayout()
         maingrid.setContentsMargins(0, 0, 0, 0)
-        maingrid.addWidget(titleBar)
-        maingrid.addWidget(self.settingsWidget)
+        maingrid.addWidget(titleBar, 0, 0)
+        maingrid.addWidget(self.settingsWidget, 1, 0, 2, 2)
 
         self.setLayout(maingrid)
         self.centerOnScreen()
@@ -68,7 +69,8 @@ class TitleBar(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TitleBar, self).__init__()
         self.parent = parent
-        self.setMinimumSize(200, 60)
+        self.setMinimumSize(520, 60)
+        self.setMaximumSize(520, 60)
         self.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("color: #FFFFFF;")
         self.setStyleSheet("QWidget { border: 0px; }")
@@ -93,7 +95,7 @@ class TitleBar(QtGui.QWidget):
     def draw(self, painter):
         penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
         painter.setPen(penblank)
-        painter.setBrush(QtGui.QColor('#699afb'))
+        painter.setBrush(QtGui.QColor('#1763A6'))
         painter.drawRect(0, 0, self.frameSize().width(), self.frameSize().height())
 
 
@@ -102,7 +104,6 @@ class SettingsPanel(QtGui.QWidget):
         super(SettingsPanel, self).__init__()
         self.parent = parent
 
-        self.setMinimumSize(200, 80)
         self.setContentsMargins(0, 0, 0, 0)
 
         grid = QtGui.QGridLayout()
@@ -147,6 +148,7 @@ class SaveButton(QtGui.QWidget):
         self.text = text
         self.font = QtGui.QFont("Vegur", 14, QtGui.QFont.Bold, False)
 
+        self.color = '#8DBF41'
         self.initUI()
 
     def setMaxSize(self):
@@ -166,7 +168,7 @@ class SaveButton(QtGui.QWidget):
     def drawBackground(self, painter):
         penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
         painter.setPen(penblank)
-        painter.setBrush(QtGui.QColor('#699afb'))
+        painter.setBrush(QtGui.QColor(self.color))
         painter.drawRect(0, 0, self.squareWidth, self.squareHeight)
 
     def drawText(self, event, painter):
@@ -176,3 +178,10 @@ class SaveButton(QtGui.QWidget):
 
     def mousePressEvent(self, event):
         self.parent.parent.saveSettings()
+    
+    def enterEvent(self, event):
+        self.repaint()
+
+    def leaveEvent(self, event):
+        self.repaint()
+

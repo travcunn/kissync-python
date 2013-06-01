@@ -22,18 +22,12 @@ class LogoutLabel(QtGui.QLabel):
         if (reply == QtGui.QMessageBox.Yes):
             self.parent.parent.tray.notification("Kissync", "Logging out..")
             try:
-                ##print "rm..."
                 os.remove(self.parent.parent.settingsFile)
-                ###print "Deleted Config"
-                ##print "exiting..."
-                #sys.exit()
                 os._exit(-1)
             except:
                 raise
         else:
             event.ignore()
-            #self.parent.tray.notification("Kissync", "The user pressed cancel. Continuing the setup...")
-            #self.parent.show()
 
     def mouseDoubleClickEvent(self, event):
         pass
@@ -70,7 +64,6 @@ class AvatarWidget(QtGui.QWidget):
         self.parent = parent
         self.email = email
 
-        ##get rid of the widget border
         self.setStyleSheet("QWidget { border: 0px; }")
 
         self.setMinimumSize(64, 64)
@@ -78,7 +71,6 @@ class AvatarWidget(QtGui.QWidget):
 
         self.gridlayout = QtGui.QGridLayout()
 
-        #self.setLayout(self.gridlayout)
         self.addIcon(self.email)
 
     def addIcon(self, email):
@@ -90,12 +82,10 @@ class AvatarWidget(QtGui.QWidget):
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 
     def paintEvent(self, e):
-        #Start Painter
         painter = QtGui.QPainter()
         painter.begin(self)
         # Draw Item Thumbnail.
         painter.drawImage(self.icontarget, self.icon)
-        #End Painter
         painter.end()
 
     def mousePressEvent(self, event):
@@ -118,7 +108,7 @@ class AccountWidget(QtGui.QWidget):
 
         #Call API to get full name and email address.
         try:
-            tree = self.parent.smartfile.get('/whoami', '/')
+            tree = self.parent.parent.smartfile.get('/whoami', '/')
             if 'user' not in tree:
                 return []
 
