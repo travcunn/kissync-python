@@ -177,10 +177,9 @@ class SaveButton(QtGui.QWidget):
 
     def mousePressEvent(self, event):
         self.parent.parent.saveSettings()
-    
+
     def enterEvent(self, event):
         self.repaint()
 
     def leaveEvent(self, event):
         self.repaint()
-
