@@ -1,4 +1,3 @@
-import os
 from PySide import QtGui, QtCore
 
 from ui.accountwidget import AccountWidget
