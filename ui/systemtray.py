@@ -21,7 +21,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
 
-        startingup = self.menu.addAction("starting up...")
+        startingup = self.menu.addAction("Connecting...")
         startingup.setEnabled(False)
 
         self.menu.addSeparator()
