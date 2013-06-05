@@ -25,7 +25,7 @@ class Downloader(threading.Thread):
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         try:
             f = self.smartfile.get('/path/data/', serverPath)
-            with file(absolutePath, 'wb') as o:
+            with open(absolutePath, 'wb') as o:
                 shutil.copyfileobj(f, o)
         except:
             raise
