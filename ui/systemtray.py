@@ -15,7 +15,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #menu before logging into Smartfile
         self.menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
-        self.setIcon(QtGui.QIcon("icons/menuicon.png"))
+        self.setIcon(QtGui.QIcon("icons/menuicon.ico"))
         self.setToolTip('Kissync')
 
         startAction = self.menu.addAction("Open Kissync Folder")
