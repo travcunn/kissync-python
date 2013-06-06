@@ -45,3 +45,4 @@ setup(
                 'icon_resources': [(1, "ui/images/icon.ico")],
                 }],
 )
+os.rename('dist/main.exe','dist/Kissync.exe') 
