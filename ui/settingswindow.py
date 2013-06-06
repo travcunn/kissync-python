@@ -3,6 +3,8 @@ from PySide import QtGui, QtCore
 from ui.accountwidget import AccountWidget
 from ui.style import KissyncStyle
 
+import ui.resources
+
 
 class SettingsWindow(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -11,7 +13,7 @@ class SettingsWindow(QtGui.QWidget):
         self.style = KissyncStyle()
 
         self.setWindowTitle('Kissync Folder Sync Settings')
-        self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
+        self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
         self.setFixedSize(520, 200)
         self.setContentsMargins(0, 0, 0, 0)
         #blue color: 699afb

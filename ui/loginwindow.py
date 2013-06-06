@@ -4,6 +4,8 @@ from authbrowser import AuthBrowser
 import sys
 import os
 
+import ui.resources
+
 
 class LoginWindow(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -12,7 +14,7 @@ class LoginWindow(QtGui.QWidget):
         self.setWindowTitle('Login to Kissync')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
-        self.setWindowIcon(QtGui.QIcon("icons/menuicon.png"))
+        self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
         #window size constraints
         self.setFixedSize(800, 550)
 
@@ -90,7 +92,7 @@ class CloudIconWidget(QtGui.QWidget):
         self.setMaximumSize(64, 64)
 
         self.icon = QtGui.QImage()
-        self.icon.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), "icons", "icon.xpm"))
+        self.icon.load(':/icon.xpm')
 
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 

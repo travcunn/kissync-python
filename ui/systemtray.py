@@ -3,6 +3,7 @@ import platform
 import subprocess
 from PySide import QtGui, QtCore
 
+import ui.resources
 from ui.settingswindow import SettingsWindow
 
 
@@ -15,7 +16,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #menu before logging into Smartfile
         self.menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
-        self.setIcon(QtGui.QIcon("icons/icon.ico"))
+        self.setIcon(QtGui.QIcon(":/menuicon.png"))
         self.setToolTip('Kissync')
 
         startAction = self.menu.addAction("Open Kissync Folder")
@@ -81,7 +82,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #menu after logging into Smartfile
         self.menu = QtGui.QMenu(self.parent)
         #TODO: Update this resource to be packaged with other resources
-        self.setIcon(QtGui.QIcon("icons/menuicon.png"))
+        self.setIcon(QtGui.QIcon(":/menuicon.png"))
         self.setToolTip('Kissync')
 
         startAction = self.menu.addAction("Open Kissync Folder")
