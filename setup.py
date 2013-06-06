@@ -1,11 +1,25 @@
 #!/bin/env python
 
-from setuptools import setup
+from distutils.core import setup
+import py2exe, sys, os
 
+_PYSIDEDIR = r'C:\Python27\Lib\site-packages\PySide'
+data_files =[('imageformats',[os.path.join(_PYSIDEDIR,'plugins\imageformats\qico4.dll')]),
+             ('imageformats',[os.path.join(_PYSIDEDIR,'plugins\imageformats\qjpeg4.dll')]),
+              ('.',[os.path.join(_PYSIDEDIR,'shiboken-python2.7.dll'),
+                os.path.join(_PYSIDEDIR,'QtCore4.dll'),
+                os.path.join(_PYSIDEDIR,'QtGui4.dll'), 
+                os.path.join(_PYSIDEDIR,'QtNetwork4.dll')]),
+                'cacert.pem'
+              ]
 setup(
-    name='main.py',
-    version="1.0",
-    description='Kissync Desktop Client',
+    name = 'Kissync',
+    version = "1.0",
+    description = 'Kissync',
+    author = 'Travis Cunningham',
+    author_email='travcunn@umail.iu.edu',
+    url = 'http://www.kissync.com',
+    license='MIT',
     install_requires=[
         'coverage',
         'coveralls',
@@ -19,7 +33,15 @@ setup(
         'watchdog',
         'wsgiref'
     ],
-    author='Travis Cunningham and Taylor Brazelton',
-    author_email='travcunn@umail.iu.edu',
-    license='MIT',
+    data_files=data_files,
+    options={
+        "py2exe":{
+            'dll_excludes':['MSVCP90.dll'],
+            'includes': ['PySide.QtNetwork'],
+        }},
+    app = ['main.py'],
+    windows = [{
+                'script': 'main.py',
+                'icon_resources': [(1, "ui/images/icon.ico")],
+                }],
 )

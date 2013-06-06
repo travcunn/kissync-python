@@ -13,11 +13,35 @@ data_files =[('imageformats',[os.path.join(_PYSIDEDIR,'plugins\imageformats\qico
                 'cacert.pem'
               ]
 setup(
+    name = 'Kissync',
+    version = "1.0",
+    description = 'Kissync',
+    author = 'Travis Cunningham',
+    author_email='travcunn@umail.iu.edu',
+    url = 'http://www.kissync.com',
+    license='MIT',
+    install_requires=[
+        'coverage',
+        'coveralls',
+        'oauthlib',
+        'pathtools',
+        'python-librsync',
+        'requests',
+        'requests-oauthlib',
+        'smartfile',
+        'tendo',
+        'watchdog',
+        'wsgiref'
+    ],
     data_files=data_files,
     options={
         "py2exe":{
-            "dll_excludes":['MSVCP90.dll'],
+            'dll_excludes':['MSVCP90.dll'],
             'includes': ['PySide.QtNetwork'],
         }},
-    windows = [{'script': "main.py"}],
+    app = ['main.py'],
+    windows = [{
+                'script': 'main.py',
+                'icon_resources': [(1, "ui/images/icon.ico")],
+                }],
 )
