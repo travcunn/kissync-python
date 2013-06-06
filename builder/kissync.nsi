@@ -71,10 +71,6 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}\imageformats"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk" "$INSTDIR\Kissync.exe"
-SectionEnd
-
-Section /o "Start Kissync with Windows (Recommended)" INSTALL_ONSTART
-  SetOutPath "$INSTDIR"
   CreateShortCut "$SMSTARTUP\Kissync.lnk" "$INSTDIR\Kissync.exe"
 SectionEnd
 
@@ -94,8 +90,7 @@ Section -Post
 SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${INSTALL_KISSYNC} "The Kissync synchronizer."
-  !insertmacro MUI_DESCRIPTION_TEXT ${INSTALL_ONSTART} "This will start Kissync when you start your computer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${INSTALL_KISSYNC} "The Kissync file synchronizer."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
