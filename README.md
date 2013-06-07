@@ -24,7 +24,9 @@ __Build:__
 In the console, run:
 
     $ installer_windows.cmd
-Alternatively, you can open *installer_windows.cmd* from the Windows file explorer
+Alternatively, you can open *installer_windows.cmd* from the Windows file explorer.
+
+The installer will named "Kissync.exe" in the directory "installer_windows"
 
 
 
