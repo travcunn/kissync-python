@@ -44,7 +44,6 @@ setup(
             'dll_excludes':['MSVCP90.dll'],
             'includes': ['PySide.QtNetwork'],
         }},
-    app = ['main.py'],
     windows = [{
                 'script': 'main.py',
                 'icon_resources': [(1, "ui/images/icon.ico")],

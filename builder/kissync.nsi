@@ -69,7 +69,6 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   file "imageformats\qico4.dll"
   file "imageformats\qjpeg4.dll"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}\imageformats"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk" "$INSTDIR\Kissync.exe"
   CreateShortCut "$SMSTARTUP\Kissync.lnk" "$INSTDIR\Kissync.exe"
 SectionEnd
@@ -128,6 +127,8 @@ Section "un.Kissync" UNINSTALL_KISSYNC
   Delete "$INSTDIR\win32wnet.pyd"
   Delete "$INSTDIR\imageformats\qico4.dll"
   Delete "$INSTDIR\imageformats\qjpeg4.dll"
+  Delete "$INSTDIR\uninst.exe"
+  RMDir "$INSTDIR\imageformats"
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk"

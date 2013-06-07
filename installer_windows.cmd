@@ -1,7 +1,7 @@
 @echo off
 set PYTHON="C:\Python27\python.exe"
 set BUILDDIR="installer_windows"
-set NSIS="C:\Program Files (x86)\NSIS\makensisw.exe"
+set NSIS="C:\Program Files (x86)\NSIS\makensis.exe"
 rmdir /s /q %BUILDDIR%/imageformats
 rmdir /s /q build
 rmdir /s /q dist
