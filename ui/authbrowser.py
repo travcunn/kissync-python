@@ -17,14 +17,13 @@ class AuthBrowser(QtWebKit.QWebView):
         currentUrl = str(self.url().toString())
 
         #if on kissync.com, pass verifier to smartfile client
-        if(currentUrl.startswith("http://www.kissync.com/oauth?verifier=")):
+        if currentUrl.startswith("http://www.kissync.com/oauth?verifier="):
             try:
                 verifier = currentUrl.replace("http://www.kissync.com/oauth?verifier=", "")
                 token, verifier = self.parent.parent.smartfile.get_access_token(None, verifier)
                 self.parent.parent.configuration.set("Login", "token", token)
                 self.parent.parent.configuration.set("Login", "verifier", verifier)
             except:
-                raise
                 #something happened after logging in successfully, but something happened with passing the verifier
                 self.parent.badLoginError()
             else:
@@ -44,6 +43,6 @@ class AuthBrowser(QtWebKit.QWebView):
         self.timer.start()
 
     def netwatch(self, value):
-        if (value == 1.0):
+        if value == 1.0:
             self.stop()
             self.parent.networkError()

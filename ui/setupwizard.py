@@ -56,10 +56,10 @@ class SetupWizard(QtGui.QWidget):
         self.centerOnScreen()
 
     def saveSettings(self):
-        '''Saves the settings based upon values in the setup'''
+        """Saves the settings based upon values in the setup"""
         self.parent.configuration.set('LocalSettings', 'sync-offline', True)
 
-        if(self.checkboxNotifications.isChecked()):
+        if self.checkboxNotifications.isChecked():
             self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
@@ -82,7 +82,7 @@ class SetupWizard(QtGui.QWidget):
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'Setup Wizard', "Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if(reply == QtGui.QMessageBox.Yes):
+        if reply == QtGui.QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()

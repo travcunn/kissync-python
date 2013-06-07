@@ -74,7 +74,7 @@ class PanelButton(QtGui.QWidget):
 
         painter.setPen(penblank)
 
-        if(self.hover):
+        if self.hover:
             painter.setBrush(self.qcolorlime)
         else:
             painter.setBrush(self.qcolorblue)

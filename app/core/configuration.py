@@ -5,7 +5,7 @@ class Configuration(ConfigParser.RawConfigParser):
     def __init__(self, configFile=None):
         ConfigParser.RawConfigParser.__init__(self)
         self.configuration = ConfigParser.RawConfigParser()
-        if (configFile) is not None:
+        if configFile is not None:
             self.configFile = configFile
             self.read()
         else:
@@ -14,8 +14,9 @@ class Configuration(ConfigParser.RawConfigParser):
             except ConfigException, e:
                 print e
 
+    # noinspection PyMethodOverriding
     def read(self):
-        '''Reads the configuration from the disk'''
+        """Reads the configuration from the disk"""
         try:
             with open(self.configFile):
                 pass
@@ -25,12 +26,12 @@ class Configuration(ConfigParser.RawConfigParser):
             self.configuration.read(self.configFile)
 
     def save(self):
-        '''Saves the configuration to the disk'''
+        """Saves the configuration to the disk"""
         with open(self.configFile, 'wb') as configurationFile:
             self.configuration.write(configurationFile)
 
     def setupConfig(self):
-        '''Initial configuration setup'''
+        """Initial configuration setup"""
         self.configuration.add_section('Login')
         self.configuration.set('Login', 'token', None)
         self.configuration.set('Login', 'verifier', None)
@@ -43,14 +44,15 @@ class Configuration(ConfigParser.RawConfigParser):
         self.save()
 
     def get(self, section, key):
-        '''Returns a value based upon the section and key'''
+        """Returns a value based upon the section and key"""
         #weird bug on windows. Instead of storing None, the config stores "None"
-        if (self.configuration.get(section, key) == "None"):
+        if self.configuration.get(section, key) == "None":
             return None
         return self.configuration.get(section, key)
 
+    # noinspection PyMethodOverriding
     def set(self, section, key, value):
-        '''Sets a configuration item based upon the section, key, and value'''
+        """Sets a configuration item based upon the section, key, and value"""
         self.configuration.set(section, key, value)
         self.save()
 

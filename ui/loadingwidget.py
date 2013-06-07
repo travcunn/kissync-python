@@ -49,7 +49,7 @@ class LoadingSquare(QtGui.QWidget):
     def animate(self, value):
         self.opacity = value * 1
         self.repaint()
-        if(self.opacity == 1.0):
+        if self.opacity == 1.0:
             self.timeline1 = QtCore.QTimeLine()
             self.timeline1.valueChanged.connect(self.animateback)
             self.timeline1.setDuration(1500)
@@ -58,7 +58,7 @@ class LoadingSquare(QtGui.QWidget):
     def animateback(self, value):
         self.opacity = 1 - (value * 1)
         self.repaint()
-        if(self.opacity == 0.0):
+        if self.opacity == 0.0:
             ##print self.showdelay
             self.timeline1 = QtCore.QTimeLine()
             self.timeline1.valueChanged.connect(self.animate)

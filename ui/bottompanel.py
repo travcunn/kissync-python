@@ -133,7 +133,7 @@ class BottomPanel(QtGui.QWidget):
         for item in self.parent.fileview.getActive():
             numberOfItems += 1
 
-        if (numberOfItems > 1):
+        if numberOfItems > 1:
             #set the max size with less info in the info panel
             self.infoTextWidget.setMaximumHeight(130)
             self.infoLayout.removeWidget(item)
@@ -193,12 +193,12 @@ class BottomPanel(QtGui.QWidget):
             totalsize = totalsize + item.fileSize
 
         thissize = totalsize
-        if (thissize < 1024):
+        if thissize < 1024:
             measurement = "bytes"
-        elif (thissize < int(math.pow(1024, 2))):
+        elif thissize < int(math.pow(1024, 2)):
             thissize /= 1024
             measurement = "kB"
-        elif (thissize < int(math.pow(1024, 3))):
+        elif thissize < int(math.pow(1024, 3)):
             thissize /= int(math.pow(1024, 2))
             measurement = "mB"
         else:
@@ -221,7 +221,7 @@ class BottomPanel(QtGui.QWidget):
 
     def buttonClicked(self, buttonType):
         button = buttonType.lower()
-        if (button == "add"):
+        if button == "add":
             #print "Add pressed."
             ##Open Dialog
             source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
@@ -256,7 +256,7 @@ class BottomPanel(QtGui.QWidget):
 
             self.parent.parent.database.generateRemoteListing()
 
-        elif (button == "delete"):
+        elif button == "delete":
             #print "Delete ."
             #Create the file path to delete.
             try:
@@ -264,7 +264,7 @@ class BottomPanel(QtGui.QWidget):
                 self.parent.fileview.activeSquares[0].filePath
             ##Delete the file from the system.
             try:
-                if (os.path.isdir(deleteMeFilePath)):
+                if os.path.isdir(deleteMeFilePath):
                     os.remove(deleteMeFilePath)
                 else:
                     self.deleteFolder(deleteMeFilePath)
@@ -325,7 +325,7 @@ source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.active
 
 #Get file extension and type
 extension = None
-if (source_file.rfind('.') != -1):
+if source_file.rfind('.') != -1:
     dotIndex = source_file.rfind('.')
     #print dotIndex
     fileNameLength = len(source_file)
@@ -379,11 +379,11 @@ else:
     #print "Nothing!  Yet! GENERATE A URL!"
     p = path
     n = name
-    tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True,
+    tree2 = self.parent.parent.smartfile.post('/link', path=p, name=n, read=True, list=True,
                                               recursive=True)
     #pprint.pprint(tree['href'])
     for i in tree2:
-        if (i == "href"):
+        if i == "href":
             url = tree2[i]
 
 #print "RESPONSE:"

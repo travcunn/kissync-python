@@ -41,7 +41,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #self.setIcon(self.loadingIcon1)
 
     def openSyncFolder(self):
-        '''Opens a file browser depending on the system'''
+        """Opens a file browser depending on the system"""
         if platform.system() == 'Darwin':
             subprocess.call(['open', '--', self.parent.syncDir])
         elif platform.system() == 'Linux':
@@ -50,14 +50,14 @@ class SystemTray(QtGui.QSystemTrayIcon):
             subprocess.call(['explorer', self.parent.syncDir])
 
     def openSettings(self):
-        '''Opens the settings window and brings it into focus'''
+        """Opens the settings window and brings it into focus"""
         self.settingsWindow.showSettings()
 
     def onLogin(self):
-        '''
+        """
         After auth finishes, create the settings window
         and update the system tray to display disk usage quota
-        '''
+        """
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")
         usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
@@ -65,12 +65,12 @@ class SystemTray(QtGui.QSystemTrayIcon):
         percentUsed = usedBytes / bytesLimit
 
         spaceLimit = bytesLimit
-        if (spaceLimit < 1024):
+        if spaceLimit < 1024:
             measurement = "bytes"
-        elif (spaceLimit < int(math.pow(1024, 2))):
+        elif spaceLimit < int(math.pow(1024, 2)):
             spaceLimit /= 1024
             measurement = "KB"
-        elif (spaceLimit < int(math.pow(1024, 3))):
+        elif spaceLimit < int(math.pow(1024, 3)):
             spaceLimit /= int(math.pow(1024, 2))
             measurement = "MB"
         else:
@@ -104,6 +104,6 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setContextMenu(self.menu)
 
     def notification(self, title, message):
-        '''Shows a system tray notification'''
-        if (self.parent.configuration.get('LocalSettings', 'notifications')):
+        """Shows a system tray notification"""
+        if self.parent.configuration.get('LocalSettings', 'notifications'):
             self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)

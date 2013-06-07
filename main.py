@@ -97,7 +97,7 @@ class Main(QtGui.QWidget):
         else:
             app_dir = os.path.join(os.path.expanduser("~"), ".kissync")
             settings_dir = os.path.join(os.path.expanduser("~"), ".kissync", "config.cfg")
-        return (app_dir, settings_dir)
+        return app_dir, settings_dir
 
     def closeEvent(self, event):
         event.ignore()

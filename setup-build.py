@@ -1,11 +1,14 @@
 #!/bin/env python
 
 from distutils.core import setup
+# noinspection PyPackageRequirements
 import py2exe, sys, os
 
 if sys.platform == 'darwin':
+    # noinspection PyPackageRequirements
     import py2app
 elif sys.platform == 'win32':
+    # noinspection PyPackageRequirements
     import py2exe
     _PYSIDEDIR = r'C:\Python27\Lib\site-packages\PySide'
     data_files =[('imageformats',[os.path.join(_PYSIDEDIR,'plugins\imageformats\qico4.dll')]),

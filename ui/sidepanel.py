@@ -100,7 +100,7 @@ class SidePanel(QtGui.QWidget):
         for item in self.parent.fileview.getActive():
             numberOfItems += 1
 
-        if (numberOfItems > 1):
+        if numberOfItems > 1:
             #set the max size with less info in the info panel
             self.infoTextWidget.setMaximumHeight(130)
             self.infoLayout.removeWidget(item)
@@ -155,12 +155,12 @@ class SidePanel(QtGui.QWidget):
             totalsize = totalsize + item.fileSize
 
         thissize = totalsize
-        if (thissize < 1024):
+        if thissize < 1024:
             measurement = "bytes"
-        elif (thissize < int(math.pow(1024, 2))):
+        elif thissize < int(math.pow(1024, 2)):
             thissize /= 1024
             measurement = "kB"
-        elif (thissize < int(math.pow(1024, 3))):
+        elif thissize < int(math.pow(1024, 3)):
             thissize /= int(math.pow(1024, 2))
             measurement = "mB"
         else:

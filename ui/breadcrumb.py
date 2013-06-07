@@ -33,7 +33,7 @@ class Crumb(QtGui.QWidget):
         self.isfirst = False
         self.isactive = False
 
-        if(self.arrow == 0):
+        if self.arrow == 0:
             self.isfirst = True
 
         self.textCondense()
@@ -46,9 +46,9 @@ class Crumb(QtGui.QWidget):
 
     def textCondense(self):
         self.displayText = self.text
-        if(len(self.text) > 10):
-            if not (self.isactive):
-                if(len(self.text) <= 18):
+        if len(self.text) > 10:
+            if not self.isactive:
+                if len(self.text) <= 18:
                     ratio = len(self.text) - 10
                     self.squareWidth = 100 + ratio * 10
                     self.setMaxSize()
@@ -71,7 +71,7 @@ class Crumb(QtGui.QWidget):
         painter = QtGui.QPainter()
         painter.begin(self)
         self.drawCrumbBack(painter)
-        if not (self.isfirst):
+        if not self.isfirst:
             self.drawArrow(painter)
         self.drawText(e, painter)
         painter.end()
@@ -80,7 +80,7 @@ class Crumb(QtGui.QWidget):
         penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
 
         painter.setPen(penblank)
-        if not (self.isactive):
+        if not self.isactive:
             painter.setBrush(self.color)
         else:
             painter.setBrush(self.parent.style.hexToQColor(self.parent.style.LIME))
@@ -163,7 +163,7 @@ class BreadCrumb(QtGui.QWidget):
         self.setPath("/")
 
     def __add(self, path):
-        if(len(self.breadcrumbItems) == 0):
+        if len(self.breadcrumbItems) == 0:
             item = Crumb(self, self.style.BLUE, path, 0)
         else:
             item = Crumb(self, self.style.BLUE, path, 1)
@@ -195,7 +195,7 @@ class BreadCrumb(QtGui.QWidget):
                 self.__add(newpath.split(folder)[0] + folder)
 
     def clicked(self, item):
-        if(item.crumbpath == "/Home"):
+        if item.crumbpath == "/Home":
             self.parent.changePath("/")
         else:
             self.parent.changePath(item.crumbpath)

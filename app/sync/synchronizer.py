@@ -115,9 +115,9 @@ class Synchronizer(threading.Thread):
                 return FileStatus.doNothing
 
     def localFilesList(self, localPath=None):
-        '''
+        """
         Indexes the local files and populates the self.localFiles dictionary
-        '''
+        """
         if localPath is None:
             localPath = self.parent.syncDir
         for (paths, dirs, files) in os.walk(localPath):
@@ -130,16 +130,16 @@ class Synchronizer(threading.Thread):
                 self.localFiles[discoveredFilePath.replace(localPath, '')] = modifiedTime, fileHash, isDir, size
 
     def remoteFilesList(self, remotePath=None):
-        '''
+        """
         Recursively indexes the remote directory since we cannot see the directories all at once
-        '''
+        """
         if remotePath is None:
             remotePath = "/"
         apiPath = '/path/info%s' % remotePath
         dirListing = self.parent.smartfile.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
-                if(i['isdir']):
+                if i['isdir']:
                     path = i['path'].encode("utf-8")
                     if path.startswith("/"):
                         path = path.replace("/", "", 1)
@@ -162,10 +162,10 @@ class Synchronizer(threading.Thread):
                     self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
 
     def _getFileHash(self, filepath):
-        '''Returns the MD5 hash of a local file'''
+        """Returns the MD5 hash of a local file"""
         fileToHash = open(filepath)
         md5 = hashlib.md5()
-        while(True):
+        while True:
             currentLine = fileToHash.readline()
             if not currentLine:
                 break

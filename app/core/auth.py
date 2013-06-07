@@ -22,7 +22,6 @@ class Authenticator(QtCore.QThread):
                 self.parent.smartfile.get('/whoami')
                 #self.parent.sync = SyncClient(self.parent.smartfile)
             except:
-                raise
                 self.showLoginWindow()
             else:
                 self.success()

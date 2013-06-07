@@ -54,7 +54,7 @@ class FolderPanel(QtGui.QWidget):
 
     def buttonClicked(self, buttonType):
         button = buttonType.lower()
-        if (button == "add"):
+        if button == "add":
             print "Add pressed."
             ##Open Dialog
             source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
@@ -82,10 +82,11 @@ class FolderPanel(QtGui.QWidget):
             except:
                 pass
             try:
+                # noinspection PyUnboundLocalVariable
                 self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
             except:
                 pass
-        elif (button == "refresh"):
+        elif button == "refresh":
             try:
                 Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
                 self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])

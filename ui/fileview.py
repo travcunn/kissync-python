@@ -62,7 +62,7 @@ class FileView(QtGui.QWidget):
 
         for i in tree['children']:
             #print i['path']
-            if (i['path'].startswith('/.')):
+            if i['path'].startswith('/.'):
                 pass
             else:
                 item = ItemObject(self, i['path'], i['name'], i['size'], i['mime'], i['isdir'], i['time'])
@@ -81,7 +81,7 @@ class FileView(QtGui.QWidget):
             return []
         # Returns all directories and files in directory!
         for i in tree['children']:
-            if (i['path'].startswith('/.')):
+            if i['path'].startswith('/.'):
                 pass
             else:
                 item = ItemObject(self, i['path'], i['name'], i['size'], i['mime'], i['isdir'], i['time'])
@@ -103,7 +103,7 @@ class FileView(QtGui.QWidget):
 
     def iterateActive(self):
         for item in self.squareArray:
-            if(item.isActive):
+            if item.isActive:
                 self.activeSquares.append(item)
 
     def getActive(self):

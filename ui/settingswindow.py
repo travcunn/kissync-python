@@ -30,7 +30,7 @@ class SettingsWindow(QtGui.QWidget):
         self.centerOnScreen()
 
     def saveSettings(self):
-        if(self.settingsWidget.checkboxNotifications.isChecked()):
+        if self.settingsWidget.checkboxNotifications.isChecked():
             self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)

@@ -42,7 +42,7 @@ class EventHandler(FileSystemEventHandler):
     def on_created(self, event):
         file = event.src_path
         serverPath = self.localToServerPath(file)
-        if not (event.is_directory):
+        if not event.is_directory:
             modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(file))
             fileHash = self.parent.parent._getFileHash(file)
             task = (serverPath, modifiedTime, fileHash)
@@ -60,14 +60,14 @@ class EventHandler(FileSystemEventHandler):
             raise
 
     def on_modified(self, event):
-        if not (event.is_directory):
+        if not event.is_directory:
             #TODO: add file to the synchronize queue here
             pass
 
     def localToServerPath(self, path):
         pathOnServer = path.replace(self.syncDir, '')
-        if(pathOnServer.startswith("/")):
+        if pathOnServer.startswith("/"):
             pathOnServer = pathOnServer.strip("/")
-        elif(pathOnServer.startswith("\\")):
+        elif pathOnServer.startswith("\\"):
             pathOnServer = pathOnServer.strip("\\")
         return pathOnServer

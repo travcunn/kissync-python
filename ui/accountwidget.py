@@ -19,7 +19,7 @@ class LogoutLabel(QtGui.QLabel):
     def mousePressEvent(self, event):
         ###print "Logout button pressed"
         reply = QtGui.QMessageBox.question(self, 'Kissync', "Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if (reply == QtGui.QMessageBox.Yes):
+        if reply == QtGui.QMessageBox.Yes:
             self.parent.parent.tray.notification("Kissync", "Logging out..")
             try:
                 os.remove(self.parent.parent.settingsFile)
@@ -109,11 +109,9 @@ class AccountWidget(QtGui.QWidget):
         #Call API to get full name and email address.
         try:
             tree = self.parent.parent.smartfile.get('/whoami', '/')
-            if 'user' not in tree:
-                return []
-
-            self.fullname = tree['user']['name'].encode("utf-8")
-            self.email = tree['user']['email'].encode("utf-8")
+            if 'user' in tree:
+                self.fullname = tree['user']['name'].encode("utf-8")
+                self.email = tree['user']['email'].encode("utf-8")
         except:
             self.fullname = "Test FullName"
             self.email = "web@google.com"

@@ -53,7 +53,7 @@ class OAuthClient(SmartFileClient):
         return super(OAuthClient, self)._do_request(*args, **kwargs)
 
     def get_request_token(self, callback=None):
-        "The first step of the OAuth workflow."
+        """The first step of the OAuth workflow."""
         if callback:
             callback = unicode(callback)
         oauth = OAuth1(self._client.token,
@@ -67,7 +67,7 @@ class OAuthClient(SmartFileClient):
         return self.__request
 
     def get_authorization_url(self, request=None):
-        "The second step of the OAuth workflow."
+        """The second step of the OAuth workflow."""
         if request is None:
             if not self.__request.is_valid():
                 raise APIError('You must obtain a request token to request '

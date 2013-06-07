@@ -34,6 +34,7 @@ class FlowLayout(QtGui.QLayout):
         return None
 
     def expandingDirections(self):
+        # noinspection PyCallingNonCallable
         return QtCore.Qt.Orientations(QtCore.Qt.Orientation(0))
 
     def hasHeightForWidth(self):

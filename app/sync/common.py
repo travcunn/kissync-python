@@ -3,10 +3,10 @@ import os
 
 
 def basePath(path):
-    '''
+    """
     Returns the path of files in the sync folder
     without the leading system folder separation
-    '''
+    """
     if path.startswith("/"):
         path = path.replace("/", "", 1)
     if path.startswith("\\"):
@@ -15,7 +15,7 @@ def basePath(path):
 
 
 def createLocalDirs(path):
-    '''Tries to create local directories'''
+    """Tries to create local directories"""
     try:
         os.makedirs(path)
     except OSError as e:
