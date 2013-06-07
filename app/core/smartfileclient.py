@@ -18,16 +18,16 @@ class SmartFileClient(Client):
         super(SmartFileClient, self).__init__(**kwargs)
 
     def get(self, endpoint, id=None, **kwargs):
-        return self._request('get', endpoint, id=id, params=kwargs, verify=common.certs_file())
+        return self._request('get', endpoint, id=id, params=kwargs, verify=common.cert_path())
 
     def put(self, endpoint, id=None, **kwargs):
-        return self._request('put', endpoint, id=id, data=kwargs, verify=common.certs_file())
+        return self._request('put', endpoint, id=id, data=kwargs, verify=common.cert_path())
 
     def post(self, endpoint, id=None, **kwargs):
-        return self._request('post', endpoint, id=id, data=kwargs, verify=common.certs_file())
+        return self._request('post', endpoint, id=id, data=kwargs, verify=common.cert_path())
 
     def delete(self, endpoint, id=None, **kwargs):
-        return self._request('delete', endpoint, id=id, data=kwargs, verify=common.certs_file())
+        return self._request('delete', endpoint, id=id, data=kwargs, verify=common.cert_path())
 
 
 class OAuthClient(SmartFileClient):
@@ -60,7 +60,7 @@ class OAuthClient(SmartFileClient):
                        client_secret=self._client.secret,
                        callback_uri=callback,
                        signature_method=SIGNATURE_PLAINTEXT)
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=common.certs_file())
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=common.cert_path())
         credentials = urlparse.parse_qs(r.text)
         self.__request = OAuthToken(credentials.get('oauth_token')[0],
                                     credentials.get('oauth_token_secret')[0])
@@ -78,8 +78,7 @@ class OAuthClient(SmartFileClient):
         return url + '?' + urllib.urlencode(dict(oauth_token=request.token))
 
     def get_access_token(self, request=None, verifier=None):
-        """The final step of the OAuth workflow. After this the client can make
-        API calls."""
+        """The final step of the OAuth workflow."""
         if verifier:
             verifier = unicode(verifier)
         if request is None:
@@ -94,7 +93,7 @@ class OAuthClient(SmartFileClient):
                        resource_owner_secret=request.secret,
                        verifier=unicode(verifier),
                        signature_method=SIGNATURE_PLAINTEXT)
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'), auth=oauth, verify=common.certs_file())
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'), auth=oauth, verify=common.cert_path())
         credentials = urlparse.parse_qs(r.text)
         self._access = OAuthToken(credentials.get('oauth_token')[0],
                                   credentials.get('oauth_token_secret')[0])

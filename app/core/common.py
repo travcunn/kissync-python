@@ -6,20 +6,32 @@ import sys
 from pkg_resources import resource_filename
 
 
-#http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
 def main_is_frozen():
+    """
+    Returns whether or not it is frozen in an executable
+    #http://www.py2exe.org/index.cgi/HowToDetermineIfRunningFromExe
+    :rtype : bool
+    """
     return (hasattr(sys, "frozen") or  # new py2exe
             hasattr(sys, "importers")  # old py2exe
             or imp.is_frozen("__main__"))  # tools/freeze
 
 
 def get_main_dir():
+    """
+    Returns the directory in which it is being run
+    :rtype : str
+    """
     if main_is_frozen():
         return os.path.dirname(sys.executable)
     return os.path.dirname(sys.argv[0])
 
 
-def certs_file():
+def cert_path():
+    """
+    Returns the certificate path depending on the platform
+    :rtype : str
+    """
     if platform.system() == 'Windows':
         app_dir = os.path.join(
             os.getenv('appdata', os.path.expanduser('~')), 'Kissync'
