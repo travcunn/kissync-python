@@ -1,11 +1,11 @@
 import os
+import platform
 import sys
 from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
 from app.core.configuration import Configuration
-
 from app.sync.synchronizer import Synchronizer
 
 from ui.loginwindow import LoginWindow
@@ -20,8 +20,8 @@ class Main(QtGui.QWidget):
         self.style = KissyncStyle()
 
         self.syncDir = os.path.join(os.path.expanduser("~"), "Kissync")
-        self.settingsDir = os.path.join(os.path.expanduser("~"), ".kissync")
-        self.settingsFile = os.path.join(os.path.expanduser("~"), ".kissync", "config.cfg")
+        self.settingsDir = self.settingsDirectory()[0]
+        self.settingsFile = self.settingsDirectory()[1]
 
         self.directorySetup()  # create the directories that will be needed
 
@@ -61,28 +61,43 @@ class Main(QtGui.QWidget):
         self.setLayout(self.grid)
 
     def start(self):
-        '''Called if the authentication is successful'''
+        """Called if the authentication is successful"""
         self.synchronizer = Synchronizer(self)  # initiate the synchronizer
         self.synchronizer.start()
         self.tray.onLogin()
 
     def login(self, qturl):
-        '''Opens the login window'''
+        """Opens the login window"""
         self.loginwindow.htmlView.load(qturl)
         self.loginwindow.show()
 
     def setup(self):
-        '''First Run: Called if the authentication is successful'''
+        """First Run: Called if the authentication is successful"""
         self.setupwizard.show()
         self.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
 
     def directorySetup(self):
-        '''Checks for sync and settings folder and creates if needed'''
+        """Checks for sync and settings folder and creates if needed"""
         if not os.path.exists(self.settingsDir):
             os.makedirs(self.settingsDir)
 
         if not os.path.exists(self.syncDir):
             os.makedirs(self.syncDir)
+
+    def settingsDirectory(self):
+        if platform.system() == 'Windows':
+            app_dir = os.path.join(
+                os.getenv('appdata', os.path.expanduser('~')), 'Kissync'
+            )
+            settings_dir = os.path.join(
+                os.getenv('appdata', os.path.expanduser('~')), 'Kissync', 'config.cfg'
+            )
+            if not os.path.exists(app_dir):
+                os.mkdir(app_dir)
+        else:
+            app_dir = os.path.join(os.path.expanduser("~"), ".kissync")
+            settings_dir = os.path.join(os.path.expanduser("~"), ".kissync", "config.cfg")
+        return (app_dir, settings_dir)
 
     def closeEvent(self, event):
         event.ignore()

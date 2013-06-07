@@ -1,5 +1,3 @@
-import os
-import sys
 import urllib
 import urlparse
 import requests
@@ -10,24 +8,26 @@ from smartfile.errors import APIError
 from requests_oauthlib import OAuth1
 from oauthlib.oauth1 import SIGNATURE_PLAINTEXT
 
+import common
+
 
 class SmartFileClient(Client):
     """Overrides Client from the smartfile library"""
+
     def __init__(self, **kwargs):
-        self.cert_path = self.resource_path('cacert.pem')
         super(SmartFileClient, self).__init__(**kwargs)
 
     def get(self, endpoint, id=None, **kwargs):
-        return self._request('get', endpoint, id=id, params=kwargs, verify=self.cert_path)
+        return self._request('get', endpoint, id=id, params=kwargs, verify=common.certs_file())
 
     def put(self, endpoint, id=None, **kwargs):
-        return self._request('put', endpoint, id=id, data=kwargs, verify=self.cert_path)
+        return self._request('put', endpoint, id=id, data=kwargs, verify=common.certs_file())
 
     def post(self, endpoint, id=None, **kwargs):
-        return self._request('post', endpoint, id=id, data=kwargs, verify=self.cert_path)
+        return self._request('post', endpoint, id=id, data=kwargs, verify=common.certs_file())
 
     def delete(self, endpoint, id=None, **kwargs):
-        return self._request('delete', endpoint, id=id, data=kwargs, verify=self.cert_path)
+        return self._request('delete', endpoint, id=id, data=kwargs, verify=common.certs_file())
 
 
 class OAuthClient(SmartFileClient):
@@ -44,16 +44,13 @@ class OAuthClient(SmartFileClient):
         if not self._access.is_valid():
             raise APIError('You must obtain an access token before making API '
                            'calls.')
-        # Add the OAuth parameters.
+            # Add the OAuth parameters.
         kwargs['auth'] = OAuth1(self._client.token,
                                 client_secret=self._client.secret,
                                 resource_owner_key=self._access.token,
                                 resource_owner_secret=self._access.secret,
                                 signature_method=SIGNATURE_PLAINTEXT)
         return super(OAuthClient, self)._do_request(*args, **kwargs)
-
-    def resource_path(self, relative):
-        return os.path.join(getattr(sys, '_MEIPASS', os.path.abspath(".")), relative)
 
     def get_request_token(self, callback=None):
         "The first step of the OAuth workflow."
@@ -63,8 +60,7 @@ class OAuthClient(SmartFileClient):
                        client_secret=self._client.secret,
                        callback_uri=callback,
                        signature_method=SIGNATURE_PLAINTEXT)
-        cert_path = self.resource_path('cacert.pem')
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=cert_path)
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=common.certs_file())
         credentials = urlparse.parse_qs(r.text)
         self.__request = OAuthToken(credentials.get('oauth_token')[0],
                                     credentials.get('oauth_token_secret')[0])
@@ -98,8 +94,7 @@ class OAuthClient(SmartFileClient):
                        resource_owner_secret=request.secret,
                        verifier=unicode(verifier),
                        signature_method=SIGNATURE_PLAINTEXT)
-        cert_path = self.resource_path('cacert.pem')
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'), auth=oauth, verify=cert_path)
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'), auth=oauth, verify=common.certs_file())
         credentials = urlparse.parse_qs(r.text)
         self._access = OAuthToken(credentials.get('oauth_token')[0],
                                   credentials.get('oauth_token_secret')[0])

@@ -104,6 +104,7 @@ Section "un.Kissync" UNINSTALL_KISSYNC
   Delete "$INSTDIR\bz2.pyd"
   Delete "$INSTDIR\cacert.pem"
   Delete "$INSTDIR\Kissync.exe"
+  Delete "$INSTDIR\Kissync.exe.log"
   Delete "$INSTDIR\library.zip"
   Delete "$INSTDIR\MPR.dll"
   Delete "$INSTDIR\pyexpat.pyd"
