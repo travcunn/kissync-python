@@ -26,14 +26,15 @@ class AvatarWidget(QtGui.QWidget):
 
     def addIcon(self, extension):
         self.icon = QtGui.QImage()
-        if(self.isFolder):
+        if (self.isFolder):
             extension = "folder"
-        elif(extension is None or extension == ""):
+        elif (extension is None or extension == ""):
             extension = "unknown"
         else:
             extension = extension[1:]
 
-        if (self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")):
+        if (
+        self.icon.load(os.path.dirname(os.path.realpath(__file__)) + "/icons/faience/mimetypes/" + extension + ".svg")):
             ##print "KNOWN"
             pass
         else:
@@ -52,7 +53,8 @@ class AvatarWidget(QtGui.QWidget):
 
 
 class ItemObject(QtGui.QWidget):
-    def __init__(self, parent=None, filePath=None, fileName=None, fileSize=None, fileType=None, isFolder=False, modified=None, panelView=False):
+    def __init__(self, parent=None, filePath=None, fileName=None, fileSize=None, fileType=None, isFolder=False,
+                 modified=None, panelView=False):
         QtGui.QWidget.__init__(self)
         self.parent = parent
 
@@ -100,7 +102,7 @@ class ItemObject(QtGui.QWidget):
         self.gridlayout.addWidget(self.icon, 1, 1, 3, 1, QtCore.Qt.AlignLeft)
 
         #Delete Button
-        if not(self.panelView):
+        if not (self.panelView):
             self.deleteMeButton = QtGui.QPushButton('X')
             self.deleteMeButton.setStyleSheet('QPushButton {color: White}')
             self.deleteMeButton.clicked.connect(self.deleteMe)
@@ -121,27 +123,27 @@ class ItemObject(QtGui.QWidget):
 
         #File Size Label
         thissize = self.fileSize
-        if(thissize < 1024):
+        if (thissize < 1024):
             measurement = "bytes"
-        elif(thissize < int(math.pow(1024, 2))):
-            thissize = thissize / 1024
+        elif (thissize < int(math.pow(1024, 2))):
+            thissize /= 1024
             measurement = "kB"
-        elif(thissize < int(math.pow(1024, 3))):
-            thissize = thissize / int(math.pow(1024, 2))
+        elif (thissize < int(math.pow(1024, 3))):
+            thissize /= int(math.pow(1024, 2))
             measurement = "mB"
         else:
-            thissize = thissize / int(math.pow(1024, 3))
+            thissize /= int(math.pow(1024, 3))
             measurement = "gb"
 
         self.lbFileSize = QtGui.QLabel(str(thissize) + " " + measurement)
         self.lbFileSize.setStyleSheet('QLabel {color: #222222}')
         self.lbFileSize.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        if not(self.isFolder):
+        if not (self.isFolder):
             self.gridlayout.addWidget(self.lbFileSize, 3, 2, QtCore.Qt.AlignLeft)
 
         self.setLayout(self.gridlayout)
 
-        if not(self.panelView):
+        if not (self.panelView):
             self.opacity = 0.0
             self.timeline = QtCore.QTimeLine()
             self.timeline.valueChanged.connect(self.animate)
@@ -163,7 +165,7 @@ class ItemObject(QtGui.QWidget):
 
         painter.setPen(penblank)
 
-        if(self.isActive):
+        if (self.isActive):
             painter.setBrush(self.qcolorlime)
         else:
             painter.setBrush(self.qcolorblue)
@@ -174,8 +176,8 @@ class ItemObject(QtGui.QWidget):
         self.repaint()
 
     def mousePressEvent(self, event):
-        if not(self.panelView):
-            if not(self.isActive):
+        if not (self.panelView):
+            if not (self.isActive):
                 self.isActive = True
                 self.opacity = 1.0
             else:
@@ -184,20 +186,20 @@ class ItemObject(QtGui.QWidget):
                 self.isActive = False
                 self.opacity = 0.66
 
-            if(len(self.parent.parent.fileview.getActive()) > 0):
+            if (len(self.parent.parent.fileview.getActive()) > 0):
                 self.parent.parent.folderpanel.hide()
                 self.parent.parent.bottompanel.activate()
 
             self.repaint()
 
     def mouseDoubleClickEvent(self, event):
-        if not(self.panelView):
+        if not (self.panelView):
             #Go Deeper into directory, or download and open if file.
             ##print self.filePath
             self.isActive = False
             self.parent.parent.bottompanel.deactivate()
             self.parent.parent.folderpanel.show()
-            if(self.isFolder):
+            if (self.isFolder):
                 ##print "You double clicked a folder"
                 #Item double clicked upon is a Folder.
                 #Change the breadcrumb path.
@@ -210,15 +212,15 @@ class ItemObject(QtGui.QWidget):
                 self.openFile(self.filePath)
 
     def enterEvent(self, event):
-        if not(self.panelView):
+        if not (self.panelView):
             ##print("Enter")
             self.opacity = 1.0
             self.repaint()
 
     def leaveEvent(self, event):
-        if not(self.panelView):
+        if not (self.panelView):
             ##print("Leave")
-            if not(self.isActive):
+            if not (self.isActive):
                 self.opacity = 0.66
             self.repaint()
 
@@ -255,8 +257,10 @@ class ItemObject(QtGui.QWidget):
             pathToAdd = ""
             #A BUG EXISTS IN THIS, PLEASE TEST THIS
             for directory in pathArray:
-                if not os.path.exists(self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory):
-                    os.makedirs(self.parent.parent.parent.configuration.get('LocalSettings', 'sync-dir') + "/" + pathToAdd + directory)
+                if not os.path.exists(self.parent.parent.parent.configuration.get('LocalSettings',
+                                                                                  'sync-dir') + "/" + pathToAdd + directory):
+                    os.makedirs(self.parent.parent.parent.configuration.get('LocalSettings',
+                                                                            'sync-dir') + "/" + pathToAdd + directory)
                     pathToAdd = pathToAdd + directory + "/"
                     ##print pathToAdd
 

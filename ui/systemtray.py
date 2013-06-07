@@ -3,12 +3,10 @@ import platform
 import subprocess
 from PySide import QtGui, QtCore
 
-import ui.resources
 from ui.settingswindow import SettingsWindow
 
 
 class SystemTray(QtGui.QSystemTrayIcon):
-
     def __init__(self, parent=None):
         QtGui.QSystemTrayIcon.__init__(self, parent)
         self.parent = parent
@@ -39,7 +37,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         #self.loadingIcon3 = QtGui.QIcon("icons/menuicon3.png")
         #self.loadingIcon4 = QtGui.QIcon("icons/menuicon4.png")
 
-    #def loading(self):
+        #def loading(self):
         #self.setIcon(self.loadingIcon1)
 
     def openSyncFolder(self):
@@ -67,16 +65,16 @@ class SystemTray(QtGui.QSystemTrayIcon):
         percentUsed = usedBytes / bytesLimit
 
         spaceLimit = bytesLimit
-        if(spaceLimit < 1024):
+        if (spaceLimit < 1024):
             measurement = "bytes"
-        elif(spaceLimit < int(math.pow(1024, 2))):
-            spaceLimit = spaceLimit / 1024
+        elif (spaceLimit < int(math.pow(1024, 2))):
+            spaceLimit /= 1024
             measurement = "KB"
-        elif(spaceLimit < int(math.pow(1024, 3))):
-            spaceLimit = spaceLimit / int(math.pow(1024, 2))
+        elif (spaceLimit < int(math.pow(1024, 3))):
+            spaceLimit /= int(math.pow(1024, 2))
             measurement = "MB"
         else:
-            spaceLimit = spaceLimit / int(math.pow(1024, 3))
+            spaceLimit /= int(math.pow(1024, 3))
             measurement = "GB"
 
         #menu after logging into Smartfile
@@ -107,5 +105,5 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
     def notification(self, title, message):
         '''Shows a system tray notification'''
-        if(self.parent.configuration.get('LocalSettings', 'notifications')):
+        if (self.parent.configuration.get('LocalSettings', 'notifications')):
             self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)

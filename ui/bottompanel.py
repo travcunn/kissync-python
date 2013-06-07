@@ -1,11 +1,13 @@
 import math
 import os
+import shutil
+
 from PyQt4 import QtGui, QtCore
+
 from square import ItemObject
 from panelbutton import PanelButton
-
 import flowlayout
-import shutil
+
 
 #Copy and paste library.. platform independent.
 #breaks with the virtualenv
@@ -129,9 +131,9 @@ class BottomPanel(QtGui.QWidget):
     def updateView(self):
         numberOfItems = 0
         for item in self.parent.fileview.getActive():
-            numberOfItems = numberOfItems + 1
+            numberOfItems += 1
 
-        if(numberOfItems > 1):
+        if (numberOfItems > 1):
             #set the max size with less info in the info panel
             self.infoTextWidget.setMaximumHeight(130)
             self.infoLayout.removeWidget(item)
@@ -144,7 +146,12 @@ class BottomPanel(QtGui.QWidget):
             #set the max size on one object
             self.infoTextWidget.setMaximumHeight(185)
             #self.parent.fileview.squareArray[0]
-            self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
+            self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath,
+                                   self.parent.fileview.activeSquares[0].fileName,
+                                   self.parent.fileview.activeSquares[0].fileSize,
+                                   self.parent.fileview.activeSquares[0].fileType,
+                                   self.parent.fileview.activeSquares[0].isFolder,
+                                   self.parent.fileview.activeSquares[0].lastModified, True)
             #self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
             #self.numberSelected.setText("1 item selected.")
             #self.sizeSelectedTitle.setText("Size: ")
@@ -186,16 +193,16 @@ class BottomPanel(QtGui.QWidget):
             totalsize = totalsize + item.fileSize
 
         thissize = totalsize
-        if(thissize < 1024):
+        if (thissize < 1024):
             measurement = "bytes"
-        elif(thissize < int(math.pow(1024, 2))):
-            thissize = thissize / 1024
+        elif (thissize < int(math.pow(1024, 2))):
+            thissize /= 1024
             measurement = "kB"
-        elif(thissize < int(math.pow(1024, 3))):
-            thissize = thissize / int(math.pow(1024, 2))
+        elif (thissize < int(math.pow(1024, 3))):
+            thissize /= int(math.pow(1024, 2))
             measurement = "mB"
         else:
-            thissize = thissize / int(math.pow(1024, 3))
+            thissize /= int(math.pow(1024, 3))
             measurement = "gb"
         totalsize = thissize
         self.sizeSelected.setText(str(totalsize) + " " + measurement)
@@ -205,7 +212,7 @@ class BottomPanel(QtGui.QWidget):
         self.show()
 
     def deactivate(self):
-        if not(self.item is None):
+        if not (self.item is None):
             self.infoLayout.removeWidget(self.item)
             #self.sizeSelected.setText("")
             self.numberSelected.setText("")
@@ -220,11 +227,12 @@ class BottomPanel(QtGui.QWidget):
             source_file = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.path.expanduser("~"))
             ## Print File Name
             #print str(source_file)
-            destination_folder = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.breadcrumb.currentPath
+            destination_folder = self.parent.parent.configuration.get('LocalSettings',
+                                                                      'sync-dir') + self.parent.breadcrumb.currentPath
             #print "Source: " + source_file
             #print "Dest: " + destination_folder
             #if not os.path.exists(destination_folder):
-                #os.makedirs(destination_folder)
+            #os.makedirs(destination_folder)
 
             #Call Move File Function.
             self.moveFile(str(source_file), str(destination_folder))
@@ -242,7 +250,7 @@ class BottomPanel(QtGui.QWidget):
                 Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
             except:
                 pass
-            #Prints out the directory...
+                #Prints out the directory...
             #print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
             self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
 
@@ -252,10 +260,11 @@ class BottomPanel(QtGui.QWidget):
             #print "Delete ."
             #Create the file path to delete.
             try:
-                deleteMeFilePath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
+                deleteMeFilePath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') +
+                                   self.parent.fileview.activeSquares[0].filePath
                 ##Delete the file from the system.
                 try:
-                    if(os.path.isdir(deleteMeFilePath)):
+                    if (os.path.isdir(deleteMeFilePath)):
                         os.remove(deleteMeFilePath)
                     else:
                         self.deleteFolder(deleteMeFilePath)
@@ -288,9 +297,12 @@ class BottomPanel(QtGui.QWidget):
             except:
                 pass
 
-            source_file = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') + self.parent.fileview.activeSquares[0].filePath
+            source_file = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') +
+                          self.parent.fileview.activeSquares[0].filePath
 
-            comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self.parent.parent.configuration.get('LocalSettings', 'sync-dir')))
+            comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory",
+                                                                 self.parent.parent.configuration.get('LocalSettings',
+                                                                                                      'sync-dir')))
 
             destination_folder = comment
             #print str(source_file)
@@ -359,7 +371,7 @@ class BottomPanel(QtGui.QWidget):
                 if 'href' not in i:
                     return []
                 url = i['href'].encode("utf-8")
-            #print path
+                #print path
             #print "-----------"
             #print name
             if not (url == "" or url is None):
@@ -368,10 +380,11 @@ class BottomPanel(QtGui.QWidget):
                 #print "Nothing!  Yet! GENERATE A URL!"
                 p = path
                 n = name
-                tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True, recursive=True)
+                tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True,
+                                                          recursive=True)
                 #pprint.pprint(tree['href'])
                 for i in tree2:
-                    if(i == "href"):
+                    if (i == "href"):
                         url = tree2[i]
 
             #print "RESPONSE:"
@@ -381,7 +394,7 @@ class BottomPanel(QtGui.QWidget):
             #text = "Kissync"
             #webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
             self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
-        elif(button == "user_premissions"):
+        elif (button == "user_premissions"):
             #print "User Premissions!"
             self.manageUser.show()
             self.manageUser.path = self.parent.fileview.activeSquares[0].filePath

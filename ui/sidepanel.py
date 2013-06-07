@@ -98,9 +98,9 @@ class SidePanel(QtGui.QWidget):
     def updateView(self):
         numberOfItems = 0
         for item in self.parent.fileview.getActive():
-            numberOfItems = numberOfItems + 1
+            numberOfItems += 1
 
-        if(numberOfItems > 1):
+        if (numberOfItems > 1):
             #set the max size with less info in the info panel
             self.infoTextWidget.setMaximumHeight(130)
             self.infoLayout.removeWidget(item)
@@ -112,7 +112,12 @@ class SidePanel(QtGui.QWidget):
             #set the max size on one object
             self.infoTextWidget.setMaximumHeight(185)
             #self.parent.fileview.squareArray[0]
-            self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath, self.parent.fileview.activeSquares[0].fileName, self.parent.fileview.activeSquares[0].fileSize, self.parent.fileview.activeSquares[0].fileType, self.parent.fileview.activeSquares[0].isFolder, self.parent.fileview.activeSquares[0].lastModified, True)
+            self.item = ItemObject(self, self.parent.fileview.activeSquares[0].filePath,
+                                   self.parent.fileview.activeSquares[0].fileName,
+                                   self.parent.fileview.activeSquares[0].fileSize,
+                                   self.parent.fileview.activeSquares[0].fileType,
+                                   self.parent.fileview.activeSquares[0].isFolder,
+                                   self.parent.fileview.activeSquares[0].lastModified, True)
             #self.infoLayout.addWidget(self.item, 10, 0, 1, 0, QtCore.Qt.AlignHCenter)
             self.numberSelected.setText("1 item selected.")
             self.sizeSelectedTitle.setText("Size: ")
@@ -150,16 +155,16 @@ class SidePanel(QtGui.QWidget):
             totalsize = totalsize + item.fileSize
 
         thissize = totalsize
-        if(thissize < 1024):
+        if (thissize < 1024):
             measurement = "bytes"
-        elif(thissize < int(math.pow(1024, 2))):
-            thissize = thissize / 1024
+        elif (thissize < int(math.pow(1024, 2))):
+            thissize /= 1024
             measurement = "kB"
-        elif(thissize < int(math.pow(1024, 3))):
-            thissize = thissize / int(math.pow(1024, 2))
+        elif (thissize < int(math.pow(1024, 3))):
+            thissize /= int(math.pow(1024, 2))
             measurement = "mB"
         else:
-            thissize = thissize / int(math.pow(1024, 3))
+            thissize /= int(math.pow(1024, 3))
             measurement = "gb"
         totalsize = thissize
         self.sizeSelected.setText(str(totalsize) + " " + measurement)
@@ -175,7 +180,7 @@ class SidePanel(QtGui.QWidget):
         self.show()
 
     def deactivate(self):
-        if not(self.item is None):
+        if not (self.item is None):
             self.infoLayout.removeWidget(self.item)
             self.sizeSelected.setText("")
             self.numberSelected.setText("")
