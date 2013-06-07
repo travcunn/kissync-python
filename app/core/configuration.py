@@ -3,9 +3,8 @@ import ConfigParser
 
 class Configuration(ConfigParser.RawConfigParser):
     def __init__(self, configFile=None):
-        object.__init__(self)
+        ConfigParser.RawConfigParser.__init__(self)
         self.configuration = ConfigParser.RawConfigParser()
-
         if (configFile) is not None:
             self.configFile = configFile
             self.read()
@@ -46,7 +45,7 @@ class Configuration(ConfigParser.RawConfigParser):
     def get(self, section, key):
         '''Returns a value based upon the section and key'''
         #weird bug on windows. Instead of storing None, the config stores "None"
-        if(self.configuration.get(section, key) == "None"):
+        if (self.configuration.get(section, key) == "None"):
             return None
         return self.configuration.get(section, key)
 

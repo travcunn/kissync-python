@@ -261,157 +261,158 @@ class BottomPanel(QtGui.QWidget):
             #Create the file path to delete.
             try:
                 deleteMeFilePath = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') +
-                                   self.parent.fileview.activeSquares[0].filePath
-                ##Delete the file from the system.
-                try:
-                    if (os.path.isdir(deleteMeFilePath)):
-                        os.remove(deleteMeFilePath)
-                    else:
-                        self.deleteFolder(deleteMeFilePath)
-                except:
-                    pass
-
-                ##Instead of deleting a specific square.. just re-update the fileview.
-                deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
-                #Prints out the directory...
-                #print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
-                self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
-
-                self.parent.parent.tray.notification("Kissync", "Deleted")
-            except:
-                #print "File does not exist on computer... Deleting from Cloud!"
-                try:
-                    self.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
-                except:
-                    pass
-                self.parent.parent.tray.notification("Kissync", "In Deletion Queue...")
-
-            self.parent.parent.database.generateRemoteListing()
-
-        elif (button == "move"):
-            #Move File...
-            #print self.parent.fileview.activeSquares[0].filePath
-            #print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+                self.parent.fileview.activeSquares[0].filePath
+            ##Delete the file from the system.
             try:
-                self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+                if (os.path.isdir(deleteMeFilePath)):
+                    os.remove(deleteMeFilePath)
+                else:
+                    self.deleteFolder(deleteMeFilePath)
             except:
                 pass
 
-            source_file = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') +
-                          self.parent.fileview.activeSquares[0].filePath
-
-            comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory",
-                                                                 self.parent.parent.configuration.get('LocalSettings',
-                                                                                                      'sync-dir')))
-
-            destination_folder = comment
-            #print str(source_file)
-            #print str(destination_folder)
-
-            self.moveFile(str(source_file), str(destination_folder))
-
-            Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
+            ##Instead of deleting a specific square.. just re-update the fileview.
+            deleteFileName = self.parent.fileview.activeSquares[0].filePath.rfind('/')
             #Prints out the directory...
             #print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
-            self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
+            self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1])
 
-            self.parent.parent.tray.notification("Kissync", "Moved")
+            self.parent.parent.tray.notification("Kissync", "Deleted")
+        except:
+        #print "File does not exist on computer... Deleting from Cloud!"
+        try:
+            self.parent.parent.smartfile.post('/path/oper/remove/', path=self.filePath)
+        except:
+            pass
+        self.parent.parent.tray.notification("Kissync", "In Deletion Queue...")
 
-            self.parent.parent.database.generateRemoteListing()
+    self.parent.parent.database.generateRemoteListing()
 
-        elif (button == "rename"):
+elif (button == "move"):
+#Move File...
+#print self.parent.fileview.activeSquares[0].filePath
+#print self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+try:
+    self.parent.fileview.activeSquares[0].downloadFile(self.parent.fileview.activeSquares[0].filePath)
+except:
+    pass
 
-            source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
+source_file = self.parent.parent.configuration.get('LocalSettings', 'sync-dir') +
+self.parent.fileview.activeSquares[0].filePath
 
-            #Get file extension and type
-            extension = None
-            if (source_file.rfind('.') != -1):
-                dotIndex = source_file.rfind('.')
-                #print dotIndex
-                fileNameLength = len(source_file)
-                #print fileNameLength
-                extension = source_file[dotIndex:fileNameLength]
-            else:
-                extension = None
+comment = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory",
+                                                     self.parent.parent.configuration.get('LocalSettings',
+                                                                                          'sync-dir')))
 
-            indFolder = self.parent.fileview.activeSquares[0].filePath.rfind('/')
-            folder = "/Kissync" + self.parent.fileview.activeSquares[0].filePath[:indFolder + 1]
+destination_folder = comment
+#print str(source_file)
+#print str(destination_folder)
 
-            inputter = InputDialog(self, title="Rename:", label="Folder:", text=extension)
+self.moveFile(str(source_file), str(destination_folder))
 
-            inputter.exec_()
+Filenm = self.parent.fileview.squareArray[0].filePath.rfind('/')
+#Prints out the directory...
+#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
+self.parent.changePath(self.parent.fileview.squareArray[0].filePath[:Filenm + 1])
 
-            #print source_file
-            dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
-            #print dest_file
-            self.moveFile(str(source_file), str(dest_file))
-            self.parent.parent.tray.notification("Kissync", "Renamed")
+self.parent.parent.tray.notification("Kissync", "Moved")
 
-            #Refreshes FileVIEW
-            Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
-            #Prints out the directory...
-            #print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
-            self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+self.parent.parent.database.generateRemoteListing()
 
-            self.parent.parent.database.generateRemoteListing()
+elif (button == "rename"):
 
-        elif (button == "generate_link"):
-            #print "Gen Link Pressed"
-            #print self.parent.fileview.activeSquares[0].filePath
-            path = self.parent.fileview.activeSquares[0].filePath
-            name = self.parent.fileview.activeSquares[0].fileName
-            url = ""
+source_file = os.path.expanduser("~") + "/Kissync" + self.parent.fileview.activeSquares[0].filePath
 
-            #Create a temp url in the background!
+#Get file extension and type
+extension = None
+if (source_file.rfind('.') != -1):
+    dotIndex = source_file.rfind('.')
+    #print dotIndex
+    fileNameLength = len(source_file)
+    #print fileNameLength
+    extension = source_file[dotIndex:fileNameLength]
+else:
+    extension = None
 
-            #Make API call for url.
-            tree = self.parent.parent.smartfile.get('/link', path=path)
-            #pprint.pprint(tree['href'])
-            for i in tree:
-                if 'href' not in i:
-                    return []
-                url = i['href'].encode("utf-8")
-                #print path
-            #print "-----------"
-            #print name
-            if not (url == "" or url is None):
-                pass
-            else:
-                #print "Nothing!  Yet! GENERATE A URL!"
-                p = path
-                n = name
-                tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True,
-                                                          recursive=True)
-                #pprint.pprint(tree['href'])
-                for i in tree2:
-                    if (i == "href"):
-                        url = tree2[i]
+indFolder = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+folder = "/Kissync" + self.parent.fileview.activeSquares[0].filePath[:indFolder + 1]
 
-            #print "RESPONSE:"
-            #print url
-            #pyperclip.copy(url)
-            #Share on twitter.
-            #text = "Kissync"
-            #webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
-            self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
-        elif (button == "user_premissions"):
-            #print "User Premissions!"
-            self.manageUser.show()
-            self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
+inputter = InputDialog(self, title="Rename:", label="Folder:", text=extension)
 
-    def moveFile(self, source, dest):
-        if not (source == "" or dest is None):
-            shutil.move(source, dest)
+inputter.exec_()
 
-    def deleteFolder(self, d):
-        for path in (os.path.join(d, f) for f in os.listdir(d)):
-            if os.path.isdir(path):
-                self.deleteFolder(path)
-            elif os.path.isfile(path):
-                os.remove(path)
-            else:
-                os.unlink(path)
-        os.rmdir(d)
+#print source_file
+dest_file = os.path.dirname(os.path.realpath(__file__)) + folder + inputter.text.text()
+#print dest_file
+self.moveFile(str(source_file), str(dest_file))
+self.parent.parent.tray.notification("Kissync", "Renamed")
+
+#Refreshes FileVIEW
+Filenm = self.parent.fileview.activeSquares[0].filePath.rfind('/')
+#Prints out the directory...
+#print self.parent.fileview.activeSquares[0].filePath[:deleteFileName + 1]
+self.parent.changePath(self.parent.fileview.activeSquares[0].filePath[:Filenm + 1])
+
+self.parent.parent.database.generateRemoteListing()
+
+elif (button == "generate_link"):
+#print "Gen Link Pressed"
+#print self.parent.fileview.activeSquares[0].filePath
+path = self.parent.fileview.activeSquares[0].filePath
+name = self.parent.fileview.activeSquares[0].fileName
+url = ""
+
+#Create a temp url in the background!
+
+#Make API call for url.
+tree = self.parent.parent.smartfile.get('/link', path=path)
+#pprint.pprint(tree['href'])
+for i in tree:
+    if 'href' in i:
+        url = i['href'].encode("utf-8")
+        #print path
+        #print "-----------"
+#print name
+if not (url == "" or url is None):
+    pass
+else:
+    #print "Nothing!  Yet! GENERATE A URL!"
+    p = path
+    n = name
+    tree2 = self.parent.parent.smartfile.post('/link', path=(p), name=(n), read=True, list=True,
+                                              recursive=True)
+    #pprint.pprint(tree['href'])
+    for i in tree2:
+        if (i == "href"):
+            url = tree2[i]
+
+#print "RESPONSE:"
+#print url
+#pyperclip.copy(url)
+#Share on twitter.
+#text = "Kissync"
+#webbrowser.open("http://twitter.com/share?url=" + str(url) + "&text=" + str(text))
+self.parent.parent.tray.notification("Kissync", "Link copied to clipboard.")
+elif (button == "user_premissions"):
+#print "User Premissions!"
+self.manageUser.show()
+self.manageUser.path = self.parent.fileview.activeSquares[0].filePath
+
+
+def moveFile(self, source, dest):
+    if not (source == "" or dest is None):
+        shutil.move(source, dest)
+
+
+def deleteFolder(self, d):
+    for path in (os.path.join(d, f) for f in os.listdir(d)):
+        if os.path.isdir(path):
+            self.deleteFolder(path)
+        elif os.path.isfile(path):
+            os.remove(path)
+        else:
+            os.unlink(path)
+    os.rmdir(d)
 
 
 class InputDialog(QtGui.QDialog):
