@@ -37,7 +37,7 @@ PySide has a simple packing system that allows for embedding of all the program 
 
 __Prerequisites:__ 
 
-* pyside-tools
+* pyside-rcc (included in pyside-tools)
 
 On Ubuntu/Debian, this can be installed using the following command:
 
