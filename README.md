@@ -49,6 +49,16 @@ To build the resources automatically, run the following command in the console:
 
     $ make resources
 
+__Using resources__:
+
+Since building the resources with the make file puts a "resources.py" into the UI folder, any UI component that references external images will automatically discover the resources file, assuming it is in the same folder. 
+
+To use any packaged resource in the UI, refer to the following example:
+ 
+    QtGui.QIcon(":/menuicon.png")
+
+This allows us to reference a resource with the file name ":/menuicon.png"
+
 Links
 ====
 [Official Kissync Website](http://www.kissync.com)
