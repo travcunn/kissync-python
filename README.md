@@ -6,10 +6,25 @@ A cross platfom file synchronization application for SmartFile
 
 
 Running Kissync
-============
+===============
+
+__Prerequisites:__
+
+Kissync requires PySide (cross-platform) for the GUI. On Ubuntu/Debian, this can be installed using the following command:
+
+    $ sudo apt-get install python-pyside
+
+__Build and run:__
+
     $ git clone https://github.com/travcunn/kissync-python.git kissync
     $ cd kissync
     $ python main.py
+
+
+If Python complains about dependencies, you can install them with the following commands:
+
+    $ pip install --timeout=30 -r requirements.txt --use-mirrors
+    $ pip install --timeout=30 -q -e . --use-mirrors
 
 
 Building a Windows installer
