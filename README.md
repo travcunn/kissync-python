@@ -33,7 +33,7 @@ The installer will named "Kissync.exe" in the directory "installer_windows"
 
 Resource Packaging
 ===============
-PySide has a simple packing system that allows for embedding of all the program resources (such as images) into one file. Using a program by [Shuge Lee](shuge.lee@gmail.com), these resources are collected automatically. This process has been simplified and automated in the make file. For images to be collected, they should be placed in "ui/images".
+PySide has a simple packing system that allows for embedding of all the program resources (such as images) into one file. Using a program by Shuge Lee, these resources are collected automatically. This process has been simplified and automated in the make file. For images to be collected, they should be placed in "ui/images".
 
 __Prerequisites:__ 
 
