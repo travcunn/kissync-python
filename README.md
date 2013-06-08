@@ -25,11 +25,29 @@ __Build:__
 In the console, run:
 
     $ installer_windows.cmd
+
 Alternatively, you can open *installer_windows.cmd* from the Windows file explorer.
 
 The installer will named "Kissync.exe" in the directory "installer_windows"
 
 
+Resource Packaging
+===============
+PySide has a simple packing system that allows for embedding of all the program resources (such as images) into one file. Using a program by [Shuge Lee](shuge.lee@gmail.com), these resources are collected automatically. This process has been simplified and automated in the make file. For images to be collected, they should be placed in "ui/images".
+
+__Prerequisites:__ 
+
+* pyside-tools
+
+On Ubuntu/Debian, this can be installed using the following command:
+
+    $ sudo apt-get install pyside-tools
+
+__Build:__
+
+To build the resources automatically, run the following command in the console:
+
+    $ make resources
 
 Links
 ====
