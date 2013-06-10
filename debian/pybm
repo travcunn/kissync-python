@@ -1,0 +1,3 @@
+#!/bin/sh
+cd /usr/share/kissync
+exec python main.py

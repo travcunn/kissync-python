@@ -34,7 +34,7 @@ def createDesktopFile(name, idstr, arglist, toDir=''):
     deskfile.write('\n')
     deskfile.write('GenericName=Kissync Cloud Synchronizer\n')
     deskfile.write('Comment=A cloud synchronizer with SmartFile\n')
-    deskfile.write('Categories=Qt;Network;\n')
+    deskfile.write('Categories=Network;\n')
     deskfile.write('Exec=python /usr/share/kissync/main.py')
     for a in arglist:
         deskfile.write(' --%s' % a)
@@ -52,7 +52,7 @@ createDesktopFile('', '', [], '/usr/share/applications')
 
 print '   Setting up menu items.'
 execAndWait(
-    'xdg-icon-resource install --novendor --context apps --size 64 /usr/share/kissync/icons/menuicon.png kissyncicon')
+    'xdg-icon-resource install --novendor --context apps --size 64 /usr/share/kissync/ui/images/menuicon.png kissyncicon')
 execAndWait('xdg-desktop-menu  install --novendor /usr/share/applications/armory.desktop')
 print ''
 print 'Kissync was installed successfully!'
