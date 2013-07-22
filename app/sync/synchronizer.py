@@ -13,14 +13,19 @@ from uploader import Uploader
 from sync import SyncUp, SyncDown
 from watcher import Watcher
 
+from sqlalchemy.orm import sessionmaker
+from definitions import *
+
+import pprint
+
 
 class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
 
-        self.localFiles = {}
-        self.remoteFiles = {}
+        # Initialize the database
+        self.dbInit()
 
         self.uploadQueue = Queue()
         self.downloadQueue = Queue()
@@ -32,32 +37,38 @@ class Synchronizer(threading.Thread):
         self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
         self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
+        # Set the thread to run as a daemon
         self.setDaemon(True)
 
     def run(self):
         self.synchronize()
 
-    def synchronize(self):
-        try:
-            #Initially, get the local and remote file listing
-            self.localFilesList()
-            self.remoteFilesList()
-            #Now compare the lists and populate task queues for differences
-            self.compareListing()
+    def dbInit(self):
+        engine = create_engine('sqlite:///files.db', echo=True)
+        Base.metadata.create_all(engine)
 
-            self.uploader.start()
-            self.downloader.start()
-            #self.syncUp.start()
-            #self.syncDown.start()
-            #Wait for the uploading and downloading tasks to finish
-            self.uploadQueue.join()
-            self.downloadQueue.join()
-            #self.syncUpQueue.join()
-            #self.syncDownQueue.join()
-            #print "Synchronizing done"
-        except:
-            time.sleep(30)
-            self.synchronize()
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+
+    def synchronize(self):
+        # Get the local and remote file information
+        self.remoteFilesList()
+        self.localFilesList()
+
+        #Now compare the lists and populate task queues for differences
+        #self.compareListing()
+
+        #self.uploader.start()
+        #self.downloader.start()
+        #self.syncUp.start()
+        #self.syncDown.start()
+
+        #Wait for the uploading and downloading tasks to finish
+        #self.uploadQueue.join()
+        #self.downloadQueue.join()
+        #self.syncUpQueue.join()
+        #self.syncDownQueue.join()
+        #print "Synchronizing done"
 
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
@@ -140,6 +151,7 @@ class Synchronizer(threading.Thread):
         if "children" in dirListing:
             for i in dirListing['children']:
                 if i['isdir']:
+                    # If the path is a directory
                     path = i['path'].encode("utf-8")
                     if path.startswith("/"):
                         path = path.replace("/", "", 1)
@@ -147,19 +159,22 @@ class Synchronizer(threading.Thread):
                     common.createLocalDirs(absolutePath)
                     self.remoteFilesList(i['path'])
                 else:
+                    # If the path is a file
                     path = i['path'].encode("utf-8")
                     isDir = i['isdir']
                     size = int(i['size'])
-                    permissions = i['acl']
+
                     if 'modified' in i['attributes']:
                         modifiedTime = i['attributes']['modified'].encode("utf-8").replace('T', ' ')
                     else:
                         modifiedTime = None
-                    if 'md5' in i['attributes']:
-                        fileHash = i['attributes']['md5'].encode("utf-8")
+
+                    if 'checksum' in i['attributes']:
+                        checksum = i['attributes']['checksum'].encode("utf-8")
                     else:
-                        fileHash = None
-                    self.remoteFiles[path] = modifiedTime, fileHash, isDir, size, permissions
+                        checksum = None
+
+                    self.remoteFiles[path] = modifiedTime, checksum, isDir, size
 
     def _getFileHash(self, filepath):
         """Returns the MD5 hash of a local file"""
