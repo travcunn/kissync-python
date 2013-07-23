@@ -53,7 +53,9 @@ class Synchronizer(threading.Thread):
     def synchronize(self):
         # Get the local and remote file information
         self.remoteFilesList()
+        self.dbCommit()
         self.localFilesList()
+        self.dbCommit()
 
         #Now compare the lists and populate task queues for differences
         #self.compareListing()
@@ -69,6 +71,17 @@ class Synchronizer(threading.Thread):
         #self.syncUpQueue.join()
         #self.syncDownQueue.join()
         #print "Synchronizing done"
+    
+    def addRemoteFile(self, path, checksum, modified, size, isDir):
+        remotefile = RemoteFile(path, checksum, modified, size, isDir)
+        self.session.add(remotefile)
+
+    def addLocalFile(self, path, checksum, modified, modified_local, size):
+        localfile = LocalFile(path, checksum, modified, modified_local, size)
+        self.session.add(localfile)
+
+    def dbCommit(self):
+        self.session.commit()
 
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
@@ -134,11 +147,13 @@ class Synchronizer(threading.Thread):
         for (paths, dirs, files) in os.walk(localPath):
             for item in files:
                 discoveredFilePath = os.path.join(paths, item)
-                fileHash = self._getFileHash(discoveredFilePath)
+                checksum = self._getFileHash(diiscoveredFilePath)
                 modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
                 size = int(os.path.getsize(discoveredFilePath))
                 isDir = os.path.isdir(discoveredFilePath)
-                self.localFiles[discoveredFilePath.replace(localPath, '')] = modifiedTime, fileHash, isDir, size
+                diskLocation = discoveredFilePath.replace(localPath, '')
+
+                self.addLocalFile(diskLocation, checksum, modifiedTime, None, size, isDir)
 
     def remoteFilesList(self, remotePath=None):
         """
@@ -174,7 +189,7 @@ class Synchronizer(threading.Thread):
                     else:
                         checksum = None
 
-                    self.remoteFiles[path] = modifiedTime, checksum, isDir, size
+                    self.addRemoteFile(path, checksum, modifiedTime, size, isDir)
 
     def _getFileHash(self, filepath):
         """Returns the MD5 hash of a local file"""

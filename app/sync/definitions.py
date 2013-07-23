@@ -33,10 +33,12 @@ class LocalFile(Base):
     modified = Column(Date)
     modified_local = Column(Date)
     size = Column(BigInteger)
+    isDir = Column(Boolean)
 
-    def __init__(self, path, checksum, modified, modified_local, size):
+    def __init__(self, path, checksum, modified, modified_local, size, isDir):
         self.path = path
         self.checksum = checksum
         self.modified = modified
         self.modified_local = modified_local
         self.size = size
+        self.isDir = isDir
