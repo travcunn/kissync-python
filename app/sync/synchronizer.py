@@ -13,10 +13,9 @@ from uploader import Uploader
 from sync import SyncUp, SyncDown
 from watcher import Watcher
 
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 from definitions import *
-
-import pprint
 
 
 class Synchronizer(threading.Thread):
@@ -32,10 +31,16 @@ class Synchronizer(threading.Thread):
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
 
+        # Specialized queue for downloading files and setting attributes
+        # It handles files that werent uploaded using kissync
+        self.downSyncQueue = Queue()
+
         self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
         self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
         self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+
+        #self.downSync = DownSync(self, self.downSyncQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         # Set the thread to run as a daemon
         self.setDaemon(True)
@@ -44,41 +49,35 @@ class Synchronizer(threading.Thread):
         self.synchronize()
 
     def dbInit(self):
-        engine = create_engine('sqlite:///files.db', echo=True)
+        engine = create_engine('sqlite:///files.db', echo=False)
         Base.metadata.create_all(engine)
 
         Session = sessionmaker(bind=engine)
         self.session = Session()
 
     def synchronize(self):
-        # Get the local and remote file information
-        self.remoteFilesList()
+        self.clearTables()
+        self.indexRemote()
         self.dbCommit()
-        self.localFilesList()
+        self.indexLocal()
         self.dbCommit()
 
-        #Now compare the lists and populate task queues for differences
-        #self.compareListing()
+        # Now compare the lists and populate task queues for differences
+        self.compare()
 
-        #self.uploader.start()
-        #self.downloader.start()
-        #self.syncUp.start()
-        #self.syncDown.start()
-
-        #Wait for the uploading and downloading tasks to finish
-        #self.uploadQueue.join()
-        #self.downloadQueue.join()
-        #self.syncUpQueue.join()
-        #self.syncDownQueue.join()
-        #print "Synchronizing done"
-    
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
         self.session.add(remotefile)
 
-    def addLocalFile(self, path, checksum, modified, modified_local, size):
-        localfile = LocalFile(path, checksum, modified, modified_local, size)
+    def addLocalFile(self, path, checksum, modified, modified_local, size, isDir):
+        localfile = LocalFile(path, checksum, modified, modified_local, size, isDir)
         self.session.add(localfile)
+
+    def clearTables(self):
+        for row in self.session.query(RemoteFile):
+            self.session.delete(row)
+        for row in self.session.query(LocalFile):
+            self.session.delete(row)
 
     def dbCommit(self):
         self.session.commit()
@@ -88,74 +87,40 @@ class Synchronizer(threading.Thread):
         self.localFileWatcher = Watcher(self, self.parent.smartfile, self.parent.syncDir)
         self.localFileWatcher.start()
 
-    def compareListing(self):
-        for file, properties in self.localFiles.iteritems():
-            #If local file is not in the remote files dict, add upload task
-            if not file in self.remoteFiles.iterkeys():
-                modifiedTime = properties[0]
-                fileHash = properties[1]
-                task = (file, modifiedTime, fileHash)
-                self.uploadQueue.put(task)
-            else:
-                #Otherwise, determine which way we should synchronize the file
-                #...and add a task accordingly...
-                remoteItem = self.remoteFiles.get(file)
-                localItem = properties
-                status = self.compareFile(remoteItem, localItem)
-                if status is FileStatus.newerRemote:
-                    self.syncDownQueue.put(file)
-                elif status is FileStatus.newerLocal:
-                    self.syncUpQueue.put(file)
+    def compare(self):
+        # Query to list all localfile paths
+        localpaths = self.session.query(LocalFile).all()
+        remotepaths = self.session.query(RemoteFile).all()
 
-        for file, properties in self.remoteFiles.iteritems():
-             #If remote file is not in the local files dict, add download task
-            if not file in self.localFiles.iterkeys():
-                self.downloadQueue.put(file)
-            else:
-                #Otherwise, determine which way we should synchronize the file
-                #...and add a task accordingly...
-                remoteItem = properties
-                localItem = self.localFiles.get(file)
-                status = self.compareFile(remoteItem, localItem)
-                if status is FileStatus.newerRemote:
-                    self.syncDownQueue.put(file)
-                elif status is FileStatus.newerLocal:
-                    self.syncUpQueue.put(file)
-
-    def compareFile(self, remoteItem, localItem):
-        remoteHash = remoteItem[1]
-        localHash = localItem[1]
-        badChars = ':-. '
-        if remoteItem[0] is None:
-            return FileStatus.newerRemote
-        remoteTime = int(str(remoteItem[0]).translate(None, badChars))
-        localTime = int(str(localItem[0]).translate(None, badChars))
-        if remoteHash is not localHash:
-            if remoteTime > localTime:
-                return FileStatus.newerRemote
-            elif remoteTime < localTime:
-                return FileStatus.newerLocal
-            else:
-                return FileStatus.doNothing
-
-    def localFilesList(self, localPath=None):
         """
-        Indexes the local files and populates the self.localFiles dictionary
+        for item in localpaths:
+            print item.path
+        """
+        itemsOnBoth = set(localpaths) & set(remotepaths)
+        itemsNotRemote = set(localpaths) - set(remotepaths)
+        itemsNotLocal = set(remotepaths) - set(localpaths)
+
+        for item in itemsNotLocal:
+            print item.path
+
+    def indexLocal(self, localPath=None):
+        """
+        Indexes the local files
         """
         if localPath is None:
             localPath = self.parent.syncDir
         for (paths, dirs, files) in os.walk(localPath):
             for item in files:
-                discoveredFilePath = os.path.join(paths, item)
-                checksum = self._getFileHash(diiscoveredFilePath)
-                modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(discoveredFilePath))
-                size = int(os.path.getsize(discoveredFilePath))
-                isDir = os.path.isdir(discoveredFilePath)
-                diskLocation = discoveredFilePath.replace(localPath, '')
+                path = os.path.join(paths, item)
+                checksum = self._getFileHash(path)
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path))
+                size = int(os.path.getsize(path))
+                isDir = os.path.isdir(path)
+                path = path.replace(localPath, '')
 
-                self.addLocalFile(diskLocation, checksum, modifiedTime, None, size, isDir)
+                self.addLocalFile(path, checksum, None, modified, size, isDir)
 
-    def remoteFilesList(self, remotePath=None):
+    def indexRemote(self, remotePath=None):
         """
         Recursively indexes the remote directory since we cannot see the directories all at once
         """
@@ -168,31 +133,35 @@ class Synchronizer(threading.Thread):
                 if i['isdir']:
                     # If the path is a directory
                     path = i['path'].encode("utf-8")
-                    if path.startswith("/"):
-                        path = path.replace("/", "", 1)
-                    absolutePath = os.path.join(self.parent.syncDir, path)
-                    common.createLocalDirs(absolutePath)
-                    self.remoteFilesList(i['path'])
+                    isDir = True
+                    size = None
+                    modified = i['time'].encode("utf-8")
+                    modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
+                    checksum = None
+                    # Add the folder to the database
+                    self.addRemoteFile(path, checksum, modified, size, isDir)
+                    # Dive into the directory and look for more
+                    self.indexRemote(i['path'])
                 else:
                     # If the path is a file
                     path = i['path'].encode("utf-8")
                     isDir = i['isdir']
                     size = int(i['size'])
-
-                    if 'modified' in i['attributes']:
-                        modifiedTime = i['attributes']['modified'].encode("utf-8").replace('T', ' ')
-                    else:
-                        modifiedTime = None
+                    modified = i['time'].encode("utf-8")
+                    modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
 
                     if 'checksum' in i['attributes']:
                         checksum = i['attributes']['checksum'].encode("utf-8")
                     else:
                         checksum = None
 
-                    self.addRemoteFile(path, checksum, modifiedTime, size, isDir)
+                    # Add that bad boy file to the database!
+                    self.addRemoteFile(path, checksum, modified, size, isDir)
 
     def _getFileHash(self, filepath):
-        """Returns the MD5 hash of a local file"""
+        """
+        Returns the MD5 hash of a local file
+        """
         fileToHash = open(filepath)
         md5 = hashlib.md5()
         while True:
@@ -202,10 +171,3 @@ class Synchronizer(threading.Thread):
             md5.update(currentLine)
         return md5.hexdigest()
 
-
-class FileStatus:
-    newerRemote = 1
-    newerLocal = 2
-    notOnRemote = 3
-    notOnLocal = 4
-    doNothing = 5

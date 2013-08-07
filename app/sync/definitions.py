@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy import Boolean, BigInteger, Column, Date, Integer, String
+from sqlalchemy import Boolean, BigInteger, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
@@ -12,7 +12,7 @@ class RemoteFile(Base):
     id = Column(Integer, primary_key=True)
     path = Column(String)
     checksum = Column(String)
-    modified = Column(Date)
+    modified = Column(DateTime)
     size = Column(BigInteger)
     isDir = Column(Boolean)
 
@@ -30,8 +30,8 @@ class LocalFile(Base):
     id = Column(Integer, primary_key=True)
     path = Column(String)
     checksum = Column(String)
-    modified = Column(Date)
-    modified_local = Column(Date)
+    modified = Column(DateTime)
+    modified_local = Column(DateTime)
     size = Column(BigInteger)
     isDir = Column(Boolean)
 

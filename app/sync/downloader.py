@@ -26,6 +26,7 @@ class Downloader(threading.Thread):
         try:
             f = self.smartfile.get('/path/data/', serverPath)
             with open(absolutePath, 'wb') as o:
+                # the speed can be throttled by sleeping here
                 shutil.copyfileobj(f, o)
         except:
             raise
