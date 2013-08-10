@@ -22,6 +22,8 @@ class Downloader(threading.Thread):
         serverPath = path
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
+        print "[DOWNLOAD-QUEUE](", path, ") ", absolutePath
+        """
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         try:
             f = self.smartfile.get('/path/data/', serverPath)
@@ -30,3 +32,5 @@ class Downloader(threading.Thread):
                 shutil.copyfileobj(f, o)
         except:
             raise
+        """
+

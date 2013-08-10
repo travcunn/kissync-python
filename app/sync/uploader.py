@@ -13,13 +13,16 @@ class Uploader(threading.Thread):
 
     def run(self):
         while True:
-            path, modifiedTime, fileHash = self.queue.get()
-            self.uploadFile(path, modifiedTime, fileHash)
+            path, checksum, modified = self.queue.get()
+            self.uploadFile(path, checksum, modified)
             self.queue.task_done()
 
-    def uploadFile(self, path, modifiedTime, fileHash):
+    def uploadFile(self, path, checksum, modified):
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
+
+        print "[UPLOAD]: (", path, ") ", absolutePath
+        """
         if not (os.path.isdir(absolutePath)):
             fileName = os.path.basename(path)
             inDir = path.replace(fileName, '').replace("\\", "/")
@@ -34,3 +37,4 @@ class Uploader(threading.Thread):
             #TODO: Add modifiedTime and fileHash attributes here
         else:
             self.smartfile.put('/path/oper/mkdir/', path)
+        """

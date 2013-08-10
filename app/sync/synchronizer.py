@@ -65,6 +65,9 @@ class Synchronizer(threading.Thread):
         # Now compare the lists and populate task queues for differences
         self.compare()
 
+        self.uploader.start()
+        self.downloader.start()
+
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
         self.session.add(remotefile)
@@ -73,9 +76,14 @@ class Synchronizer(threading.Thread):
         localfile = LocalFile(path, checksum, modified, modified_local, size, isDir)
         self.session.add(localfile)
 
+    def addLocalTempFile(path, checksum, modified, isDir):
+        tempfile = TempLocalFile(path, checksum, modified, isDir)
+        self.session.add(tempfile)
+
     def clearTables(self):
         for row in self.session.query(RemoteFile):
             self.session.delete(row)
+
         for row in self.session.query(LocalFile):
             self.session.delete(row)
 
@@ -96,12 +104,18 @@ class Synchronizer(threading.Thread):
         for item in localpaths:
             print item.path
         """
+
         itemsOnBoth = set(localpaths) & set(remotepaths)
         itemsNotRemote = set(localpaths) - set(remotepaths)
         itemsNotLocal = set(remotepaths) - set(localpaths)
 
         for item in itemsNotLocal:
-            print item.path
+            #print item.path
+            self.downloadQueue.put(item.path)
+
+        for item in itemsNotRemote:
+            #print item.path
+            self.uploadQueue.put((item.path, item.checksum, item.modified))
 
     def indexLocal(self, localPath=None):
         """
@@ -130,7 +144,7 @@ class Synchronizer(threading.Thread):
         dirListing = self.parent.smartfile.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
-                if i['isdir']:
+                if i['isfile'] is False:
                     # If the path is a directory
                     path = i['path'].encode("utf-8")
                     isDir = True
@@ -145,7 +159,7 @@ class Synchronizer(threading.Thread):
                 else:
                     # If the path is a file
                     path = i['path'].encode("utf-8")
-                    isDir = i['isdir']
+                    isDir = False
                     size = int(i['size'])
                     modified = i['time'].encode("utf-8")
                     modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')

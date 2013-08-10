@@ -42,3 +42,20 @@ class LocalFile(Base):
         self.modified_local = modified_local
         self.size = size
         self.isDir = isDir
+
+
+class TempLocalFile(Base):
+    __tablename__="templocalfiles"
+
+    id = Column(Integer, primary_key=True)
+    path = Column(String)
+    checksum = Column(String)
+    modified = Column(DateTime)
+    isDir = Column(Boolean)
+
+    def __init__(self, path, checksum, modified, isDir):
+        self.path = path
+        self.checksum = checksum
+        self.modified = modified
+        self.isDir = isDir
+
