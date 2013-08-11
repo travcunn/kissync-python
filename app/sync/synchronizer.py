@@ -1,8 +1,6 @@
 import datetime
-import hashlib
 import os
 import threading
-import time
 
 import common
 
@@ -22,7 +20,6 @@ class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
-
         # Initialize the database
         self.dbInit()
 
@@ -76,7 +73,7 @@ class Synchronizer(threading.Thread):
         localfile = LocalFile(path, checksum, modified, modified_local, size, isDir)
         self.session.add(localfile)
 
-    def addLocalTempFile(path, checksum, modified, isDir):
+    def addTempLocalFile(path, checksum, modified, isDir):
         tempfile = TempLocalFile(path, checksum, modified, isDir)
         self.session.add(tempfile)
 
@@ -96,26 +93,45 @@ class Synchronizer(threading.Thread):
         self.localFileWatcher.start()
 
     def compare(self):
-        # Query to list all localfile paths
-        localpaths = self.session.query(LocalFile).all()
-        remotepaths = self.session.query(RemoteFile).all()
+        local = self.session.query(LocalFile).all()
+        remote = self.session.query(RemoteFile).all()
 
-        """
-        for item in localpaths:
-            print item.path
-        """
+        objectsOnBoth = []
 
-        itemsOnBoth = set(localpaths) & set(remotepaths)
-        itemsNotRemote = set(localpaths) - set(remotepaths)
-        itemsNotLocal = set(remotepaths) - set(localpaths)
+        objectsNotRemote = []
+        objectsNotLocal = []
 
-        for item in itemsNotLocal:
-            #print item.path
-            self.downloadQueue.put(item.path)
+        # Check which files exist on both and which local files dont exist on remote
+        for localObject in local:
+            found = False
+            for remoteObject in remote:
+                if localObject.path == remoteObject.path:
+                    found = True
+            if found:
+                objectsOnBoth.append((localObject, remoteObject))
+            else:
+                objectsNotRemote.append(localObject)
+            found = False
 
-        for item in itemsNotRemote:
-            #print item.path
-            self.uploadQueue.put((item.path, item.checksum, item.modified))
+        # Check which remote files dont exist on local
+        for remoteObject in remote:
+            found = False
+            for localObject in local:
+                if remoteObject.path == localObject.path:
+                    found = True
+            if not found:
+                objectsNotLocal.append(remoteObject)
+            found = False
+
+        # TODO: iterate through each object in objectsOnBoth and add to the queues
+
+        for object in objectsNotLocal:
+            print "Need to download: ", object.path
+            self.downloadQueue.put(object)
+
+        for object in objectsNotRemote:
+            print "Need to upload: ", object.path
+            self.uploadQueue.put(object)
 
     def indexLocal(self, localPath=None):
         """
@@ -126,7 +142,7 @@ class Synchronizer(threading.Thread):
         for (paths, dirs, files) in os.walk(localPath):
             for item in files:
                 path = os.path.join(paths, item)
-                checksum = self._getFileHash(path)
+                checksum = common.getFileHash(path)
                 modified = datetime.datetime.fromtimestamp(os.path.getmtime(path))
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
@@ -168,20 +184,6 @@ class Synchronizer(threading.Thread):
                         checksum = i['attributes']['checksum'].encode("utf-8")
                     else:
                         checksum = None
-
                     # Add that bad boy file to the database!
                     self.addRemoteFile(path, checksum, modified, size, isDir)
-
-    def _getFileHash(self, filepath):
-        """
-        Returns the MD5 hash of a local file
-        """
-        fileToHash = open(filepath)
-        md5 = hashlib.md5()
-        while True:
-            currentLine = fileToHash.readline()
-            if not currentLine:
-                break
-            md5.update(currentLine)
-        return md5.hexdigest()
 
