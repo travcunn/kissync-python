@@ -20,15 +20,29 @@ class Uploader(object):
             inDir = path.replace(fileName, '').replace("\\", "/")
             apiPath = "/path/data/%s" % inDir
 
-            #make sure the directory exists before uploading
+            # create directory before uploading
             self.api.put('/path/oper/mkdir/', inDir)
 
-            #the actual uploading of the file
+            # upload the file
             self.api.post(apiPath, file=file(absolutePath, 'rb'))
 
-            #TODO: Add modifiedTime and fileHash attributes here
+            # set the new attributes
+            self.setAttributes(object)
         else:
             self.api.put('/path/oper/mkdir/', path)
+
+    def setAttributes(self, object):
+        checksum = object.checksum
+        #TODO: Change this back to modified and implement proper time checking
+        modified = object.modified_local
+
+        fileChecksum = "checksum=%s" % checksum
+        fileModified = "modified=%s" % modified
+        apiPath = "/path/info%s" % object.path
+
+        #TODO: reduce this to one request
+        self.api.post(apiPath, attributes=fileChecksum)
+        self.api.post(apiPath, attributes=fileModified)
 
 
 class UploadThread(Uploader, threading.Thread):
