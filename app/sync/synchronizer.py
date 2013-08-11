@@ -6,8 +6,8 @@ import common
 
 from Queue import Queue
 
-from downloader import Downloader
-from uploader import Uploader
+from download import DownloadThread
+from upload import UploadThread
 from sync import SyncUp, SyncDown
 from watcher import Watcher
 
@@ -32,8 +32,8 @@ class Synchronizer(threading.Thread):
         # It handles files that werent uploaded using kissync
         self.downSyncQueue = Queue()
 
-        self.uploader = Uploader(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
-        self.downloader = Downloader(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
+        self.uploader = UploadThread(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
+        self.downloader = DownloadThread(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
         self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
         self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
@@ -98,9 +98,6 @@ class Synchronizer(threading.Thread):
 
         objectsOnBoth = []
 
-        objectsNotRemote = []
-        objectsNotLocal = []
-
         # Check which files exist on both and which local files dont exist on remote
         for localObject in local:
             found = False
@@ -110,7 +107,7 @@ class Synchronizer(threading.Thread):
             if found:
                 objectsOnBoth.append((localObject, remoteObject))
             else:
-                objectsNotRemote.append(localObject)
+                self.uploadQueue.put(localObject)
             found = False
 
         # Check which remote files dont exist on local
@@ -120,18 +117,10 @@ class Synchronizer(threading.Thread):
                 if remoteObject.path == localObject.path:
                     found = True
             if not found:
-                objectsNotLocal.append(remoteObject)
+                self.downloadQueue.put(remoteObject)
             found = False
 
         # TODO: iterate through each object in objectsOnBoth and add to the queues
-
-        for object in objectsNotLocal:
-            print "Need to download: ", object.path
-            self.downloadQueue.put(object)
-
-        for object in objectsNotRemote:
-            print "Need to upload: ", object.path
-            self.uploadQueue.put(object)
 
     def indexLocal(self, localPath=None):
         """
