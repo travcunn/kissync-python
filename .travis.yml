@@ -3,6 +3,8 @@ python:
   - "2.6"
   - "2.7"
 before_install:
+  - sudo add-apt-repository ppa:pyside
+  - sudo apt-get update
   - sudo apt-get install python-pyside
 install:
   - pip install --timeout=30 pep8 --use-mirrors
