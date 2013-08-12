@@ -8,6 +8,9 @@ class Uploader(object):
     def __init__(self, api, syncDir):
         self.api = api
         self.syncDir = syncDir
+        self._timeoffset = None
+        if self._timeoffset is None:
+            self._timeoffset = common.calculate_time_offset()
 
     def upload(self, object):
         path = common.basePath(object.path)
@@ -34,10 +37,10 @@ class Uploader(object):
     def setAttributes(self, object):
         checksum = object.checksum
         #TODO: Change this back to modified and implement proper time checking
-        modified = object.modified_local
+        modified = object.modified_local.replace(microsecond=0)
 
         fileChecksum = "checksum=%s" % checksum
-        fileModified = "modified=%s" % modified
+        fileModified = "modified=%s" % (modified - self._timeoffset)
         apiPath = "/path/info%s" % object.path
 
         #TODO: reduce this to one request

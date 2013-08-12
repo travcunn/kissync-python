@@ -28,16 +28,12 @@ class Synchronizer(threading.Thread):
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
 
-        # Specialized queue for downloading files and setting attributes
-        # It handles files that werent uploaded using kissync
-        self.downSyncQueue = Queue()
-
         self.uploader = UploadThread(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = DownloadThread(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
         self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
         self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
-        #self.downSync = DownSync(self, self.downSyncQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self._timeoffset = None
 
         # Set the thread to run as a daemon
         self.setDaemon(True)
@@ -53,6 +49,8 @@ class Synchronizer(threading.Thread):
         self.session = Session()
 
     def synchronize(self):
+        if self._timeoffset is None:
+            self._timeoffset = common.calculate_time_offset()
         self.clearTables()
         self.indexRemote()
         self.dbCommit()
@@ -98,6 +96,8 @@ class Synchronizer(threading.Thread):
 
         objectsOnBoth = []
 
+        # Eventually this will be done with more SQL queries...
+
         # Check which files exist on both and which local files dont exist on remote
         for localObject in local:
             found = False
@@ -132,7 +132,8 @@ class Synchronizer(threading.Thread):
             for item in files:
                 path = os.path.join(paths, item)
                 checksum = common.getFileHash(path)
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path))
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0)\
+                        - self._timeoffset
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
                 path = path.replace(localPath, '')

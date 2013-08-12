@@ -1,6 +1,9 @@
+import datetime
+from dateutil.parser import parse
 import errno
 import hashlib
 import os
+import requests
 
 
 def basePath(path):
@@ -23,6 +26,7 @@ def createLocalDirs(path):
         if e.errno != errno.EEXIST:
             raise
 
+
 def getFileHash(filepath):
     """
     Returns the MD5 hash of a local file
@@ -35,3 +39,19 @@ def getFileHash(filepath):
             break
         md5.update(currentLine)
     return md5.hexdigest()
+
+
+def get_server_time():
+    """
+    Returns the time of the SmartFile servers
+    """
+    response = requests.get('https://www.smartfile.com')
+    time = parse(response.headers['Date']).replace(tzinfo=None)
+    return time
+
+
+def calculate_time_offset():
+    now = datetime.datetime.now().replace(microsecond=0)
+    offset = now - get_server_time()
+    return offset
+
