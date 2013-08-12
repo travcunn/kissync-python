@@ -59,4 +59,3 @@ class UploadThread(Uploader, threading.Thread):
             object = self.queue.get()
             self.upload(object)
             self.queue.task_done()
-

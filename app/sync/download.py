@@ -61,4 +61,3 @@ class DownloadThread(Downloader, threading.Thread):
             object = self.queue.get()
             self.download(object)
             self.queue.task_done()
-

@@ -11,9 +11,9 @@ from upload import UploadThread
 from sync import SyncUp, SyncDown
 from watcher import Watcher
 
-from sqlalchemy import and_
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from definitions import *
+from definitions import Base, RemoteFile, LocalFile, TempLocalFile
 
 
 class Synchronizer(threading.Thread):
@@ -71,7 +71,7 @@ class Synchronizer(threading.Thread):
         localfile = LocalFile(path, checksum, modified, modified_local, size, isDir)
         self.session.add(localfile)
 
-    def addTempLocalFile(path, checksum, modified, isDir):
+    def addTempLocalFile(self, path, checksum, modified, isDir):
         tempfile = TempLocalFile(path, checksum, modified, isDir)
         self.session.add(tempfile)
 
@@ -132,8 +132,7 @@ class Synchronizer(threading.Thread):
             for item in files:
                 path = os.path.join(paths, item)
                 checksum = common.getFileHash(path)
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0)\
-                        - self._timeoffset
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
                 path = path.replace(localPath, '')
@@ -176,4 +175,3 @@ class Synchronizer(threading.Thread):
                         checksum = None
                     # Add that bad boy file to the database!
                     self.addRemoteFile(path, checksum, modified, size, isDir)
-

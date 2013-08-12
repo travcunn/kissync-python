@@ -54,4 +54,3 @@ def calculate_time_offset():
     now = datetime.datetime.now().replace(microsecond=0)
     offset = now - get_server_time()
     return offset
-

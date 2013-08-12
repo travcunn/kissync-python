@@ -1,7 +1,5 @@
-from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy import Boolean, BigInteger, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
 
 Base = declarative_base()
 
@@ -58,4 +56,3 @@ class TempLocalFile(Base):
         self.checksum = checksum
         self.modified = modified
         self.isDir = isDir
-

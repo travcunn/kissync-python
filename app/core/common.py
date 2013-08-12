@@ -57,4 +57,3 @@ def cert_path():
             if os.path.exists(path):
                 return path
         return resource_filename(__name__, 'cacert.pem')
-

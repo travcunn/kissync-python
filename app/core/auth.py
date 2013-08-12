@@ -56,4 +56,3 @@ class Authenticator(QtCore.QThread):
         else:
             self.done.emit('done')
             #self.parent.filewatcher.start()
-
