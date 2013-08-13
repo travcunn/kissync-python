@@ -19,6 +19,8 @@ class SyncUp(threading.Thread):
             self.queue.task_done()
 
     def syncUp(self, path):
+        print "Sync Up:", path[0].path
+        """
         serverPath = path
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
@@ -27,6 +29,7 @@ class SyncUp(threading.Thread):
             #TODO: Add modifiedTime and fileHash attributes here
         except:
             raise
+        """
 
 
 class SyncDown(threading.Thread):
@@ -44,6 +47,8 @@ class SyncDown(threading.Thread):
             self.queue.task_done()
 
     def syncDown(self, path):
+        print "Sync Down:", path[0].path
+        """
         serverPath = path
         path = common.basePath(path)
         absolutePath = os.path.join(self.syncDir, path)
@@ -51,3 +56,4 @@ class SyncDown(threading.Thread):
             self.sync.download(absolutePath, serverPath)
         except:
             raise
+        """

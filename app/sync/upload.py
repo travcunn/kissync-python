@@ -38,9 +38,10 @@ class Uploader(object):
         checksum = object.checksum
         #TODO: Change this back to modified and implement proper time checking
         modified = object.modified_local.replace(microsecond=0)
+        modified = modified - self._timeoffset
 
         fileChecksum = "checksum=%s" % checksum
-        fileModified = "modified=%s" % (modified - self._timeoffset)
+        fileModified = "modified=%s" % modified
         apiPath = "/path/info%s" % object.path
 
         #TODO: reduce this to one request

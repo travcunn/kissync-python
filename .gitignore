@@ -5,4 +5,4 @@ configuration.cfg
 *~
 .project
 .pydevproject
-files.db
+*.db

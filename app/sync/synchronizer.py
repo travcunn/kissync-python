@@ -62,6 +62,17 @@ class Synchronizer(threading.Thread):
 
         self.uploader.start()
         self.downloader.start()
+        self.syncUp.start()
+        self.syncDown.start()
+
+        self.uploadQueue.join()
+        self.downloadQueue.join()
+        self.syncUpQueue.join()
+        self.syncDownQueue.join()
+
+        print "Joined all the queues"
+        # Now watch the file system for changes
+        #self.watchFileSystem()
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
@@ -101,14 +112,17 @@ class Synchronizer(threading.Thread):
         # Check which files exist on both and which local files dont exist on remote
         for localObject in local:
             found = False
+            foundObject = None
             for remoteObject in remote:
                 if localObject.path == remoteObject.path:
                     found = True
+                    foundObject = remoteObject
             if found:
-                objectsOnBoth.append((localObject, remoteObject))
+                objectsOnBoth.append((localObject, foundObject))
             else:
                 self.uploadQueue.put(localObject)
             found = False
+            foundObject = None
 
         # Check which remote files dont exist on local
         for remoteObject in remote:
@@ -120,7 +134,20 @@ class Synchronizer(threading.Thread):
                 self.downloadQueue.put(remoteObject)
             found = False
 
-        # TODO: iterate through each object in objectsOnBoth and add to the queues
+        print "Objects on both"
+        print objectsOnBoth
+        # Check which way to synchronize files
+        for object in objectsOnBoth:
+            localObject = object[0]
+            remoteObject = object[1]
+            print "Object Path", localObject.path
+            print "Local Object Time:", localObject.modified_local
+            print "Remote Object Time:", remoteObject.modified
+            if localObject.checksum is not remoteObject.checksum:
+                if localObject.modified_local > remoteObject.modified:
+                    self.syncUpQueue.put(object)
+                elif localObject.modified_local < remoteObject.modified:
+                    self.syncDownQueue.put(object)
 
     def indexLocal(self, localPath=None):
         """
@@ -154,9 +181,16 @@ class Synchronizer(threading.Thread):
                     path = i['path'].encode("utf-8")
                     isDir = True
                     size = None
-                    modified = i['time'].encode("utf-8")
-                    modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
+                    # Check if modified is in attributes and use that
+                    if "modified" in i['attributes']:
+                        modified = i['attributes']['modified'].encode("utf-8")
+                        modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                    # Or else, just use the modified time set by the api
+                    else:
+                        modified = i['time'].encode("utf-8")
+                        modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
                     checksum = None
+
                     # Add the folder to the database
                     self.addRemoteFile(path, checksum, modified, size, isDir)
                     # Dive into the directory and look for more
@@ -166,12 +200,18 @@ class Synchronizer(threading.Thread):
                     path = i['path'].encode("utf-8")
                     isDir = False
                     size = int(i['size'])
-                    modified = i['time'].encode("utf-8")
-                    modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-
+                    # Check if modified is in attributes and use that
+                    if "modified" in i['attributes']:
+                        modified = i['attributes']['modified'].encode("utf-8")
+                        modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                    # Or else, just use the modified time set by the api
+                    else:
+                        modified = i['time'].encode("utf-8")
+                        modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
                     if 'checksum' in i['attributes']:
                         checksum = i['attributes']['checksum'].encode("utf-8")
                     else:
                         checksum = None
+
                     # Add that bad boy file to the database!
                     self.addRemoteFile(path, checksum, modified, size, isDir)
