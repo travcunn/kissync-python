@@ -1,7 +1,4 @@
-import os
 import threading
-
-import common
 
 
 class SyncUp(threading.Thread):
