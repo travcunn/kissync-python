@@ -23,6 +23,7 @@ class Uploader(object):
             inDir = path.replace(fileName, '').replace("\\", "/")
             apiPath = "/path/data/%s" % inDir
 
+            #TODO: Check if this is actually doing what it should do
             # create directory before uploading
             self.api.put('/path/oper/mkdir/', inDir)
 

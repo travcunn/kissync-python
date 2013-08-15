@@ -1,6 +1,6 @@
 from PySide import QtCore
 from smartfileclient import OAuthClient
-#from smartfile.sync import SyncClient
+from smartfile.sync import SyncClient
 
 
 class Authenticator(QtCore.QThread):
@@ -20,7 +20,6 @@ class Authenticator(QtCore.QThread):
                 self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq",
                                                     configToken, configVerifier)
                 self.parent.smartfile.get('/whoami')
-                #self.parent.sync = SyncClient(self.parent.smartfile)
             except:
                 self.showLoginWindow()
             else:
@@ -28,7 +27,6 @@ class Authenticator(QtCore.QThread):
         else:
             try:
                 self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq")
-                #self.parent.sync = SyncClient(self.parent.smartfile)
             except:
                 self.networkError()
             else:
@@ -55,4 +53,5 @@ class Authenticator(QtCore.QThread):
             self.setup.emit('done')
         else:
             self.done.emit('done')
+            self.parent.sync = SyncClient(self.parent.smartfile)
             #self.parent.filewatcher.start()

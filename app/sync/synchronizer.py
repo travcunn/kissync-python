@@ -8,7 +8,7 @@ from Queue import Queue
 
 from download import DownloadThread
 from upload import UploadThread
-from sync import SyncUp, SyncDown
+from sync import SyncUpThread, SyncDown
 from watcher import Watcher
 
 from sqlalchemy import create_engine
@@ -30,7 +30,7 @@ class Synchronizer(threading.Thread):
 
         self.uploader = UploadThread(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = DownloadThread(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
-        self.syncUp = SyncUp(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self.syncUp = SyncUpThread(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
         self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         self._timeoffset = None
@@ -107,7 +107,7 @@ class Synchronizer(threading.Thread):
 
         objectsOnBoth = []
 
-        # Eventually this will be done with more SQL queries...
+        # Eventually this will be done with more SQLAlchemy queries...
 
         # Check which files exist on both and which local files dont exist on remote
         for localObject in local:
@@ -134,8 +134,6 @@ class Synchronizer(threading.Thread):
                 self.downloadQueue.put(remoteObject)
             found = False
 
-        print "Objects on both"
-        print objectsOnBoth
         # Check which way to synchronize files
         for object in objectsOnBoth:
             localObject = object[0]
