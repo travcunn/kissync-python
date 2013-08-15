@@ -38,7 +38,6 @@ class Uploader(object):
         checksum = object.checksum
         #TODO: Change this back to modified and implement proper time checking
         modified = object.modified_local.replace(microsecond=0)
-        modified = modified - self._timeoffset
 
         fileChecksum = "checksum=%s" % checksum
         fileModified = "modified=%s" % modified

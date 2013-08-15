@@ -140,9 +140,6 @@ class Synchronizer(threading.Thread):
         for object in objectsOnBoth:
             localObject = object[0]
             remoteObject = object[1]
-            print "Object Path", localObject.path
-            print "Local Object Time:", localObject.modified_local
-            print "Remote Object Time:", remoteObject.modified
             if localObject.checksum is not remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     self.syncUpQueue.put(object)
@@ -159,7 +156,7 @@ class Synchronizer(threading.Thread):
             for item in files:
                 path = os.path.join(paths, item)
                 checksum = common.getFileHash(path)
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0)
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
                 path = path.replace(localPath, '')
