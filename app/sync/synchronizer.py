@@ -156,7 +156,7 @@ class Synchronizer(threading.Thread):
             for item in files:
                 path = os.path.join(paths, item)
                 checksum = common.getFileHash(path)
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0)
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
                 path = path.replace(localPath, '')

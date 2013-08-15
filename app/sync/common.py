@@ -46,11 +46,12 @@ def get_server_time():
     Returns the time of the SmartFile servers
     """
     response = requests.get('https://www.smartfile.com')
-    time = parse(response.headers['Date']).replace(tzinfo=None)
+    time = parse(response.headers['Date']).replace(tzinfo=None, second=0)
     return time
 
 
 def calculate_time_offset():
-    now = datetime.datetime.now().replace(microsecond=0)
-    offset = now - get_server_time()
+    server_time = get_server_time()
+    now = datetime.datetime.now().replace(microsecond=0, second=0)
+    offset = now - server_time
     return offset

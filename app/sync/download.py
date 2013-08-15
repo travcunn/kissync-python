@@ -39,7 +39,7 @@ class Downloader(object):
         #TODO: Change this back to modified and implement proper time checking
         path = os.path.join(self.syncDir, common.basePath(object.path))
         checksum = common.getFileHash(path)
-        modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0)
+        modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
 
         fileChecksum = "checksum=%s" % checksum
         fileModified = "modified=%s" % modified
