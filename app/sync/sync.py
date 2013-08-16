@@ -33,7 +33,6 @@ class SyncUp(object):
         else:
             self.setAttributes(object[0])
 
-
     def setAttributes(self, object):
         #TODO: Change this back to modified and implement proper time checking
         path = os.path.join(self.syncDir, common.basePath(object.path))
