@@ -20,6 +20,7 @@ class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
+        self.api = self.parent.smartfile
         # Initialize the database
         self.dbInit()
 
@@ -72,7 +73,7 @@ class Synchronizer(threading.Thread):
 
         print "Joined all the queues"
         # Now watch the file system for changes
-        #self.watchFileSystem()
+        self.watchFileSystem()
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
@@ -168,7 +169,7 @@ class Synchronizer(threading.Thread):
         if remotePath is None:
             remotePath = "/"
         apiPath = '/path/info%s' % remotePath
-        dirListing = self.parent.smartfile.get(apiPath, children=True)
+        dirListing = self.api.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
                 if i['isfile'] is False:

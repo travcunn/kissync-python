@@ -2,19 +2,23 @@ import datetime
 import os
 import threading
 import time
+
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
+import common
+from definitions import LocalFile
+
 
 class Watcher(threading.Thread):
-    def __init__(self, parent, smartfile, syncDir):
+    def __init__(self, parent, api, syncDir):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.smartfile = smartfile
+        self.api = api
         self.syncDir = syncDir
 
     def run(self):
-        self.event_handler = EventHandler(self)
+        self.event_handler = EventHandler(self, self.api)
         self.observer = Observer()
         self.observer.schedule(self.event_handler, self.syncDir, recursive=True)
         self.observer.start()
@@ -27,42 +31,67 @@ class Watcher(threading.Thread):
 
 
 class EventHandler(FileSystemEventHandler):
-    def __init__(self, parent=None):
+    def __init__(self, parent, api):
         self.parent = parent
+        self.api = api
         self.syncDir = self.parent.syncDir
+        self._timeoffset = common.calculate_time_offset()
 
     def on_moved(self, event):
+        print "Item Moved:", event.src_path, event.dest_path
         serverPath = self.localToServerPath(event.src_path)
-        serverPathNew = self.localToServerPath(event.src_path)
+        serverPathNew = self.localToServerPath(event.dest_path)
+        print "Server Path:", serverPath
+        print "Server Path New:", serverPathNew
         try:
-            self.parent.smartfile.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+            print self.api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
         except:
             raise
 
     def on_created(self, event):
-        file = event.src_path
-        serverPath = self.localToServerPath(file)
+        print "Item Created:", event.src_path
+        path = event.src_path
+        serverPath = self.localToServerPath(path)
         if not event.is_directory:
-            modifiedTime = datetime.datetime.fromtimestamp(os.path.getmtime(file))
-            fileHash = self.parent.parent._getFileHash(file)
-            task = (serverPath, modifiedTime, fileHash)
-            self.parent.parent.uploadQueue.put(task)
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+            checksum = common.getFileHash(path)
+            size = int(os.path.getsize(path))
+            isDir = os.path.isdir(path)
+            localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
+
+            self.parent.uploadQueue.put(localfile)
+        else:
+            try:
+                self.api.post('/path/oper/mkdir/', path=serverPath)
+            except:
+                raise
+
+    def on_deleted(self, event):
+        print "Item Deleted:", event.src_path
+        try:
+            self.api.post('/path/oper/remove', path=event.src_path)
+        except:
+            raise
+
+    def on_modified(self, event):
+        print "Item Modified:", event.src_path
+        path = event.src_path
+        serverPath = self.localToServerPath(path)
+        if not event.is_directory:
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+            checksum = common.getFileHash(path)
+            size = int(os.path.getsize(path))
+            isDir = os.path.isdir(path)
+            localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
+
+            self.parent.syncUpQueue.put(localfile)
+        """
         else:
             try:
                 self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
             except:
                 raise
-
-    def on_deleted(self, event):
-        try:
-            self.parent.smartfile.post('/path/oper/remove', path=event.src_path)
-        except:
-            raise
-
-    def on_modified(self, event):
-        if not event.is_directory:
-            #TODO: add file to the synchronize queue here
-            pass
+        """
 
     def localToServerPath(self, path):
         pathOnServer = path.replace(self.syncDir, '')

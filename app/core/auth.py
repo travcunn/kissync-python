@@ -54,4 +54,3 @@ class Authenticator(QtCore.QThread):
         else:
             self.done.emit('done')
             self.parent.sync = SyncClient(self.parent.smartfile)
-            #self.parent.filewatcher.start()

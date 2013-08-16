@@ -14,6 +14,7 @@ class Uploader(object):
 
     def upload(self, object):
         path = common.basePath(object.path)
+        print path
         absolutePath = os.path.join(self.syncDir, path)
 
         print "[UPLOAD]: (", path, ") ", absolutePath
