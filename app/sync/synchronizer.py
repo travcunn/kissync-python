@@ -8,7 +8,7 @@ from Queue import Queue
 
 from download import DownloadThread
 from upload import UploadThread
-from sync import SyncUpThread, SyncDown
+from sync import SyncUpThread, SyncDownThread
 from watcher import Watcher
 
 from sqlalchemy import create_engine
@@ -31,7 +31,7 @@ class Synchronizer(threading.Thread):
         self.uploader = UploadThread(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
         self.downloader = DownloadThread(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
         self.syncUp = SyncUpThread(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
-        self.syncDown = SyncDown(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self.syncDown = SyncDownThread(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
 
         self._timeoffset = None
 
