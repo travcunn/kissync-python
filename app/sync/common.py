@@ -51,6 +51,12 @@ def get_server_time():
 
 
 def calculate_time_offset():
+    """
+    Calculates a time offset, duh!
+    This should be tested more. If the offset calculation is incorrect,
+    unchanged files will be put into sync up/down queues, and since a sync up
+    on a file that has not been changed will cause corruption.
+    """
     server_time = get_server_time()
     now = datetime.datetime.now().replace(microsecond=0, second=0)
     offset = now - server_time
