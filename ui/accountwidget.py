@@ -71,7 +71,8 @@ class AvatarWidget(QtGui.QWidget):
 
         self.gridlayout = QtGui.QGridLayout()
 
-        self.addIcon(self.email)
+        #TODO: initializing this takes too long
+        #self.addIcon(self.email)
 
     def addIcon(self, email):
         self.icon = QtGui.QImage()
@@ -81,12 +82,14 @@ class AvatarWidget(QtGui.QWidget):
         self.icon.loadFromData(img_file, "JPG")
         self.icontarget = QtCore.QRectF(0, 0, 64, 64)
 
+    """
     def paintEvent(self, e):
         painter = QtGui.QPainter()
         painter.begin(self)
         # Draw Item Thumbnail.
         painter.drawImage(self.icontarget, self.icon)
         painter.end()
+    """
 
     def mousePressEvent(self, event):
         webbrowser.open('http://www.gravatar.com/')
@@ -119,11 +122,11 @@ class AccountWidget(QtGui.QWidget):
         self.lbFullName = UsernameLabel(self, self.fullname)
         self.lblogout = LogoutLabel(self)
 
-        self.icon = AvatarWidget(self, self.email)
+        #self.icon = AvatarWidget(self, self.email)
 
         self.gridlayout = QtGui.QGridLayout()
 
-        self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
+        #self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
         self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
