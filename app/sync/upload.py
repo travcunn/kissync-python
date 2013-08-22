@@ -1,5 +1,7 @@
 import os
 import threading
+import time
+from smartfile.errors import ResponseError
 
 import common
 
@@ -45,6 +47,25 @@ class Uploader(object):
         fileModified = "modified=%s" % modified
         apiPath = "/path/info%s" % object.path
 
+        try:
+            self._setAttributes(apiPath, fileChecksum, fileModified)
+        except ResponseError, err:
+            if err.status_code == 404:
+                """
+                If we try setting attributes to a file too soon, SmartFile
+                gives us an error, so sleep the thread for a bit
+                """
+                time.sleep(2)
+                # Now try setting the attributes again
+                self._setAttributes(apiPath, fileChecksum, fileModified)
+            elif err.status_code == 500:
+                self._setAttributes(apiPath, fileChecksum, fileModified)
+            else:
+                raise
+        except:
+            raise
+
+    def _setAttributes(self, apiPath, fileChecksum, fileModified):
         #TODO: reduce this to one request
         self.api.post(apiPath, attributes=fileChecksum)
         self.api.post(apiPath, attributes=fileModified)

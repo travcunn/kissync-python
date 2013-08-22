@@ -18,7 +18,7 @@ class Watcher(threading.Thread):
         self.syncDir = syncDir
 
     def run(self):
-        self.event_handler = EventHandler(self, self.api)
+        self.event_handler = EventHandler(self, self.parent, self.api)
         self.observer = Observer()
         self.observer.schedule(self.event_handler, self.syncDir, recursive=True)
         self.observer.start()
@@ -31,8 +31,9 @@ class Watcher(threading.Thread):
 
 
 class EventHandler(FileSystemEventHandler):
-    def __init__(self, parent, api):
+    def __init__(self, parent, synchronizer, api):
         self.parent = parent
+        self.synchronizer = synchronizer
         self.api = api
         self.syncDir = self.parent.syncDir
         self._timeoffset = common.calculate_time_offset()
@@ -59,7 +60,7 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(path)
             localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
 
-            self.parent.uploadQueue.put(localfile)
+            self.synchronizer.uploadQueue.put(localfile)
         else:
             try:
                 self.api.post('/path/oper/mkdir/', path=serverPath)
@@ -84,7 +85,7 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(path)
             localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
 
-            self.parent.syncUpQueue.put(localfile)
+            self.synchronizer.syncUpQueue.put(localfile)
         """
         else:
             try:
