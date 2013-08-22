@@ -45,6 +45,7 @@ def get_server_time():
     """
     Returns the time of the SmartFile servers
     """
+    #TODO: cache the time
     response = requests.get('https://www.smartfile.com')
     time = parse(response.headers['Date']).replace(tzinfo=None, second=0)
     return time

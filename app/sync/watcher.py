@@ -42,10 +42,15 @@ class EventHandler(FileSystemEventHandler):
         print "Item Moved:", event.src_path, event.dest_path
         serverPath = self.localToServerPath(event.src_path)
         serverPathNew = self.localToServerPath(event.dest_path)
-        print "Server Path:", serverPath
-        print "Server Path New:", serverPathNew
+        print "Old Server Path:", serverPath
+        print "New Server Path:", serverPathNew
+
         try:
-            print self.api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+            #TODO: This doenst work
+            # According to the logs, /cloud.png gets moved to
+            # /logo.png/cloud.png, where instead it should be moved to
+            # /logo.png
+            self.api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
         except:
             raise
 
@@ -53,9 +58,6 @@ class EventHandler(FileSystemEventHandler):
         print "Item Created:", event.src_path
         path = event.src_path
         serverPath = self.localToServerPath(path)
-        #TODO: Test this on other platforms than Linux
-        if not serverPath.startswith("/"):
-            serverPath = os.path.join("/", serverPath)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
@@ -63,15 +65,6 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(path)
             localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
 
-            #TODO: Something weird is happening here. When passing localfile
-            #to the upload queue, SmartFile returns a 404 when seting the
-            #attributes for the file
-            #TODO: The error is caused when the file does not have a leading
-            #forward slash
-            print "Watcher file information"
-            print localfile.path
-            print localfile.checksum
-            print localfile.modified_local
             self.synchronizer.uploadQueue.put(localfile)
         else:
             try:
@@ -81,8 +74,10 @@ class EventHandler(FileSystemEventHandler):
 
     def on_deleted(self, event):
         print "Item Deleted:", event.src_path
+        path = event.src_path
+        serverPath = self.localToServerPath(path)
         try:
-            self.api.post('/path/oper/remove', path=event.src_path)
+            self.api.post('/path/oper/remove/', path=serverPath)
         except:
             raise
 
@@ -107,9 +102,13 @@ class EventHandler(FileSystemEventHandler):
         """
 
     def localToServerPath(self, path):
+        #TODO: Test this on different platforms
+        # Also, rewrite this when you get some time
         pathOnServer = path.replace(self.syncDir, '')
         if pathOnServer.startswith("/"):
             pathOnServer = pathOnServer.strip("/")
         elif pathOnServer.startswith("\\"):
             pathOnServer = pathOnServer.strip("\\")
+        if not pathOnServer.startswith("/"):
+            pathOnServer = os.path.join("/", pathOnServer)
         return pathOnServer
