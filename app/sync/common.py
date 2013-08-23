@@ -5,6 +5,20 @@ import hashlib
 import os
 import requests
 
+_cache = {}
+
+
+def cache(key):
+    def _decorating_wrapper(func):
+        def _caching_wrapper(*args, **kwargs):
+            if _cache.has_key(key):
+                return _cache[key]
+            value = func(*args, **kwargs)
+            _cache[key] = value
+            return value
+        return _caching_wrapper
+    return _decorating_wrapper
+
 
 def basePath(path):
     """
@@ -45,15 +59,14 @@ def get_server_time():
     """
     Returns the time of the SmartFile servers
     """
-    #TODO: cache the time
     response = requests.get('https://www.smartfile.com')
     time = parse(response.headers['Date']).replace(tzinfo=None, second=0)
     return time
 
 
+@cache('server_time_offset')
 def calculate_time_offset():
     """
-    Calculates a time offset, duh!
     This should be tested more. If the offset calculation is incorrect,
     unchanged files will be put into sync up/down queues, and since a sync up
     on a file that has not been changed will cause corruption.
