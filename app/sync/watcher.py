@@ -56,7 +56,6 @@ class EventHandler(FileSystemEventHandler):
             raise
 
     def on_created(self, event):
-        print "Item Created:", event.src_path
         path = event.src_path
         serverPath = self.localToServerPath(path)
         if not event.is_directory:
@@ -74,7 +73,6 @@ class EventHandler(FileSystemEventHandler):
                 raise
 
     def on_deleted(self, event):
-        print "Item Deleted:", event.src_path
         path = event.src_path
         serverPath = self.localToServerPath(path)
         try:
@@ -83,7 +81,6 @@ class EventHandler(FileSystemEventHandler):
             raise
 
     def on_modified(self, event):
-        print "Item Modified:", event.src_path
         path = event.src_path
         serverPath = self.localToServerPath(path)
         if not event.is_directory:
