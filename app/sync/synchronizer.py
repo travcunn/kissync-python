@@ -8,6 +8,8 @@ from upload import UploadThread
 from sync import SyncUpThread, SyncDownThread
 from watcher import Watcher
 
+from fs.osfs import OSFS
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from definitions import Base, RemoteFile, LocalFile, TempLocalFile
@@ -20,6 +22,11 @@ class Synchronizer(threading.Thread):
         threading.Thread.__init__(self)
         self.parent = parent
         self.api = self.parent.smartfile
+        self.syncDir = self.parent.syncDir
+
+        # Set the thread to run as a daemon
+        self.setDaemon(True)
+
         # Initialize the database
         self.dbInit()
 
@@ -28,15 +35,12 @@ class Synchronizer(threading.Thread):
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
 
-        self.uploader = UploadThread(self.uploadQueue, self.parent.smartfile, self.parent.syncDir)
-        self.downloader = DownloadThread(self.downloadQueue, self.parent.smartfile, self.parent.syncDir)
-        self.syncUp = SyncUpThread(self.syncUpQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
-        self.syncDown = SyncDownThread(self.syncDownQueue, self.parent.smartfile, self.parent.sync, self.parent.syncDir)
+        self.uploader = UploadThread(self.uploadQueue, self.api, self.syncDir)
+        self.downloader = DownloadThread(self.downloadQueue, self.api, self.syncDir)
+        self.syncUp = SyncUpThread(self.syncUpQueue, self.api, self.parent.sync, self.syncDir)
+        self.syncDown = SyncDownThread(self.syncDownQueue, self.api, self.parent.sync, self.syncDir)
 
-        self._timeoffset = None
-
-        # Set the thread to run as a daemon
-        self.setDaemon(True)
+        self._timeoffset = common.calculate_time_offset()
 
     def run(self):
         self.synchronize()
@@ -49,8 +53,6 @@ class Synchronizer(threading.Thread):
         self.session = Session()
 
     def synchronize(self):
-        if self._timeoffset is None:
-            self._timeoffset = common.calculate_time_offset()
         self.clearTables()
         self.indexRemote()
         self.dbCommit()
@@ -78,8 +80,8 @@ class Synchronizer(threading.Thread):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
         self.session.add(remotefile)
 
-    def addLocalFile(self, path, checksum, modified, modified_local, size, isDir):
-        localfile = LocalFile(path, checksum, modified, modified_local, size, isDir)
+    def addLocalFile(self, path, system_path, checksum, modified, modified_local, size, isDir):
+        localfile = LocalFile(path, system_path, checksum, modified, modified_local, size, isDir)
         self.session.add(localfile)
 
     def addTempLocalFile(self, path, checksum, modified, isDir):
@@ -98,7 +100,7 @@ class Synchronizer(threading.Thread):
 
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
-        self.localFileWatcher = Watcher(self, self.parent.smartfile, self.parent.syncDir)
+        self.localFileWatcher = Watcher(self, self.api, self.syncDir)
         self.localFileWatcher.start()
 
     def compare(self):
@@ -149,18 +151,18 @@ class Synchronizer(threading.Thread):
         Indexes the local files
         """
         if localPath is None:
-            localPath = self.parent.syncDir
-        for (paths, dirs, files) in os.walk(localPath):
-            for item in files:
-                path = os.path.join(paths, item)
-                checksum = common.getFileHash(path)
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-                size = int(os.path.getsize(path))
-                isDir = os.path.isdir(path)
-                path = path.replace(localPath, '')
-                path = common.unixPath(self.parent.syncDir, path)
+            localPath = self.syncDir
 
-                self.addLocalFile(path, checksum, None, modified, size, isDir)
+        syncFS = OSFS(localPath)
+
+        for path in syncFS.walkfiles():
+            systemPath = syncFS.getsyspath(path).strip("\\\\?\\")
+            checksum = common.getFileHash(systemPath)
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(systemPath)).replace(microsecond=0) - self._timeoffset
+            size = syncFS.getsize(path)
+            isDir = syncFS.isdir(path)
+
+            self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
 
     def indexRemote(self, remotePath=None):
         """

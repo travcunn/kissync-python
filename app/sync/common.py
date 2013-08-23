@@ -23,34 +23,13 @@ def cache(key):
 def basePath(path):
     """
     Returns the path of files in the sync folder
-    without the leading system folder separation
+    without the leading folder separation character
     """
     if path.startswith("/"):
         path = path.replace("/", "", 1)
     if path.startswith("\\"):
         path = path.replace("\\", "", 1)
     return path
-
-
-def unixPath(syncDir, path):
-    #TODO: Test this on different platforms
-    # Also, rewrite this when you get some time
-    path = path.replace(syncDir, '')
-    path = path.replace("\\", "/")
-    path = path.replace("//", "/")
-    if not path.startswith("/"):
-        path = os.path.join("/", path)
-    return path
-    """
-    pathOnServer = path.replace(self.syncDir, '')
-    if pathOnServer.startswith("/"):
-        pathOnServer = pathOnServer.strip("/")
-    elif pathOnServer.startswith("\\"):
-        pathOnServer = pathOnServer.strip("\\")
-    if not pathOnServer.startswith("/"):
-        pathOnServer = os.path.join("/", pathOnServer)
-    return pathOnServer
-    """
 
 
 def createLocalDirs(path):
