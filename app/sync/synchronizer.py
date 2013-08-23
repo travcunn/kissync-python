@@ -1,9 +1,6 @@
 import datetime
 import os
 import threading
-
-import common
-
 from Queue import Queue
 
 from download import DownloadThread
@@ -14,6 +11,8 @@ from watcher import Watcher
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from definitions import Base, RemoteFile, LocalFile, TempLocalFile
+
+import common
 
 
 class Synchronizer(threading.Thread):

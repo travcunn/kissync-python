@@ -27,14 +27,16 @@ class LocalFile(Base):
 
     id = Column(Integer, primary_key=True)
     path = Column(String)
+    system_path = Column(String)
     checksum = Column(String)
     modified = Column(DateTime)
     modified_local = Column(DateTime)
     size = Column(BigInteger)
     isDir = Column(Boolean)
 
-    def __init__(self, path, checksum, modified, modified_local, size, isDir):
+    def __init__(self, path, system_path, checksum, modified, modified_local, size, isDir):
         self.path = path
+        self.system_path = system_path
         self.checksum = checksum
         self.modified = modified
         self.modified_local = modified_local
