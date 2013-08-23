@@ -49,7 +49,8 @@ class EventHandler(FileSystemEventHandler):
             #TODO: This doenst work
             # According to the logs, /cloud.png gets moved to
             # /logo.png/cloud.png, where instead it should be moved to
-            # /logo.png
+            # /logo.png.
+            # post created: http://smartfile.forumbee.com/t/19b28
             self.api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
         except:
             raise
