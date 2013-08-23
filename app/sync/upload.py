@@ -31,6 +31,9 @@ class Uploader(object):
             print object.checksum
             print object.modified_local
 
+            print "in Directory"
+            print inDir
+
             #TODO: Check if this is actually doing what it should do
             # create directory before uploading
             self.api.put('/path/oper/mkdir/', inDir)
@@ -40,6 +43,7 @@ class Uploader(object):
 
             # set the new attributes
             self.setAttributes(object)
+            print "Done"
         else:
             self.api.put('/path/oper/mkdir/', path)
 

@@ -40,8 +40,8 @@ class EventHandler(FileSystemEventHandler):
 
     def on_moved(self, event):
         print "Item Moved:", event.src_path, event.dest_path
-        serverPath = self.localToServerPath(event.src_path)
-        serverPathNew = self.localToServerPath(event.dest_path)
+        serverPath = common.unixPath(self.syncDir, event.src_path)
+        serverPathNew = common.unixPath(self.syncDir, event.dest_path)
         print "Old Server Path:", serverPath
         print "New Server Path:", serverPathNew
 
@@ -57,7 +57,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         path = event.src_path
-        serverPath = self.localToServerPath(path)
+        serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
@@ -74,7 +74,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_deleted(self, event):
         path = event.src_path
-        serverPath = self.localToServerPath(path)
+        serverPath = common.unixPath(self.syncDir, path)
         try:
             self.api.post('/path/oper/remove/', path=serverPath)
         except:
@@ -82,7 +82,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         path = event.src_path
-        serverPath = self.localToServerPath(path)
+        serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
@@ -98,15 +98,3 @@ class EventHandler(FileSystemEventHandler):
             except:
                 raise
         """
-
-    def localToServerPath(self, path):
-        #TODO: Test this on different platforms
-        # Also, rewrite this when you get some time
-        pathOnServer = path.replace(self.syncDir, '')
-        if pathOnServer.startswith("/"):
-            pathOnServer = pathOnServer.strip("/")
-        elif pathOnServer.startswith("\\"):
-            pathOnServer = pathOnServer.strip("\\")
-        if not pathOnServer.startswith("/"):
-            pathOnServer = os.path.join("/", pathOnServer)
-        return pathOnServer

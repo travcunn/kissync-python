@@ -159,6 +159,7 @@ class Synchronizer(threading.Thread):
                 size = int(os.path.getsize(path))
                 isDir = os.path.isdir(path)
                 path = path.replace(localPath, '')
+                path = common.unixPath(self.parent.syncDir, path)
 
                 self.addLocalFile(path, checksum, None, modified, size, isDir)
 
