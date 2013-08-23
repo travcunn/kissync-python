@@ -2,8 +2,9 @@ import fs.base
 from fs.osfs import OSFS
 
 
-sync_fs = OSFS('/home/travis/Kissync')
+sync_fs = OSFS('C:\Users\Travis\Kissync')
 
-for object in sync_fs.walkfiles():
-    print object
-    print sync_fs.getsyspath(object)
+for path in sync_fs.walkfiles():
+    print path
+    systemPath = sync_fs.getsyspath(path).strip("\\\\?\\")
+    print systemPath
