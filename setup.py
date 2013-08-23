@@ -11,6 +11,7 @@ setup(
         'coveralls',
         'oauthlib',
         'pathtools',
+        'python-dateutil',
         'python-librsync',
         'requests',
         'requests-oauthlib',

@@ -1,6 +1,9 @@
 from PySide import QtCore
 from smartfileclient import OAuthClient
-from smartfile.sync import SyncClient
+try:
+    from smartfile.sync import SyncClient
+except:
+    print "Could not load rsync"
 
 
 class Authenticator(QtCore.QThread):
