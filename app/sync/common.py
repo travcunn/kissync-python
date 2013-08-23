@@ -11,7 +11,7 @@ _cache = {}
 def cache(key):
     def _decorating_wrapper(func):
         def _caching_wrapper(*args, **kwargs):
-            if _cache.has_key(key):
+            if key in _cache:
                 return _cache[key]
             value = func(*args, **kwargs)
             _cache[key] = value
@@ -59,6 +59,7 @@ def get_server_time():
     """
     Returns the time of the SmartFile servers
     """
+    print "grabbing the time"
     response = requests.get('https://www.smartfile.com')
     time = parse(response.headers['Date']).replace(tzinfo=None, second=0)
     return time
