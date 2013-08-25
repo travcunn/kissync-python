@@ -33,15 +33,15 @@ class Watcher(threading.Thread):
 class EventHandler(FileSystemEventHandler):
     def __init__(self, parent, synchronizer, api):
         self.parent = parent
-        self.synchronizer = synchronizer
-        self.api = api
-        self.syncDir = self.parent.syncDir
+        self._synchronizer = synchronizer
+        self._api = api
+        self._syncDir = self.parent.syncDir
         self._timeoffset = common.calculate_time_offset()
 
     def on_moved(self, event):
         print "Item Moved:", event.src_path, event.dest_path
-        serverPath = common.unixPath(self.syncDir, event.src_path)
-        serverPathNew = common.unixPath(self.syncDir, event.dest_path)
+        serverPath = common.unixPath(self._syncDir, event.src_path)
+        serverPathNew = common.unixPath(self._syncDir, event.dest_path)
         print "Old Server Path:", serverPath
         print "New Server Path:", serverPathNew
 
@@ -65,10 +65,10 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(path)
             localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
 
-            self.synchronizer.uploadQueue.put(localfile)
+            self._synchronizer.uploadQueue.put(localfile)
         else:
             try:
-                self.api.post('/path/oper/mkdir/', path=serverPath)
+                self._api.post('/path/oper/mkdir/', path=serverPath)
             except:
                 raise
 
@@ -76,7 +76,7 @@ class EventHandler(FileSystemEventHandler):
         path = event.src_path
         serverPath = common.unixPath(self.syncDir, path)
         try:
-            self.api.post('/path/oper/remove/', path=serverPath)
+            self._api.post('/path/oper/remove/', path=serverPath)
         except:
             raise
 
@@ -90,7 +90,7 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(path)
             localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
 
-            self.synchronizer.syncUpQueue.put(localfile)
+            self._synchronizer.syncUpQueue.put(localfile)
         """
         else:
             try:

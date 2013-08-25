@@ -2,7 +2,6 @@ import os
 import threading
 import time
 
-from fs.osfs import OSFS
 from smartfile.errors import ResponseError
 
 import common
@@ -13,8 +12,6 @@ class Uploader(object):
         self._api = api
         self._syncDir = syncDir
         self._timeoffset = common.calculate_time_offset()
-
-        self._syncFS = OSFS(self._syncDir)
 
     def upload(self, object):
         print "[UPLOAD]: (", object.path, ") ", object.system_path

@@ -21,8 +21,8 @@ class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.api = self.parent.smartfile
-        self.syncDir = self.parent.syncDir
+        self._api = self.parent.smartfile
+        self._syncDir = self.parent.syncDir
 
         # Set the thread to run as a daemon
         self.setDaemon(True)
@@ -35,10 +35,23 @@ class Synchronizer(threading.Thread):
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
 
-        self.uploader = UploadThread(self.uploadQueue, self.api, self.syncDir)
-        self.downloader = DownloadThread(self.downloadQueue, self.api, self.syncDir)
-        self.syncUp = SyncUpThread(self.syncUpQueue, self.api, self.parent.sync, self.syncDir)
-        self.syncDown = SyncDownThread(self.syncDownQueue, self.api, self.parent.sync, self.syncDir)
+        # Initialize the uploader and downloader
+        self.uploader = UploadThread(self.uploadQueue, self._api, self._syncDir)
+        self.downloader = DownloadThread(self.downloadQueue, self._api, self._syncDir)
+
+        # Attempt loading the SyncClient
+        try:
+            from smartfile.sync import SyncClient
+        except:
+            self.__syncLoaded = False
+        else:
+            self._sync = SyncClient(self._api)
+            self.__syncLoaded = True
+
+        # Check if the SyncClient loads before initializing the sync up/down
+        if self.__syncLoaded:
+            self.syncUp = SyncUpThread(self.syncUpQueue, self._api, self._sync, self._syncDir)
+            self.syncDown = SyncDownThread(self.syncDownQueue, self._api, self._sync, self._syncDir)
 
         self._timeoffset = common.calculate_time_offset()
 
@@ -50,7 +63,7 @@ class Synchronizer(threading.Thread):
         Base.metadata.create_all(engine)
 
         Session = sessionmaker(bind=engine)
-        self.session = Session()
+        self.__session = Session()
 
     def synchronize(self):
         self.clearTables()
@@ -78,34 +91,34 @@ class Synchronizer(threading.Thread):
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
-        self.session.add(remotefile)
+        self.__session.add(remotefile)
 
     def addLocalFile(self, path, system_path, checksum, modified, modified_local, size, isDir):
         localfile = LocalFile(path, system_path, checksum, modified, modified_local, size, isDir)
-        self.session.add(localfile)
+        self.__session.add(localfile)
 
     def addTempLocalFile(self, path, checksum, modified, isDir):
         tempfile = TempLocalFile(path, checksum, modified, isDir)
-        self.session.add(tempfile)
+        self.__session.add(tempfile)
 
     def clearTables(self):
-        for row in self.session.query(RemoteFile):
-            self.session.delete(row)
+        for row in self.__session.query(RemoteFile):
+            self.__session.delete(row)
 
-        for row in self.session.query(LocalFile):
-            self.session.delete(row)
+        for row in self.__session.query(LocalFile):
+            self.__session.delete(row)
 
     def dbCommit(self):
-        self.session.commit()
+        self.__session.commit()
 
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
-        self.localFileWatcher = Watcher(self, self.api, self.syncDir)
-        self.localFileWatcher.start()
+        self.localWatcher = Watcher(self, self._api, self._syncDir)
+        self.localWatcher.start()
 
     def compare(self):
-        local = self.session.query(LocalFile).all()
-        remote = self.session.query(RemoteFile).all()
+        local = self.__session.query(LocalFile).all()
+        remote = self.__session.query(RemoteFile).all()
 
         objectsOnBoth = []
 
@@ -151,7 +164,7 @@ class Synchronizer(threading.Thread):
         Indexes the local files
         """
         if localPath is None:
-            localPath = self.syncDir
+            localPath = self._syncDir
 
         syncFS = OSFS(localPath)
 
@@ -171,7 +184,7 @@ class Synchronizer(threading.Thread):
         if remotePath is None:
             remotePath = "/"
         apiPath = '/path/info%s' % remotePath
-        dirListing = self.api.get(apiPath, children=True)
+        dirListing = self._api.get(apiPath, children=True)
         if "children" in dirListing:
             for i in dirListing['children']:
                 if i['isfile'] is False:
