@@ -86,8 +86,8 @@ class SyncDown(object):
         apiPath = "/path/info%s" % object.path
 
         #TODO: reduce this to one request
-        self.api.post(apiPath, attributes=fileChecksum)
-        self.api.post(apiPath, attributes=fileModified)
+        self._api.post(apiPath, attributes=fileChecksum)
+        self._api.post(apiPath, attributes=fileModified)
 
 
 class SyncDownThread(SyncDown, threading.Thread):
