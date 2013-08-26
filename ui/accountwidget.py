@@ -16,9 +16,9 @@ class LogoutLabel(QtGui.QLabel):
 
     def mousePressEvent(self, event):
         ###print "Logout button pressed"
-        reply = QtGui.QMessageBox.question(self, 'Kissync', "Are you sure you want to exit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        reply = QtGui.QMessageBox.question(self, 'Kissync', "Are you sure you want to logout? Kissync will close afterwards.", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
-            self.parent.parent.tray.notification("Kissync", "Logging out..")
+            self.parent.parent.tray.notification("Kissync", "Logging out...")
             try:
                 os.remove(self.parent.parent.settingsFile)
                 os._exit(-1)

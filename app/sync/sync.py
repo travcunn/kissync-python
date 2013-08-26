@@ -16,23 +16,23 @@ class SyncUp(object):
     def syncUp(self, object):
         serverPath = object[0].path
         path = common.basePath(serverPath)
-        absolutePath = os.path.join(self.syncDir, path)
+        absolutePath = os.path.join(self._syncDir, path)
 
         print "[SYNC-UP-QUEUE]", path, absolutePath
 
         try:
-            self.sync.upload(absolutePath, serverPath)
+            self._sync.upload(absolutePath, serverPath)
         except ResponseError, err:
             if err.status_code == 500:
                 # The server gives a 500 when the sync is successful. bug?
                 # Checking for an error makes it a feature :-)
-                self.setAttributes(object[0])
+                self._setAttributes(object[0])
         except:
             raise
         else:
-            self.setAttributes(object[0])
+            self._setAttributes(object[0])
 
-    def setAttributes(self, object):
+    def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
         checksum = common.getFileHash(path)
         modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
@@ -74,9 +74,9 @@ class SyncDown(object):
         except:
             raise
         else:
-            self.setAttributes(object[0])
+            self._setAttributes(object[0])
 
-    def setAttributes(self, object):
+    def _setAttributes(self, object):
         #TODO: Change this back to modified and implement proper time checking
         path = os.path.join(self._syncDir, common.basePath(object.path))
         checksum = common.getFileHash(path)
