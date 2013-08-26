@@ -30,7 +30,6 @@ class Main(QtGui.QWidget):
         self.configuration = Configuration(self.settingsFile)  # initialize the configuration
 
         self.smartfile = None  # this will be initiated later in Authenticator()
-        self.sync = None
 
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
