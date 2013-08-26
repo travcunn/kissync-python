@@ -8,7 +8,7 @@ from PySide import QtGui, QtCore
 
 
 class LogoutLabel(QtGui.QLabel):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtGui.QLabel.__init__(self)
         self.parent = parent
         self.setText("Logout")
@@ -47,8 +47,10 @@ class UsernameLabel(QtGui.QLabel):
         self.setStyleSheet("color: #000000; font-size: 14pt;")
         self.repaint()
 
+    """
     def mousePressEvent(self, event):
         webbrowser.open('https://app.smartfile.com/ftp/private/account/')
+    """
 
     def mouseDoubleClickEvent(self, event):
         pass

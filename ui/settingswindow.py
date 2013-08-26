@@ -10,6 +10,8 @@ class SettingsWindow(QtGui.QWidget):
     def __init__(self, parent=None):
         super(SettingsWindow, self).__init__()
         self.parent = parent
+        self.tray = self.parent.tray
+        self.settingsFile = self.parent.settingsFile
         self.style = KissyncStyle()
 
         self.setWindowTitle('Kissync Folder Sync Settings')
