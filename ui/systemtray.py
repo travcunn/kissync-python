@@ -1,6 +1,7 @@
 import math
 import platform
 import subprocess
+import webbrowser
 from PySide import QtGui, QtCore
 
 from ui.settingswindow import SettingsWindow
@@ -49,6 +50,10 @@ class SystemTray(QtGui.QSystemTrayIcon):
         elif platform.system() == 'Windows':
             subprocess.call(['explorer', self.parent.syncDir])
 
+    def openWebsite(self):
+        url = "https://app.smartfile.com"
+        webbrowser.open(url,new=2)
+
     def openSettings(self):
         """Opens the settings window and brings it into focus"""
         self.settingsWindow.showSettings()
@@ -85,6 +90,9 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
         startAction = self.menu.addAction("Open Kissync Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+
+        openWebsite = self.menu.addAction("Launch SmartFile Website")
+        self.connect(openWebsite, QtCore.SIGNAL("triggered()"), self.openWebsite)
 
         self.menu.addSeparator()
 
