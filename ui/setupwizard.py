@@ -73,7 +73,7 @@ class SetupWizard(QtGui.QWidget):
         self.parent.configuration.set('LocalSettings', 'first-run', False)
         self.hide()
         self.parent.configuration.save()
-        self.parent.tray.notification("Kissync", "Welcome to Kissync Enterprise File Management")
+        self.parent.tray.notification("Kissync", "Starting Kissync Cloud Sync...")
         self.parent.start()
 
     def centerOnScreen(self):

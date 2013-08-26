@@ -18,20 +18,22 @@ class LoginWindow(QtGui.QWidget):
         #window size constraints
         self.setFixedSize(800, 550)
 
+        self.setStyleSheet("QWidget { font-size: 14pt; }")
+
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
         topText = QtGui.QLabel('Login to Kissync')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        font = QtGui.QFont("Vegur", 24, QtGui.QFont.Light, False)
-        topText.setFont(font)
+        #font = QtGui.QFont("Vegur", 24, QtGui.QFont.Light, False)
+        #topText.setFont(font)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF
 
         detailsText = QtGui.QLabel('using your Smartfile acount')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
-        detailsText.setFont(fontsmall)
+        #fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
+        #detailsText.setFont(fontsmall)
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF;")
 
