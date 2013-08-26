@@ -77,13 +77,17 @@ class Synchronizer(threading.Thread):
 
         self.uploader.start()
         self.downloader.start()
-        self.syncUp.start()
-        self.syncDown.start()
+
+        if self.__syncLoaded:
+            self.syncUp.start()
+            self.syncDown.start()
 
         self.uploadQueue.join()
         self.downloadQueue.join()
-        self.syncUpQueue.join()
-        self.syncDownQueue.join()
+
+        if self.__syncLoaded:
+            self.syncUpQueue.join()
+            self.syncDownQueue.join()
 
         print "Joined all the queues"
         # Now watch the file system for changes

@@ -100,8 +100,10 @@ class SettingsPanel(QtGui.QWidget):
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        font = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
-        self.checkboxNotifications.setFont(font)
+        self.checkboxNotifications.setObjectName("notificationsCheckbox")
+        self.checkboxNotifications.setStyleSheet('QCheckBox { font-size: 12pt; }')
+        #font = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
+        #self.checkboxNotifications.setFont(font)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():
                 self.checkboxNotifications.toggle()
@@ -133,7 +135,8 @@ class SaveButton(QtGui.QWidget):
         #os.path.dirname(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
 
         self.text = text
-        self.font = QtGui.QFont("Vegur", 14, QtGui.QFont.Bold, False)
+        #self.font = QtGui.QFont("Vegur", 14, QtGui.QFont.Bold, False)
+        self.setStyleSheet('QWidget { font-size: 14pt; }')
 
         self.color = '#8DBF41'
         self.initUI()
@@ -160,7 +163,7 @@ class SaveButton(QtGui.QWidget):
 
     def drawText(self, event, painter):
         painter.setPen(QtGui.QColor(255, 255, 255))
-        painter.setFont(self.font)
+        #painter.setFont(self.font)
         painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self.text)
 
     def mousePressEvent(self, event):

@@ -12,9 +12,7 @@ class LogoutLabel(QtGui.QLabel):
         QtGui.QLabel.__init__(self)
         self.parent = parent
         self.setText("Logout")
-        font = QtGui.QFont("Vegur", 16, QtGui.QFont.Normal, False)
-        self.setFont(font)
-        self.setStyleSheet("color: #1BA1E2;")
+        self.setStyleSheet("color: #1BA1E2; font-size: 14pt;")
 
     def mousePressEvent(self, event):
         ###print "Logout button pressed"
@@ -33,11 +31,11 @@ class LogoutLabel(QtGui.QLabel):
         pass
 
     def enterEvent(self, event):
-        self.setStyleSheet("color: #8CBF26;")
+        self.setStyleSheet("color: #8CBF26; font-size: 14pt;")
         self.repaint()
 
     def leaveEvent(self, event):
-        self.setStyleSheet("color: #1BA1E2;")
+        self.setStyleSheet("color: #1BA1E2; font-size: 14pt;")
         self.repaint()
 
 
@@ -46,9 +44,7 @@ class UsernameLabel(QtGui.QLabel):
         QtGui.QLabel.__init__(self)
         self.parent = parent
         self.setText(fullname)
-        font = QtGui.QFont("Roboto", 12, QtGui.QFont.Light, False)
-        self.setFont(font)
-        self.setStyleSheet("color: #000000;")
+        self.setStyleSheet("color: #000000; font-size: 14pt;")
         self.repaint()
 
     def mousePressEvent(self, event):
@@ -105,6 +101,8 @@ class AccountWidget(QtGui.QWidget):
 
         self.setMinimumSize(300, 80)
         self.setMaximumSize(300, 80)
+
+        self.setStyleSheet('QWidget { font-size: 14pt; }')
 
         ##get rid of the widget border
         self.setStyleSheet("QWidget { border: 0px; }")
