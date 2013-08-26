@@ -30,7 +30,7 @@ class LoginWindow(QtGui.QWidget):
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF
 
-        detailsText = QtGui.QLabel('using your Smartfile acount')
+        detailsText = QtGui.QLabel('using your Smartfile account')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
         #fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
         #detailsText.setFont(fontsmall)
