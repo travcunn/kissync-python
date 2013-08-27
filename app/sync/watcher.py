@@ -3,7 +3,7 @@ import os
 import threading
 import time
 
-from fs.path import *
+import fs.path
 from fs.osfs import OSFS
 
 from watchdog.observers.polling import PollingObserver as Observer
@@ -45,7 +45,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_moved(self, event):
         print "Item Moved:", event.src_path, event.dest_path
-        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
         #serverPath = common.unixPath(self._syncDir, event.src_path)
         serverPathNew = self._syncFS.unsyspath(event.dest_path).strip("\\\\?\\")
@@ -65,7 +65,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         path = event.src_path
-        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
         #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
@@ -84,7 +84,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_deleted(self, event):
         #path = event.src_path
-        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
         #serverPath = common.unixPath(self.syncDir, path)
         try:
@@ -94,7 +94,7 @@ class EventHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         path = event.src_path
-        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
         #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
