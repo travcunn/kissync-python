@@ -3,6 +3,9 @@ import os
 import threading
 import time
 
+from fs.path import *
+from fs.osfs import OSFS
+
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -38,10 +41,15 @@ class EventHandler(FileSystemEventHandler):
         self._syncDir = self.parent.syncDir
         self._timeoffset = common.calculate_time_offset()
 
+        self._syncFS = OSFS(self._syncDir)
+
     def on_moved(self, event):
         print "Item Moved:", event.src_path, event.dest_path
-        serverPath = common.unixPath(self._syncDir, event.src_path)
-        serverPathNew = common.unixPath(self._syncDir, event.dest_path)
+        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
+        #serverPath = common.unixPath(self._syncDir, event.src_path)
+        serverPathNew = self._syncFS.unsyspath(event.dest_path).strip("\\\\?\\")
+        #serverPathNew = common.unixPath(self._syncDir, event.dest_path)
         print "Old Server Path:", serverPath
         print "New Server Path:", serverPathNew
 
@@ -51,19 +59,21 @@ class EventHandler(FileSystemEventHandler):
             # /logo.png/cloud.png, where instead it should be moved to
             # /logo.png.
             # post created: http://smartfile.forumbee.com/t/19b28
-            self.api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+            self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
         except:
             raise
 
     def on_created(self, event):
         path = event.src_path
-        serverPath = common.unixPath(self.syncDir, path)
+        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
+        #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
             size = int(os.path.getsize(path))
             isDir = os.path.isdir(path)
-            localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
+            localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
             self._synchronizer.uploadQueue.put(localfile)
         else:
@@ -73,8 +83,10 @@ class EventHandler(FileSystemEventHandler):
                 raise
 
     def on_deleted(self, event):
-        path = event.src_path
-        serverPath = common.unixPath(self.syncDir, path)
+        #path = event.src_path
+        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
+        #serverPath = common.unixPath(self.syncDir, path)
         try:
             self._api.post('/path/oper/remove/', path=serverPath)
         except:
@@ -82,7 +94,9 @@ class EventHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         path = event.src_path
-        serverPath = common.unixPath(self.syncDir, path)
+        serverPath = normpath(event.src_path.replace(self._syncDir, ''))
+        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
+        #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
