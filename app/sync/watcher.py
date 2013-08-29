@@ -92,7 +92,7 @@ class EventHandler(FileSystemEventHandler):
             checksum = common.getFileHash(path)
             size = int(os.path.getsize(path))
             isDir = os.path.isdir(path)
-            localfile = LocalFile(serverPath, checksum, None, modified, size, isDir)
+            localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
             self._synchronizer.syncUpQueue.put(localfile)
         """
