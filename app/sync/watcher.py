@@ -46,10 +46,7 @@ class EventHandler(FileSystemEventHandler):
     def on_moved(self, event):
         print "Item Moved:", event.src_path, event.dest_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
-        #serverPath = common.unixPath(self._syncDir, event.src_path)
         serverPathNew = self._syncFS.unsyspath(event.dest_path).strip("\\\\?\\")
-        #serverPathNew = common.unixPath(self._syncDir, event.dest_path)
         print "Old Server Path:", serverPath
         print "New Server Path:", serverPathNew
 
@@ -66,8 +63,6 @@ class EventHandler(FileSystemEventHandler):
     def on_created(self, event):
         path = event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
-        #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)
@@ -83,10 +78,7 @@ class EventHandler(FileSystemEventHandler):
                 raise
 
     def on_deleted(self, event):
-        #path = event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
-        #serverPath = common.unixPath(self.syncDir, path)
         try:
             self._api.post('/path/oper/remove/', path=serverPath)
         except:
@@ -95,8 +87,6 @@ class EventHandler(FileSystemEventHandler):
     def on_modified(self, event):
         path = event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        #serverPath = self._syncFS.unsyspath(event.src_path).strip("\\\\?\\")
-        #serverPath = common.unixPath(self.syncDir, path)
         if not event.is_directory:
             modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
             checksum = common.getFileHash(path)

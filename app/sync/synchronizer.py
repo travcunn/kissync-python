@@ -16,6 +16,15 @@ from definitions import Base, RemoteFile, LocalFile, TempLocalFile
 
 import common
 
+# Attempt loading the SyncClient
+try:
+    from smartfile.sync import SyncClient
+except:
+    _syncLoaded = False
+else:
+    _syncLoaded = True
+
+
 
 class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
@@ -35,28 +44,23 @@ class Synchronizer(threading.Thread):
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
 
-        # Initialize the uploader and downloader
-        self.uploader = UploadThread(self.uploadQueue, self._api, self._syncDir)
-        self.downloader = DownloadThread(self.downloadQueue, self._api, self._syncDir)
-
-        # Attempt loading the SyncClient
-        try:
-            from smartfile.sync import SyncClient
-        except:
-            self.__syncLoaded = False
-        else:
-            self._sync = SyncClient(self._api)
-            self.__syncLoaded = True
-
-        # Check if the SyncClient loads before initializing the sync up/down
-        if self.__syncLoaded:
-            self.syncUp = SyncUpThread(self.syncUpQueue, self._api, self._sync, self._syncDir)
-            self.syncDown = SyncDownThread(self.syncDownQueue, self._api, self._sync, self._syncDir)
-
         self._timeoffset = common.calculate_time_offset()
 
     def run(self):
         self.synchronize()
+
+    def startTransferThreads(self):
+        # Initialize the uploader and downloader
+        self.uploader = UploadThread(self.uploadQueue, self._api, self._syncDir)
+        self.downloader = DownloadThread(self.downloadQueue, self._api, self._syncDir)
+        self.uploader.start()
+        self.downloader.start()
+        if _syncLoaded:
+            self._sync = SyncClient(self._api)
+            self.syncUp = SyncUpThread(self.syncUpQueue, self._api, self._sync, self._syncDir)
+            self.syncDown = SyncDownThread(self.syncDownQueue, self._api, self._sync, self._syncDir)
+            self.syncUp.start()
+            self.syncDown.start()
 
     def dbInit(self):
         engine = create_engine('sqlite:///files.db', echo=False)
@@ -66,30 +70,29 @@ class Synchronizer(threading.Thread):
         self.__session = Session()
 
     def synchronize(self):
+        # Start the transfer threads to wait for tasks
+        self.startTransferThreads()
+        # Clear the remote tables
         self.clearTables()
+        # Index the remote files
         self.indexRemote()
         self.dbCommit()
+        # Index the local files
         self.indexLocal()
         self.dbCommit()
 
-        # Now compare the lists and populate task queues for differences
+        # Now compare the lists and populate task queues
         self.compare()
-
-        self.uploader.start()
-        self.downloader.start()
-
-        if self.__syncLoaded:
-            self.syncUp.start()
-            self.syncDown.start()
 
         self.uploadQueue.join()
         self.downloadQueue.join()
 
-        if self.__syncLoaded:
+        if _syncLoaded:
             self.syncUpQueue.join()
             self.syncDownQueue.join()
 
-        print "Joined all the queues"
+        print "Initial sync finished"
+
         # Now watch the file system for changes
         self.watchFileSystem()
 
@@ -179,11 +182,12 @@ class Synchronizer(threading.Thread):
             size = syncFS.getsize(path)
             isDir = syncFS.isdir(path)
 
+            # Add the file to the database
             self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
 
     def indexRemote(self, remotePath=None):
         """
-        Recursively indexes the remote directory since we cannot see the directories all at once
+        Index the files on SmartFile and dive into directories when necessary
         """
         if remotePath is None:
             remotePath = "/"
@@ -228,5 +232,5 @@ class Synchronizer(threading.Thread):
                     else:
                         checksum = None
 
-                    # Add that bad boy file to the database!
+                    # Add the file to the database
                     self.addRemoteFile(path, checksum, modified, size, isDir)

@@ -25,6 +25,8 @@ class Downloader(object):
                 f = self._api.get('/path/data/', serverPath)
                 with open(absolutePath, 'wb') as o:
                     shutil.copyfileobj(f, o)
+            except IOError, err:
+                print err
             except:
                 raise
 
