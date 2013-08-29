@@ -25,7 +25,6 @@ else:
     _syncLoaded = True
 
 
-
 class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)

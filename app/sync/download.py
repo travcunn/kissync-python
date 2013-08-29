@@ -26,7 +26,11 @@ class Downloader(object):
                 with open(absolutePath, 'wb') as o:
                     shutil.copyfileobj(f, o)
             except IOError, err:
-                print err
+                if err.errno == 22:
+                    # Windows has file name restrictions. Ignore it.
+                    pass
+                else:
+                    raise
             except:
                 raise
 
