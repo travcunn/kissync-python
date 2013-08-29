@@ -14,7 +14,7 @@ class SyncUp(object):
         self._timeoffset = common.calculate_time_offset()
 
     def syncUp(self, object):
-        serverPath = object[0].path
+        serverPath = object.path
         path = common.basePath(serverPath)
         absolutePath = os.path.join(self._syncDir, path)
 
@@ -26,11 +26,11 @@ class SyncUp(object):
             if err.status_code == 500:
                 # The server gives a 500 when the sync is successful. bug?
                 # Checking for an error makes it a feature :-)
-                self._setAttributes(object[0])
+                self._setAttributes(object)
         except:
             raise
         else:
-            self._setAttributes(object[0])
+            self._setAttributes(object)
 
     def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
@@ -66,7 +66,7 @@ class SyncDown(object):
         self._timeoffset = common.calculate_time_offset()
 
     def syncDown(self, object):
-        serverPath = object[0].path
+        serverPath = object.path
         path = common.basePath(serverPath)
         absolutePath = os.path.join(self._syncDir, path)
         try:
@@ -74,7 +74,7 @@ class SyncDown(object):
         except:
             raise
         else:
-            self._setAttributes(object[0])
+            self._setAttributes(object)
 
     def _setAttributes(self, object):
         #TODO: Change this back to modified and implement proper time checking

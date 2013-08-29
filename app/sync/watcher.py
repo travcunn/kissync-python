@@ -105,8 +105,6 @@ class EventHandler(FileSystemEventHandler):
             print "okay lets sync it"
 
             if self._synchronizer.syncLoaded:
-                #TODO: MAJOR: this requires a localfiles and remotefile object
-                # have the sync up queue only take localfiles
                 self._synchronizer.syncUpQueue.put(localfile)
                 print "It was put in the sync up queue"
             else:

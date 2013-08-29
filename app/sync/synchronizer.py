@@ -167,12 +167,12 @@ class Synchronizer(threading.Thread):
             if localObject.checksum is not remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     if self.syncLoaded:
-                        self.syncUpQueue.put(object)
+                        self.syncUpQueue.put(localObject)
                     else:
                         self.uploadQueue.put(localObject)
                 elif localObject.modified_local < remoteObject.modified:
                     if self.syncLoaded:
-                        self.syncDownQueue.put(object)
+                        self.syncDownQueue.put(localObject)
                     else:
                         self.downloadQueue.put(remoteObject)
 
