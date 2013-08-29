@@ -45,6 +45,11 @@ class Synchronizer(threading.Thread):
 
         self._timeoffset = common.calculate_time_offset()
 
+        if _syncLoaded:
+            self.syncLoaded = True
+        else:
+            self.syncLoaded = False
+
     def run(self):
         self.synchronize()
 
@@ -161,9 +166,15 @@ class Synchronizer(threading.Thread):
             remoteObject = object[1]
             if localObject.checksum is not remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
-                    self.syncUpQueue.put(object)
+                    if self.syncLoaded:
+                        self.syncUpQueue.put(object)
+                    else:
+                        self.uploadQueue.put(localObject)
                 elif localObject.modified_local < remoteObject.modified:
-                    self.syncDownQueue.put(object)
+                    if self.syncLoaded:
+                        self.syncDownQueue.put(object)
+                    else:
+                        self.downloadQueue.put(remoteObject)
 
     def indexLocal(self, localPath=None):
         """
