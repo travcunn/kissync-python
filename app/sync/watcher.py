@@ -44,6 +44,9 @@ class EventHandler(FileSystemEventHandler):
 
         self._syncFS = OSFS(self._syncDir)
 
+        # This helps the modifiedFix hack
+        self.__modifiedFix = []
+
     def on_moved(self, event):
         print "destination path:::::::", event.dest_path
         print "Item Moved:", event.src_path, event.dest_path
@@ -91,29 +94,44 @@ class EventHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         path = event.src_path
-        print "item modified:", path
-        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        print "server path modified:", serverPath
-        if not event.is_directory:
-            print "its not a directory"
-            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-            checksum = common.getFileHash(path)
-            size = int(os.path.getsize(path))
-            isDir = os.path.isdir(path)
-            localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
+        if self.modifiedOnce(path):
+            print "item modified:", path
+            serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
+            print "server path modified:", serverPath
+            if not event.is_directory:
+                print "its not a directory"
+                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+                checksum = common.getFileHash(path)
+                size = int(os.path.getsize(path))
+                isDir = os.path.isdir(path)
+                localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
-            print "okay lets sync it"
+                print "okay lets sync it"
 
-            if self._synchronizer.syncLoaded:
-                self._synchronizer.syncUpQueue.put(localfile)
-                print "It was put in the sync up queue"
+                if self._synchronizer.syncLoaded:
+                    self._synchronizer.syncUpQueue.put(localfile)
+                    print "It was put in the sync up queue"
+                else:
+                    self._synchronizer.uploadQueue.put(localfile)
+                    print "it was put up in the upload queue"
+            """
             else:
-                self._synchronizer.uploadQueue.put(localfile)
-                print "it was put up in the upload queue"
+                try:
+                    self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
+                except:
+                    raise
+            """
+
+    def modifiedOnce(self, path):
         """
+        This is a hack to workaround a bug in watchdog.
+        When a file is modified, watchdog calls on_modified twice instead of
+        only once. This method keeps track of both events and returns true
+        if the event has been previously called
+        """
+        if path in self.__modifiedFix:
+            self.__modifiedFix.remove(path)
+            return True
         else:
-            try:
-                self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
-            except:
-                raise
-        """
+            self.__modifiedFix.append(path)
+            return False
