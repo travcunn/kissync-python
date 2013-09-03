@@ -7,11 +7,26 @@ import fs.path
 from fs.osfs import OSFS
 
 from watchdog.observers import Observer
+# Move events arent called on Windows using the PollingObserver
 #from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
 import common
 from definitions import LocalFile
+
+
+checkCalls = []
+
+
+def checkDuplicateCalls(func):
+    def wrapped(*args, **kwargs):
+        path = args[1].src_path
+        if path in checkCalls:
+            checkCalls.remove(path)
+            func(*args, **kwargs)
+        else:
+            checkCalls.append(path)
+    return wrapped
 
 
 class Watcher(threading.Thread):
@@ -92,35 +107,35 @@ class EventHandler(FileSystemEventHandler):
         except:
             raise
 
+    #@checkDuplicateCalls
     def on_modified(self, event):
         path = event.src_path
-        if self.modifiedOnce(path):
-            print "item modified:", path
-            serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-            print "server path modified:", serverPath
-            if not event.is_directory:
-                print "its not a directory"
-                modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-                checksum = common.getFileHash(path)
-                size = int(os.path.getsize(path))
-                isDir = os.path.isdir(path)
-                localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
+        print "item modified:", path
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
+        print "server path modified:", serverPath
+        if not event.is_directory:
+            print "its not a directory"
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+            checksum = common.getFileHash(path)
+            size = int(os.path.getsize(path))
+            isDir = os.path.isdir(path)
+            localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
-                print "okay lets sync it"
+            print "okay lets sync it"
 
-                if self._synchronizer.syncLoaded:
-                    self._synchronizer.syncUpQueue.put(localfile)
-                    print "It was put in the sync up queue"
-                else:
-                    self._synchronizer.uploadQueue.put(localfile)
-                    print "it was put up in the upload queue"
-            """
+            if self._synchronizer.syncLoaded:
+                self._synchronizer.syncUpQueue.put(localfile)
+                print "It was put in the sync up queue"
             else:
-                try:
-                    self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
-                except:
-                    raise
-            """
+                self._synchronizer.uploadQueue.put(localfile)
+                print "it was put up in the upload queue"
+        """
+        else:
+            try:
+                self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
+            except:
+                raise
+        """
 
     def modifiedOnce(self, path):
         """
