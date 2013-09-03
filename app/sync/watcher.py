@@ -15,20 +15,6 @@ import common
 from definitions import LocalFile
 
 
-checkCalls = []
-
-
-def checkDuplicateCalls(func):
-    def wrapped(*args, **kwargs):
-        path = args[1].src_path
-        if path in checkCalls:
-            checkCalls.remove(path)
-            func(*args, **kwargs)
-        else:
-            checkCalls.append(path)
-    return wrapped
-
-
 class Watcher(threading.Thread):
     def __init__(self, parent, api, syncDir):
         threading.Thread.__init__(self)
@@ -107,7 +93,6 @@ class EventHandler(FileSystemEventHandler):
         except:
             raise
 
-    #@checkDuplicateCalls
     def on_modified(self, event):
         path = event.src_path
         print "item modified:", path
