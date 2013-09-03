@@ -11,7 +11,7 @@ class LoginWindow(QtGui.QWidget):
     def __init__(self, parent=None):
         super(LoginWindow, self).__init__()
         self.parent = parent
-        self.setWindowTitle('Login to Kissync')
+        self.setWindowTitle('Login to SmartFile')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
@@ -23,14 +23,14 @@ class LoginWindow(QtGui.QWidget):
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
-        topText = QtGui.QLabel('Login to Kissync')
+        topText = QtGui.QLabel('Login to SmartFile')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
         #font = QtGui.QFont("Vegur", 24, QtGui.QFont.Light, False)
         #topText.setFont(font)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         #topText.setStyleSheet("color: #FFFFFF
 
-        detailsText = QtGui.QLabel('using your Smartfile account')
+        detailsText = QtGui.QLabel('to get started')
         #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
         #fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
         #detailsText.setFont(fontsmall)

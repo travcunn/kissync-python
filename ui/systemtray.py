@@ -18,7 +18,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
         self.setToolTip('Kissync')
 
-        startAction = self.menu.addAction("Open Kissync Folder")
+        startAction = self.menu.addAction("Open SmartFile Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
 
         startingup = self.menu.addAction("Connecting...")
@@ -88,7 +88,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
         self.setToolTip('Kissync')
 
-        startAction = self.menu.addAction("Open Kissync Folder")
+        startAction = self.menu.addAction("Open SmartFile Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
 
         openWebsite = self.menu.addAction("Launch SmartFile Website")

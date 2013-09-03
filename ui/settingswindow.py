@@ -14,7 +14,7 @@ class SettingsWindow(QtGui.QWidget):
         self.settingsFile = self.parent.settingsFile
         self.style = KissyncStyle()
 
-        self.setWindowTitle('Kissync Folder Sync Settings')
+        self.setWindowTitle('SmartFile Folder Sync Settings')
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
         self.setFixedSize(520, 200)
         self.setContentsMargins(0, 0, 0, 0)
