@@ -14,7 +14,7 @@ class Uploader(object):
         self._timeoffset = common.calculate_time_offset()
 
     def upload(self, object):
-        print "[UPLOAD]: (", object.path, ") ", object.system_path
+        #print "[UPLOAD]: (", object.path, ") ", object.system_path
 
         # If the object is a file
         if not os.path.isdir(object.system_path):
@@ -65,9 +65,9 @@ class Uploader(object):
 
     def __setAttributes(self, apiPath, fileChecksum, fileModified):
         #TODO: reduce this to one request
-        print "Setting the attributes in the try statement"
-        print fileChecksum
-        print fileModified
+        #print "Setting the attributes in the try statement"
+        #print fileChecksum
+        #print fileModified
         self._api.post(apiPath, attributes=fileChecksum)
         self._api.post(apiPath, attributes=fileModified)
 

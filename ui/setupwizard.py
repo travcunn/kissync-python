@@ -6,7 +6,7 @@ class SetupWizard(QtGui.QWidget):
     def __init__(self, parent=None):
         super(SetupWizard, self).__init__()
         self.parent = parent
-        self.setWindowTitle('Setup')
+        self.setWindowTitle('Setup Smartfile')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
         self.setFixedSize(465, 325)
@@ -16,7 +16,7 @@ class SetupWizard(QtGui.QWidget):
         exit = QtGui.QAction(self)
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
-        topText = QtGui.QLabel('Setting Up Kissync')
+        topText = QtGui.QLabel('Setting Up Smartfile')
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         topText.setFont(font)
         topText.setPalette(palette)
@@ -64,7 +64,7 @@ class SetupWizard(QtGui.QWidget):
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
 
-        directory = os.path.join(os.path.expanduser("~"), "Kissync")
+        directory = os.path.join(os.path.expanduser("~"), "Smartfile")
         if not os.path.exists(directory):
             os.makedirs(directory)
 
@@ -73,7 +73,7 @@ class SetupWizard(QtGui.QWidget):
         self.parent.configuration.set('LocalSettings', 'first-run', False)
         self.hide()
         self.parent.configuration.save()
-        self.parent.tray.notification("Kissync", "Starting Kissync Cloud Sync...")
+        self.parent.tray.notification("Smartfile", "Starting Smartfile Folder Sync...")
         self.parent.start()
 
     def centerOnScreen(self):

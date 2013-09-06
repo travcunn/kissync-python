@@ -18,7 +18,7 @@ class SyncUp(object):
         path = common.basePath(serverPath)
         absolutePath = os.path.join(self._syncDir, path)
 
-        print "[SYNC-UP-QUEUE]", path, absolutePath
+        #print "[SYNC-UP-QUEUE]", path, absolutePath
 
         try:
             self._sync.upload(absolutePath, serverPath)

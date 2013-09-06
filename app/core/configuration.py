@@ -14,7 +14,6 @@ class Configuration(ConfigParser.RawConfigParser):
             except ConfigException, e:
                 print e
 
-    # noinspection PyMethodOverriding
     def read(self):
         """Reads the configuration from the disk"""
         try:
@@ -50,7 +49,6 @@ class Configuration(ConfigParser.RawConfigParser):
             return None
         return self.configuration.get(section, key)
 
-    # noinspection PyMethodOverriding
     def set(self, section, key, value):
         """Sets a configuration item based upon the section, key, and value"""
         self.configuration.set(section, key, value)

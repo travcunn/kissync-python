@@ -12,16 +12,14 @@ from app.sync.synchronizer import Synchronizer
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
-from ui.style import KissyncStyle
 from ui.systemtray import SystemTray
 
 
 class Main(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Main, self).__init__(parent)
-        self.style = KissyncStyle()
 
-        self.syncDir = os.path.join(os.path.expanduser("~"), "Kissync")
+        self.syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
         self.settingsDir = self.settingsDirectory()[0]
         self.settingsFile = self.settingsDirectory()[1]
 
@@ -41,12 +39,12 @@ class Main(QtGui.QWidget):
         self.authenticator.start()
 
         #################MAIN WINDOW GUI#####################
-        self.setWindowTitle('Keep It Simple Sync')
+        self.setWindowTitle('SmartFile Folder Sync')
         self.displayFont = QtGui.QFont()
         self.setGeometry(200, 200, 870, 600)
         self.setMinimumSize(900, 600)
 
-        topText = QtGui.QLabel('Kissync Enterprise')
+        topText = QtGui.QLabel('SmartFile Folder Sync')
         font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
         topText.setFont(font)
 
@@ -88,16 +86,16 @@ class Main(QtGui.QWidget):
     def settingsDirectory(self):
         if platform.system() == 'Windows':
             app_dir = os.path.join(
-                os.getenv('appdata', os.path.expanduser('~')), 'Kissync'
+                os.getenv('appdata', os.path.expanduser('~')), 'Smartfile'
             )
             settings_dir = os.path.join(
-                os.getenv('appdata', os.path.expanduser('~')), 'Kissync', 'config.cfg'
+                os.getenv('appdata', os.path.expanduser('~')), 'Smartfile', 'config.cfg'
             )
             if not os.path.exists(app_dir):
                 os.mkdir(app_dir)
         else:
-            app_dir = os.path.join(os.path.expanduser("~"), ".kissync")
-            settings_dir = os.path.join(os.path.expanduser("~"), ".kissync", "config.cfg")
+            app_dir = os.path.join(os.path.expanduser("~"), ".smartfile")
+            settings_dir = os.path.join(os.path.expanduser("~"), ".smartfile", "config.cfg")
         return app_dir, settings_dir
 
     def closeEvent(self, event):

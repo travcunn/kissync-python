@@ -98,6 +98,7 @@ class Synchronizer(threading.Thread):
         print "Initial sync finished"
 
         # Now watch the file system for changes
+        # TODO: start this alongside the file comparisons
         self.watchFileSystem()
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
