@@ -38,7 +38,7 @@ class Downloader(object):
                 self._setAttributes(object)
 
     def _setAttributes(self, object):
-        path = os.path.join(self.syncDir, common.basePath(object.path))
+        path = os.path.join(self._syncDir, common.basePath(object.path))
         checksum = common.getFileHash(path)
         modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
 

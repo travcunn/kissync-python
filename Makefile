@@ -3,7 +3,7 @@ test:
 
 verify:
 	pyflakes app
-	pep8 --ignore=E501,E225 app
+	pep8 --ignore=E501,E225,E128 app
 
 resources:
 	python builder/buildresources.py ui/images > ui/images/resources.qrc

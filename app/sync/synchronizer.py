@@ -31,7 +31,6 @@ class Synchronizer(threading.Thread):
         self.parent = parent
         self._api = self.parent.smartfile
         self._syncDir = self.parent.syncDir
-
         # Set the thread to run as a daemon
         self.setDaemon(True)
 
@@ -42,6 +41,12 @@ class Synchronizer(threading.Thread):
         self.downloadQueue = Queue()
         self.syncUpQueue = Queue()
         self.syncDownQueue = Queue()
+        # Queue for events to send to the realtime sync server
+        self.changesQueue = Queue()
+
+        # List of files that the watcher should ignore
+        # -- this is used for the realtime sync
+        self.ignoreFiles = []
 
         self._timeoffset = common.calculate_time_offset()
 
@@ -55,14 +60,18 @@ class Synchronizer(threading.Thread):
 
     def startTransferThreads(self):
         # Initialize the uploader and downloader
-        self.uploader = UploadThread(self.uploadQueue, self._api, self._syncDir)
-        self.downloader = DownloadThread(self.downloadQueue, self._api, self._syncDir)
+        self.uploader = UploadThread(self.uploadQueue, self._api,
+                self._syncDir)
+        self.downloader = DownloadThread(self.downloadQueue, self._api,
+                self._syncDir)
         self.uploader.start()
         self.downloader.start()
         if _syncLoaded:
             self._sync = SyncClient(self._api)
-            self.syncUp = SyncUpThread(self.syncUpQueue, self._api, self._sync, self._syncDir)
-            self.syncDown = SyncDownThread(self.syncDownQueue, self._api, self._sync, self._syncDir)
+            self.syncUp = SyncUpThread(self.syncUpQueue, self._api,
+                    self._sync, self._syncDir)
+            self.syncDown = SyncDownThread(self.syncDownQueue, self._api,
+                    self._sync, self._syncDir)
             self.syncUp.start()
             self.syncDown.start()
 

@@ -13,6 +13,15 @@ from watchdog.events import FileSystemEventHandler
 
 import common
 from definitions import LocalFile
+from realtime import RealtimeSync
+
+"""
+# YOU MIGHT NEED THIS LATER
+try:
+    import simplejson as json
+except ImportError:
+    import json
+"""
 
 
 class Watcher(threading.Thread):
@@ -27,6 +36,11 @@ class Watcher(threading.Thread):
         self.observer = Observer()
         self.observer.schedule(self.event_handler, self.syncDir, recursive=True)
         self.observer.start()
+
+        # realtime sync thread
+        self.realtime = RealtimeSync(self.parent)
+        self.realtime.start()
+
         try:
             while True:
                 time.sleep(1)
@@ -45,7 +59,7 @@ class EventHandler(FileSystemEventHandler):
 
         self._syncFS = OSFS(self._syncDir)
 
-        # This helps the modifiedFix hack
+        # This helps the modifiedFix workaround
         self.__modifiedFix = []
 
     def on_moved(self, event):

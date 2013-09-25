@@ -22,13 +22,10 @@ class Uploader(object):
             if not inDir.startswith("/"):
                 inDir = os.path.join("/", inDir)
             apiPath = "/path/data/%s" % inDir
-
             # create the directory to make sure it exists
             self._api.post('/path/oper/mkdir/', path=inDir)
-
             # upload the file
             self._api.post(apiPath, file=file(object.system_path, 'rb'))
-
             # set the new attributes
             self._setAttributes(object)
 
@@ -65,9 +62,6 @@ class Uploader(object):
 
     def __setAttributes(self, apiPath, fileChecksum, fileModified):
         #TODO: reduce this to one request
-        #print "Setting the attributes in the try statement"
-        #print fileChecksum
-        #print fileModified
         self._api.post(apiPath, attributes=fileChecksum)
         self._api.post(apiPath, attributes=fileModified)
 
