@@ -35,7 +35,7 @@ class RealtimeSync(threading.Thread):
             time.sleep(10)
 
     def create_connection(self):
-        #websocket.enableTrace(True)
+        websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.websocket_address,
                                 on_message=self.on_message,
                                 on_error=self.on_error,
