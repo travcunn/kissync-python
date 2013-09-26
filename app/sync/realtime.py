@@ -18,7 +18,7 @@ class RealtimeSync(threading.Thread):
     def __init__(self, parent):
         threading.Thread.__init__(self)
         self.parent = parent
-        self.websocket_address = "ws://198.58.119.99:8888/sync"
+        self.websocket_address = "wss://www.kissync.com/sync"
 
         # Generate a UUID for this client
         self.auth_uuid = str(uuid.uuid1())
@@ -29,7 +29,7 @@ class RealtimeSync(threading.Thread):
     def run(self):
         while True:
             self.create_connection()
-            self.ws.run_forever()
+            self.ws.run_forever(ping_interval=45)
             # if the client disconnects, delay, then reconnect
             time.sleep(10)
 
@@ -175,10 +175,8 @@ class RealtimeSync(threading.Thread):
             realtime_key = auth_hash.hexdigest()
             self.parent.api.put("/pref/user/sync.realtime-key",
                     value=realtime_key)
-            print "Generated key: ", realtime_key
         else:
             realtime_key = realtime_key['value']
-            print "Key from the server: ", realtime_key
 
         auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
         json_data = json.dumps(auth_data)
