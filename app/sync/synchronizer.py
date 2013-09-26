@@ -29,7 +29,7 @@ class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
         self.parent = parent
-        self._api = self.parent.smartfile
+        self.api = self.parent.smartfile
         self._syncDir = self.parent.syncDir
         # Set the thread to run as a daemon
         self.setDaemon(True)
@@ -55,22 +55,24 @@ class Synchronizer(threading.Thread):
         else:
             self.syncLoaded = False
 
+        self.watcherRunning = False
+
     def run(self):
         self.synchronize()
 
     def startTransferThreads(self):
         # Initialize the uploader and downloader
-        self.uploader = UploadThread(self.uploadQueue, self._api,
-                self._syncDir)
-        self.downloader = DownloadThread(self.downloadQueue, self._api,
+        self.uploader = UploadThread(self.uploadQueue, self.api,
+                self._syncDir, self)
+        self.downloader = DownloadThread(self.downloadQueue, self.api,
                 self._syncDir)
         self.uploader.start()
         self.downloader.start()
         if _syncLoaded:
-            self._sync = SyncClient(self._api)
-            self.syncUp = SyncUpThread(self.syncUpQueue, self._api,
-                    self._sync, self._syncDir)
-            self.syncDown = SyncDownThread(self.syncDownQueue, self._api,
+            self._sync = SyncClient(self.api)
+            self.syncUp = SyncUpThread(self.syncUpQueue, self.api,
+                    self._sync, self._syncDir, self)
+            self.syncDown = SyncDownThread(self.syncDownQueue, self.api,
                     self._sync, self._syncDir)
             self.syncUp.start()
             self.syncDown.start()
@@ -134,8 +136,9 @@ class Synchronizer(threading.Thread):
 
     def watchFileSystem(self):
         #after uploading, downloading, and synchronizing are finished, start the watcher thread
-        self.localWatcher = Watcher(self, self._api, self._syncDir)
+        self.localWatcher = Watcher(self, self.api, self._syncDir)
         self.localWatcher.start()
+        self.watcherRunning = True
 
     def compare(self):
         local = self.__session.query(LocalFile).all()
@@ -209,48 +212,54 @@ class Synchronizer(threading.Thread):
         """
         Index the files on SmartFile and dive into directories when necessary
         """
-        if remotePath is None:
-            remotePath = "/"
-        apiPath = '/path/info%s' % remotePath
-        dirListing = self._api.get(apiPath, children=True)
-        if "children" in dirListing:
-            for i in dirListing['children']:
-                if i['isfile'] is False:
-                    # If the path is a directory
-                    path = i['path'].encode("utf-8")
-                    isDir = True
-                    size = None
-                    # Check if modified is in attributes and use that
-                    if "modified" in i['attributes']:
-                        modified = i['attributes']['modified'].encode("utf-8")
-                        modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                    # Or else, just use the modified time set by the api
-                    else:
-                        modified = i['time'].encode("utf-8")
-                        modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                    checksum = None
-
-                    # Add the folder to the database
-                    self.addRemoteFile(path, checksum, modified, size, isDir)
-                    # Dive into the directory and look for more
-                    self.indexRemote(i['path'])
-                else:
-                    # If the path is a file
-                    path = i['path'].encode("utf-8")
-                    isDir = False
-                    size = int(i['size'])
-                    # Check if modified is in attributes and use that
-                    if "modified" in i['attributes']:
-                        modified = i['attributes']['modified'].encode("utf-8")
-                        modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                    # Or else, just use the modified time set by the api
-                    else:
-                        modified = i['time'].encode("utf-8")
-                        modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                    if 'checksum' in i['attributes']:
-                        checksum = i['attributes']['checksum'].encode("utf-8")
-                    else:
+        filesIndexed = False
+        while filesIndexed is not True:
+            if remotePath is None:
+                remotePath = "/"
+            apiPath = '/path/info%s' % remotePath
+            try:
+                dirListing = self.api.get(apiPath, children=True)
+            except:
+                continue
+            if "children" in dirListing:
+                for i in dirListing['children']:
+                    if i['isfile'] is False:
+                        # If the path is a directory
+                        path = i['path'].encode("utf-8")
+                        isDir = True
+                        size = None
+                        # Check if modified is in attributes and use that
+                        if "modified" in i['attributes']:
+                            modified = i['attributes']['modified'].encode("utf-8")
+                            modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                        # Or else, just use the modified time set by the api
+                        else:
+                            modified = i['time'].encode("utf-8")
+                            modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
                         checksum = None
 
-                    # Add the file to the database
-                    self.addRemoteFile(path, checksum, modified, size, isDir)
+                        # Add the folder to the database
+                        self.addRemoteFile(path, checksum, modified, size, isDir)
+                        # Dive into the directory and look for more
+                        self.indexRemote(i['path'])
+                    else:
+                        # If the path is a file
+                        path = i['path'].encode("utf-8")
+                        isDir = False
+                        size = int(i['size'])
+                        # Check if modified is in attributes and use that
+                        if "modified" in i['attributes']:
+                            modified = i['attributes']['modified'].encode("utf-8")
+                            modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                        # Or else, just use the modified time set by the api
+                        else:
+                            modified = i['time'].encode("utf-8")
+                            modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
+                        if 'checksum' in i['attributes']:
+                            checksum = i['attributes']['checksum'].encode("utf-8")
+                        else:
+                            checksum = None
+
+                        # Add the file to the database
+                        self.addRemoteFile(path, checksum, modified, size, isDir)
+            filesIndexed = True

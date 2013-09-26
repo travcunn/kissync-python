@@ -7,17 +7,20 @@ import common
 
 
 class SyncUp(object):
-    def __init__(self, api, sync, syncDir):
+    def __init__(self, api, sync, syncDir, parent):
         self._api = api
         self._sync = sync
         self._syncDir = syncDir
         self._timeoffset = common.calculate_time_offset()
+
+        self.parent = parent
 
     def syncUp(self, object):
         serverPath = object.path
         path = common.basePath(serverPath)
         absolutePath = os.path.join(self._syncDir, path)
 
+        isDir = os.path.isdir(absolutePath)
         #print "[SYNC-UP-QUEUE]", path, absolutePath
 
         try:
@@ -31,6 +34,10 @@ class SyncUp(object):
             raise
         else:
             self._setAttributes(object)
+
+            # Notify the realtime sync of the changes
+            if self.parent.watcherRunning:
+                self.parent.localWatcher.realtime.update(serverPath, 'modified', 0, isDir)
 
     def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
@@ -46,9 +53,9 @@ class SyncUp(object):
 
 
 class SyncUpThread(SyncUp, threading.Thread):
-    def __init__(self, queue, api, sync, syncDir):
+    def __init__(self, queue, api, sync, syncDir, parent):
         threading.Thread.__init__(self)
-        SyncUp.__init__(self, api, sync, syncDir)
+        SyncUp.__init__(self, api, sync, syncDir, parent)
         self.queue = queue
 
     def run(self):

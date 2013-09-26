@@ -34,7 +34,7 @@ class RealtimeSync(threading.Thread):
             time.sleep(10)
 
     def create_connection(self):
-        websocket.enableTrace(True)
+        #websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.websocket_address,
                                 on_message=self.on_message,
                                 on_error=self.on_error,
@@ -73,7 +73,7 @@ class RealtimeSync(threading.Thread):
         else:
             self.parent.changesQueue.put(data)
 
-    def update(self, path, change_type, size, isDir, destination):
+    def update(self, path, change_type, size, isDir, destination=None):
         """
         use this method to send updates to the server
         use the following for change_type:
@@ -93,6 +93,10 @@ class RealtimeSync(threading.Thread):
             size = json_data['size']
             isDir = False
             remotefile = RemoteFile(path, checksum, modified, size, isDir)
+
+            # Ignore this file
+            self.parent.ignoreFiles.append(path)
+
             self.parent.downloadQueue.put(remotefile)
         elif 'created_dir' in json_data:
             path = json_data['path']
@@ -101,6 +105,10 @@ class RealtimeSync(threading.Thread):
             size = 0
             isDir = True
             remotefile = RemoteFile(path, checksum, modified, size, isDir)
+
+            # Ignore this file
+            self.parent.ignoreFiles.append(path)
+
             self.parent.downloadQueue.put(remotefile)
         elif 'modified' in json_data:
             path = json_data['path']
@@ -109,6 +117,10 @@ class RealtimeSync(threading.Thread):
             size = json_data['size']
             isDir = False
             remotefile = RemoteFile(path, checksum, modified, size, isDir)
+
+            # Ignore this file
+            self.parent.ignoreFiles.append(path)
+
             if self.parent.syncLoaded:
                 self.parent.syncDownQueue.put(remotefile)
             else:
@@ -117,6 +129,10 @@ class RealtimeSync(threading.Thread):
             serverPath = json_data['path']
             path = common.basePath(serverPath)
             absolutePath = os.path.join(self.parent._syncDir, path)
+
+            # Ignore this file
+            self.parent.ignoreFiles.append(serverPath)
+
             if json_data['isDir']:
                 os.rmdir(absolutePath)
             else:
@@ -126,9 +142,14 @@ class RealtimeSync(threading.Thread):
             path = common.basePath(serverPath)
             absolutePath = os.path.join(self.parent._syncDir, path)
             common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
+
             destination = json_data['dest']
             destPath = common.basePath(destination)
             absoluteDest = os.path.join(self.parent._syncDir, destPath)
+
+            # Ignore this file
+            self.parent.ignoreFiles.append(serverPath)
+            self.parent.ignoreFiles.append(destination)
 
             os.rename(absolutePath, absoluteDest)
 
@@ -143,15 +164,23 @@ class RealtimeSync(threading.Thread):
     def on_open(self, ws):
         self.connected = True
 
-        # authenticate the client
-        token = self.config.get("Login", "token")
-        verifier = self.config.get("Login", "verifier")
+        # Get the user realtime_key from the SmartFile preferences
+        # or generate one
+        try:
+            realtime_key = self.parent.api.get("/pref/user/sync.realtime-key/")
+        except:
+            generated_key = str(uuid.uuid4())
+            auth_hash = hashlib.md5()
+            auth_hash.update("%s" % (generated_key))
+            realtime_key = auth_hash.hexdigest()
+            self.parent.api.put("/pref/user/sync.realtime-key",
+                    value=realtime_key)
+            print "Generated key: ", realtime_key
+        else:
+            realtime_key = realtime_key['value']
+            print "Key from the server: ", realtime_key
 
-        auth_hash = hashlib.md5()
-        auth_hash.update("%s%s" % (token, verifier))
-        auth_string = auth_hash.hexdigest()
-
-        auth_data = {'authentication': auth_string, 'uuid': self.auth_uuid}
+        auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
         json_data = json.dumps(auth_data)
 
         # send the auth data to the server

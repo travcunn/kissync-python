@@ -8,10 +8,12 @@ import common
 
 
 class Uploader(object):
-    def __init__(self, api, syncDir):
+    def __init__(self, api, syncDir, parent):
         self._api = api
         self._syncDir = syncDir
         self._timeoffset = common.calculate_time_offset()
+
+        self.parent = parent
 
     def upload(self, object):
         #print "[UPLOAD]: (", object.path, ") ", object.system_path
@@ -29,10 +31,17 @@ class Uploader(object):
             # set the new attributes
             self._setAttributes(object)
 
+            # Notify the realtime sync of the change
+            if self.parent.watcherRunning:
+                self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
         # If the object is a folder
         else:
             createDir = object.path
             self._api.post('/path/oper/mkdir/', path=createDir)
+
+            # Notify the realtime sync of the change
+            if self.parent.watcherRunning:
+                self.parent.localWatcher.realtime.update(createDir, 'created_dir', 0, True)
 
     def _setAttributes(self, object):
         checksum = object.checksum
@@ -67,9 +76,9 @@ class Uploader(object):
 
 
 class UploadThread(Uploader, threading.Thread):
-    def __init__(self, queue, api, syncDir):
+    def __init__(self, queue, api, syncDir, parent):
         threading.Thread.__init__(self)
-        Uploader.__init__(self, api, syncDir)
+        Uploader.__init__(self, api, syncDir, parent)
         self.queue = queue
 
     def run(self):
