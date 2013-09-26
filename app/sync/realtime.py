@@ -1,5 +1,6 @@
 import hashlib
 import os
+import ssl
 import thread
 import threading
 import time
@@ -29,7 +30,7 @@ class RealtimeSync(threading.Thread):
     def run(self):
         while True:
             self.create_connection()
-            self.ws.run_forever(ping_interval=45)
+            self.ws.run_forever(sslopt={"ssl_version": ssl.PROTOCOL_TLSv1}, ping_interval=45)
             # if the client disconnects, delay, then reconnect
             time.sleep(10)
 
@@ -38,8 +39,8 @@ class RealtimeSync(threading.Thread):
         self.ws = websocket.WebSocketApp(self.websocket_address,
                                 on_message=self.on_message,
                                 on_error=self.on_error,
-                                on_close=self.on_close)
-        self.ws.on_open = self.on_open
+                                on_close=self.on_close,
+                                on_open=self.on_open)
 
     def processSendQueue(self, *args):
         """
@@ -154,7 +155,7 @@ class RealtimeSync(threading.Thread):
             os.rename(absolutePath, absoluteDest)
 
     def on_error(self, ws, error):
-        print error
+        print "An error occured on the websocket: ", error
 
     def on_close(self, ws):
         self.connected = False
