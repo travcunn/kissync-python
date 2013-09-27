@@ -79,7 +79,9 @@ class SyncDown(object):
         try:
             self._sync.download(absolutePath, serverPath)
         except:
-            raise
+            # If the file cannot be synced down, the resource may not still
+            # exist or a server error occured
+            pass
         else:
             self._setAttributes(object)
 

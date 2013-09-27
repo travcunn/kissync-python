@@ -31,11 +31,12 @@ class RealtimeSync(threading.Thread):
         while True:
             self.create_connection()
             self.ws.run_forever(sslopt={"ssl_version": ssl.PROTOCOL_TLSv1}, ping_interval=45)
+
             # if the client disconnects, delay, then reconnect
             time.sleep(10)
 
     def create_connection(self):
-        #websocket.enableTrace(True)
+        websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.websocket_address,
                                 on_message=self.on_message,
                                 on_error=self.on_error,
@@ -68,10 +69,12 @@ class RealtimeSync(threading.Thread):
         send_data.update(changes)
         data = json.dumps(send_data)
 
+        # Check if the websocket is available
         if self.connected and self.authenticated:
             # send the json encoded message
             self.ws.send(data)
         else:
+            # process the message when the websocket is available
             self.parent.changesQueue.put(data)
 
     def update(self, path, change_type, size, isDir, destination=None):
@@ -88,6 +91,7 @@ class RealtimeSync(threading.Thread):
         json_data = json.loads(message)
 
         if 'created_file' in json_data:
+            print "Recieved message for create_file"
             path = json_data['path']
             checksum = "123"  # Provide something not None
             modified = None
@@ -100,6 +104,7 @@ class RealtimeSync(threading.Thread):
 
             self.parent.downloadQueue.put(remotefile)
         elif 'created_dir' in json_data:
+            print "Recieved message for created_dir"
             path = json_data['path']
             checksum = "123"
             modified = None
@@ -112,6 +117,7 @@ class RealtimeSync(threading.Thread):
 
             self.parent.downloadQueue.put(remotefile)
         elif 'modified' in json_data:
+            print "Recieved message for created_dir"
             path = json_data['path']
             checksum = "123"
             modified = None
@@ -127,6 +133,7 @@ class RealtimeSync(threading.Thread):
             else:
                 self.parent.downloadQueue.put(remotefile)
         elif 'deleted' in json_data:
+            print "Recieved message for deleted"
             serverPath = json_data['path']
             path = common.basePath(serverPath)
             absolutePath = os.path.join(self.parent._syncDir, path)
@@ -139,6 +146,7 @@ class RealtimeSync(threading.Thread):
             else:
                 os.remove(absolutePath)
         elif 'moved' in json_data:
+            print "Recieved message for moved"
             serverPath = json_data['path']
             path = common.basePath(serverPath)
             absolutePath = os.path.join(self.parent._syncDir, path)

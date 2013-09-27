@@ -8,4 +8,5 @@ requests-oauthlib
 smartfile
 tendo
 watchdog
+websocket-client
 wsgiref

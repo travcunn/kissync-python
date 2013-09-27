@@ -66,7 +66,7 @@ class TitleBar(QtGui.QWidget):
         self.setStyleSheet("color: #FFFFFF;")
         self.setStyleSheet("QWidget { border: 0px; }")
 
-        settingsLabel = QtGui.QLabel('sync settings')
+        settingsLabel = QtGui.QLabel('SmartFile Sync Settings')
         font = QtGui.QFont("Vegur", 28, QtGui.QFont.Light, False)
         settingsLabel.setFont(font)
         settingsLabel.setObjectName("settingsLabel")
