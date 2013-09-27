@@ -91,6 +91,8 @@ class RealtimeSync(threading.Thread):
         json_data = json.loads(message)
 
         if 'type' in json_data:
+            if json_data['uuid'] == self.auth_uuid:
+                return
             message_type = json_data['type']
             if message_type == 'created_file':
                 path = json_data['path']
@@ -174,12 +176,12 @@ class RealtimeSync(threading.Thread):
                         pass
 
     def on_error(self, ws, error):
-        print "An error occured on the websocket: ", error
+        #ignore errors, as these will probably result in a socket reconnection
+        pass
 
     def on_close(self, ws):
         self.connected = False
         self.authenticated = False
-        print("Disconnected from the realtime sync server")
 
     def on_open(self, ws):
         self.connected = True

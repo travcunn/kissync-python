@@ -16,6 +16,9 @@ from definitions import Base, RemoteFile, LocalFile, TempLocalFile
 
 import common
 
+# Sync should be implemented in a later version
+# -- for now, just use download/upload
+"""
 # Attempt loading the SyncClient
 try:
     from smartfile.sync import SyncClient
@@ -23,6 +26,8 @@ except:
     _syncLoaded = False
 else:
     _syncLoaded = True
+"""
+_syncLoaded = False
 
 
 class Synchronizer(threading.Thread):
