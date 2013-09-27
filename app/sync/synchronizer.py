@@ -18,7 +18,6 @@ import common
 
 # Sync should be implemented in a later version
 # -- for now, just use download/upload
-"""
 # Attempt loading the SyncClient
 try:
     from smartfile.sync import SyncClient
@@ -26,7 +25,7 @@ except:
     _syncLoaded = False
 else:
     _syncLoaded = True
-"""
+# Turn off SyncClient for now
 _syncLoaded = False
 
 
