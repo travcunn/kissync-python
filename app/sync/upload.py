@@ -18,30 +18,32 @@ class Uploader(object):
     def upload(self, object):
         print "[UPLOAD]: (", object.path, ") ", object.system_path
 
-        # If the object is a file
-        if not os.path.isdir(object.system_path):
-            inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
-            if not inDir.startswith("/"):
-                inDir = os.path.join("/", inDir)
-            apiPath = "/path/data/%s" % inDir
-            # create the directory to make sure it exists
-            self._api.post('/path/oper/mkdir/', path=inDir)
-            # upload the file
-            self._api.post(apiPath, file=file(object.system_path, 'rb'))
-            # set the new attributes
-            self._setAttributes(object)
+        # First, check if the path exists
+        if os.path.exists(object.system_path):
+            # If the object is a file
+            if not os.path.isdir(object.system_path):
+                inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
+                if not inDir.startswith("/"):
+                    inDir = os.path.join("/", inDir)
+                apiPath = "/path/data/%s" % inDir
+                # create the directory to make sure it exists
+                self._api.post('/path/oper/mkdir/', path=inDir)
+                # upload the file
+                self._api.post(apiPath, file=file(object.system_path, 'rb'))
+                # set the new attributes
+                self._setAttributes(object)
 
-            # Notify the realtime sync of the change
-            if self.parent.watcherRunning:
-                self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
-        # If the object is a folder
-        else:
-            createDir = object.path
-            self._api.post('/path/oper/mkdir/', path=createDir)
+                # Notify the realtime sync of the change
+                if self.parent.watcherRunning:
+                    self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
+            # If the object is a folder
+            else:
+                createDir = object.path
+                self._api.post('/path/oper/mkdir/', path=createDir)
 
-            # Notify the realtime sync of the change
-            if self.parent.watcherRunning:
-                self.parent.localWatcher.realtime.update(createDir, 'created_dir', 0, True)
+                # Notify the realtime sync of the change
+                if self.parent.watcherRunning:
+                    self.parent.localWatcher.realtime.update(createDir, 'created_dir', 0, True)
 
     def _setAttributes(self, object):
         checksum = object.checksum

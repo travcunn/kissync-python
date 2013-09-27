@@ -20,24 +20,24 @@ class SyncUp(object):
         path = common.basePath(serverPath)
         absolutePath = os.path.join(self._syncDir, path)
 
-        isDir = os.path.isdir(absolutePath)
-        #print "[SYNC-UP-QUEUE]", path, absolutePath
-
-        try:
-            self._sync.upload(absolutePath, serverPath)
-        except ResponseError, err:
-            if err.status_code == 500:
-                # The server gives a 500 when the sync is successful. bug?
-                # Checking for an error makes it a feature :-)
+        # First, check if the path exists
+        if os.path.exists(absolutePath):
+            isDir = os.path.isdir(absolutePath)
+            try:
+                self._sync.upload(absolutePath, serverPath)
+            except ResponseError, err:
+                if err.status_code == 500:
+                    # The server gives a 500 when the sync is successful. bug?
+                    # Checking for an error makes it a feature :-)
+                    self._setAttributes(object)
+            except:
+                raise
+            else:
                 self._setAttributes(object)
-        except:
-            raise
-        else:
-            self._setAttributes(object)
 
-            # Notify the realtime sync of the changes
-            if self.parent.watcherRunning:
-                self.parent.localWatcher.realtime.update(serverPath, 'modified', 0, isDir)
+                # Notify the realtime sync of the changes
+                if self.parent.watcherRunning:
+                    self.parent.localWatcher.realtime.update(serverPath, 'modified', 0, isDir)
 
     def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
