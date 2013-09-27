@@ -16,7 +16,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.menu = QtGui.QMenu(parent)
         #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setToolTip('Kissync')
+        self.setToolTip('SmartFile')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)

@@ -17,7 +17,7 @@ class Downloader(object):
         path = common.basePath(object.path)
         absolutePath = os.path.join(self._syncDir, path)
 
-        #print "[DOWNLOAD-QUEUE]", path, absolutePath
+        print "[DOWNLOAD-QUEUE]", path, absolutePath
 
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:
