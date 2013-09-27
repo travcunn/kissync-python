@@ -90,10 +90,12 @@ class RealtimeSync(threading.Thread):
     def on_message(self, ws, message):
         print ".......Received a message......."
         json_data = json.loads(message)
+        print json_data
 
         if 'type' in json_data:
-            if json_data['type'] is 'created_file':
-                print "Recieved message for create_file"
+            message_type = json_data['type']
+            if message_type == 'created_file':
+                print "Received message for create_file"
                 path = json_data['path']
                 checksum = "123"  # Provide something not None
                 modified = None
@@ -105,8 +107,8 @@ class RealtimeSync(threading.Thread):
                 self.parent.ignoreFiles.append(path)
 
                 self.parent.downloadQueue.put(remotefile)
-            elif json_data['type'] is 'created_dir':
-                print "Recieved message for created_dir"
+            elif message_type == 'created_dir':
+                print "Received message for created_dir"
                 path = json_data['path']
                 checksum = "123"
                 modified = None
@@ -118,8 +120,8 @@ class RealtimeSync(threading.Thread):
                 self.parent.ignoreFiles.append(path)
 
                 self.parent.downloadQueue.put(remotefile)
-            elif json_data['type'] is 'modified':
-                print "Recieved message for created_dir"
+            elif message_type == 'modified':
+                print "Received message for created_dir"
                 path = json_data['path']
                 checksum = "123"
                 modified = None
@@ -134,8 +136,8 @@ class RealtimeSync(threading.Thread):
                     self.parent.syncDownQueue.put(remotefile)
                 else:
                     self.parent.downloadQueue.put(remotefile)
-            elif json_data['type'] is 'deleted':
-                print "Recieved message for deleted"
+            elif message_type == 'deleted':
+                print "Received message for deleted"
                 serverPath = json_data['path']
                 path = common.basePath(serverPath)
                 absolutePath = os.path.join(self.parent._syncDir, path)
@@ -147,8 +149,8 @@ class RealtimeSync(threading.Thread):
                     os.rmdir(absolutePath)
                 else:
                     os.remove(absolutePath)
-            elif json_data['type'] is 'moved':
-                print "Recieved message for moved"
+            elif message_type == 'moved':
+                print "Received message for moved"
                 serverPath = json_data['path']
                 path = common.basePath(serverPath)
                 absolutePath = os.path.join(self.parent._syncDir, path)
