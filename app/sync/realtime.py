@@ -36,7 +36,7 @@ class RealtimeSync(threading.Thread):
             time.sleep(10)
 
     def create_connection(self):
-        websocket.enableTrace(True)
+        #websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.websocket_address,
                                 on_message=self.on_message,
                                 on_error=self.on_error,
@@ -88,14 +88,11 @@ class RealtimeSync(threading.Thread):
         self._sendChanges(send_data)
 
     def on_message(self, ws, message):
-        print ".......Received a message......."
         json_data = json.loads(message)
-        print json_data
 
         if 'type' in json_data:
             message_type = json_data['type']
             if message_type == 'created_file':
-                print "Received message for create_file"
                 path = json_data['path']
                 checksum = "123"  # Provide something not None
                 modified = None
@@ -108,7 +105,6 @@ class RealtimeSync(threading.Thread):
 
                 self.parent.downloadQueue.put(remotefile)
             elif message_type == 'created_dir':
-                print "Received message for created_dir"
                 path = json_data['path']
                 checksum = "123"
                 modified = None
@@ -121,7 +117,6 @@ class RealtimeSync(threading.Thread):
 
                 self.parent.downloadQueue.put(remotefile)
             elif message_type == 'modified':
-                print "Received message for created_dir"
                 path = json_data['path']
                 checksum = "123"
                 modified = None
@@ -137,7 +132,6 @@ class RealtimeSync(threading.Thread):
                 else:
                     self.parent.downloadQueue.put(remotefile)
             elif message_type == 'deleted':
-                print "Received message for deleted"
                 serverPath = json_data['path']
                 path = common.basePath(serverPath)
                 absolutePath = os.path.join(self.parent._syncDir, path)
@@ -145,26 +139,39 @@ class RealtimeSync(threading.Thread):
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(serverPath)
 
-                if json_data['isDir']:
-                    os.rmdir(absolutePath)
-                else:
-                    os.remove(absolutePath)
+                try:
+                    if json_data['isDir']:
+                        os.rmdir(absolutePath)
+                    else:
+                        os.remove(absolutePath)
+                except:
+                    # the file/folder is not accessible
+                    # let the user decide the fate of their file/folder
+                    pass
             elif message_type == 'moved':
-                print "Received message for moved"
                 serverPath = json_data['path']
                 path = common.basePath(serverPath)
                 absolutePath = os.path.join(self.parent._syncDir, path)
-                common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
 
                 destination = json_data['dest']
                 destPath = common.basePath(destination)
                 absoluteDest = os.path.join(self.parent._syncDir, destPath)
+                try:
+                    common.createLocalDirs(os.path.dirname(os.path.realpath(absoluteDest)))
+                except:
+                    # the file/folder is not accessible
+                    pass
+                else:
 
-                # Ignore this file in the watcher
-                self.parent.ignoreFiles.append(serverPath)
-                self.parent.ignoreFiles.append(destination)
+                    # Ignore this file in the watcher
+                    self.parent.ignoreFiles.append(serverPath)
+                    self.parent.ignoreFiles.append(destination)
 
-                os.rename(absolutePath, absoluteDest)
+                    try:
+                        os.rename(absolutePath, absoluteDest)
+                    except:
+                        # again, paths arent accessible, so let the user handle it
+                        pass
 
     def on_error(self, ws, error):
         print "An error occured on the websocket: ", error
