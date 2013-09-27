@@ -88,79 +88,81 @@ class RealtimeSync(threading.Thread):
         self._sendChanges(send_data)
 
     def on_message(self, ws, message):
+        print ".......Received a message......."
         json_data = json.loads(message)
 
-        if 'created_file' in json_data:
-            print "Recieved message for create_file"
-            path = json_data['path']
-            checksum = "123"  # Provide something not None
-            modified = None
-            size = json_data['size']
-            isDir = False
-            remotefile = RemoteFile(path, checksum, modified, size, isDir)
+        if 'type' in json_data:
+            if json_data['type'] is 'created_file':
+                print "Recieved message for create_file"
+                path = json_data['path']
+                checksum = "123"  # Provide something not None
+                modified = None
+                size = json_data['size']
+                isDir = False
+                remotefile = RemoteFile(path, checksum, modified, size, isDir)
 
-            # Ignore this file
-            self.parent.ignoreFiles.append(path)
+                # Ignore this file in the watcher
+                self.parent.ignoreFiles.append(path)
 
-            self.parent.downloadQueue.put(remotefile)
-        elif 'created_dir' in json_data:
-            print "Recieved message for created_dir"
-            path = json_data['path']
-            checksum = "123"
-            modified = None
-            size = 0
-            isDir = True
-            remotefile = RemoteFile(path, checksum, modified, size, isDir)
-
-            # Ignore this file
-            self.parent.ignoreFiles.append(path)
-
-            self.parent.downloadQueue.put(remotefile)
-        elif 'modified' in json_data:
-            print "Recieved message for created_dir"
-            path = json_data['path']
-            checksum = "123"
-            modified = None
-            size = json_data['size']
-            isDir = False
-            remotefile = RemoteFile(path, checksum, modified, size, isDir)
-
-            # Ignore this file
-            self.parent.ignoreFiles.append(path)
-
-            if self.parent.syncLoaded:
-                self.parent.syncDownQueue.put(remotefile)
-            else:
                 self.parent.downloadQueue.put(remotefile)
-        elif 'deleted' in json_data:
-            print "Recieved message for deleted"
-            serverPath = json_data['path']
-            path = common.basePath(serverPath)
-            absolutePath = os.path.join(self.parent._syncDir, path)
+            elif json_data['type'] is 'created_dir':
+                print "Recieved message for created_dir"
+                path = json_data['path']
+                checksum = "123"
+                modified = None
+                size = 0
+                isDir = True
+                remotefile = RemoteFile(path, checksum, modified, size, isDir)
 
-            # Ignore this file
-            self.parent.ignoreFiles.append(serverPath)
+                # Ignore this file in the watcher
+                self.parent.ignoreFiles.append(path)
 
-            if json_data['isDir']:
-                os.rmdir(absolutePath)
-            else:
-                os.remove(absolutePath)
-        elif 'moved' in json_data:
-            print "Recieved message for moved"
-            serverPath = json_data['path']
-            path = common.basePath(serverPath)
-            absolutePath = os.path.join(self.parent._syncDir, path)
-            common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
+                self.parent.downloadQueue.put(remotefile)
+            elif json_data['type'] is 'modified':
+                print "Recieved message for created_dir"
+                path = json_data['path']
+                checksum = "123"
+                modified = None
+                size = json_data['size']
+                isDir = False
+                remotefile = RemoteFile(path, checksum, modified, size, isDir)
 
-            destination = json_data['dest']
-            destPath = common.basePath(destination)
-            absoluteDest = os.path.join(self.parent._syncDir, destPath)
+                # Ignore this file in the watcher
+                self.parent.ignoreFiles.append(path)
 
-            # Ignore this file
-            self.parent.ignoreFiles.append(serverPath)
-            self.parent.ignoreFiles.append(destination)
+                if self.parent.syncLoaded:
+                    self.parent.syncDownQueue.put(remotefile)
+                else:
+                    self.parent.downloadQueue.put(remotefile)
+            elif json_data['type'] is 'deleted':
+                print "Recieved message for deleted"
+                serverPath = json_data['path']
+                path = common.basePath(serverPath)
+                absolutePath = os.path.join(self.parent._syncDir, path)
 
-            os.rename(absolutePath, absoluteDest)
+                # Ignore this file in the watcher
+                self.parent.ignoreFiles.append(serverPath)
+
+                if json_data['isDir']:
+                    os.rmdir(absolutePath)
+                else:
+                    os.remove(absolutePath)
+            elif json_data['type'] is 'moved':
+                print "Recieved message for moved"
+                serverPath = json_data['path']
+                path = common.basePath(serverPath)
+                absolutePath = os.path.join(self.parent._syncDir, path)
+                common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
+
+                destination = json_data['dest']
+                destPath = common.basePath(destination)
+                absoluteDest = os.path.join(self.parent._syncDir, destPath)
+
+                # Ignore this file in the watcher
+                self.parent.ignoreFiles.append(serverPath)
+                self.parent.ignoreFiles.append(destination)
+
+                os.rename(absolutePath, absoluteDest)
 
     def on_error(self, ws, error):
         print "An error occured on the websocket: ", error
