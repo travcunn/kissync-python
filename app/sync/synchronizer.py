@@ -49,7 +49,6 @@ class Synchronizer(threading.Thread):
         self.changesQueue = Queue()
 
         # List of files that the watcher should ignore
-        # -- this is used for the realtime sync
         self.ignoreFiles = []
 
         self._timeoffset = common.calculate_time_offset()

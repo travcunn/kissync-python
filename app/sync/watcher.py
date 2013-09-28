@@ -16,6 +16,18 @@ from definitions import LocalFile
 from realtime import RealtimeSync
 
 
+def checkPath():
+    """ Ignore certain types of files """
+    def _decorating_wrapper(func):
+        def _wrapper(*args, **kwargs):
+            path = args[1].src_path
+            # Ignore temp files
+            if not path.endswith("~"):
+                return func(*args, **kwargs)
+        return _wrapper
+    return _decorating_wrapper
+
+
 class Watcher(threading.Thread):
     def __init__(self, parent, api, syncDir):
         threading.Thread.__init__(self)
@@ -54,9 +66,8 @@ class EventHandler(FileSystemEventHandler):
         # This helps the modifiedFix workaround
         self.__modifiedFix = []
 
+    @checkPath()
     def on_moved(self, event):
-        print "destination path:::::::", event.dest_path
-        print "Item Moved:", event.src_path, event.dest_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         serverPathNew = fs.path.normpath(event.dest_path.replace(self._syncDir, ''))
         #serverPathNew = self._syncFS.unsyspath(event.dest_path.replace(self._syncDir, '')).strip("\\\\?\\")
@@ -64,10 +75,6 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(event.dest_path):
             isDir = os.path.isdir(event.dest_path)
-
-            print "Old Server Path:", serverPath
-            print "New Server Path:", serverPathNew
-
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
                 try:
                     #TODO: This doenst work
@@ -85,9 +92,9 @@ class EventHandler(FileSystemEventHandler):
                 self.parent.parent.ignoreFiles.remove(serverPath)
                 self.parent.parent.ignoreFiles.remove(serverPathNew)
 
+    @checkPath()
     def on_created(self, event):
         path = event.src_path
-        print "item created:", path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         # First, check if the path exists
         if os.path.exists(path):
@@ -111,6 +118,7 @@ class EventHandler(FileSystemEventHandler):
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
 
+    @checkPath()
     def on_deleted(self, event):
         print "item deleted:", event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
@@ -125,14 +133,13 @@ class EventHandler(FileSystemEventHandler):
         else:
             self.parent.parent.ignoreFiles.remove(serverPath)
 
+    @checkPath()
     def on_modified(self, event):
         #TODO: put everything in a try catch, in case a file is not available
         # at the time of access. Some apps create temp files and delete them
         # quickly, which can be a problem if we try to read them
         path = event.src_path
-        print "item modified:", path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        print "server path modified:", serverPath
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
