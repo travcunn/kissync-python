@@ -208,8 +208,9 @@ class Synchronizer(threading.Thread):
             size = syncFS.getsize(path)
             isDir = syncFS.isdir(path)
 
-            # Add the file to the database
-            self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
+            if not path.endswith("~"):
+                # Add the file to the database
+                self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
 
     def indexRemote(self, remotePath=None):
         """

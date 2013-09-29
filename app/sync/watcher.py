@@ -120,12 +120,10 @@ class EventHandler(FileSystemEventHandler):
 
     @checkPath()
     def on_deleted(self, event):
-        print "item deleted:", event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         if serverPath not in self.parent.parent.ignoreFiles:
             try:
                 self._api.post('/path/oper/remove/', path=serverPath)
-
                 # Notify the realtime sync of the change
                 self.parent.realtime.update(serverPath, 'deleted', 0, False)
             except:
@@ -144,21 +142,16 @@ class EventHandler(FileSystemEventHandler):
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
                 if not event.is_directory:
-                    print "its not a directory"
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                     checksum = common.getFileHash(path)
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
-                    print "okay lets sync it"
-
                     if self._synchronizer.syncLoaded:
                         self._synchronizer.syncUpQueue.put(localfile)
-                        print "It was put in the sync up queue"
                     else:
                         self._synchronizer.uploadQueue.put(localfile)
-                        print "it was put up in the upload queue"
                 """
                 else:
                     try:

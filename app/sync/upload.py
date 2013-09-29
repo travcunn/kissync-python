@@ -86,5 +86,10 @@ class UploadThread(Uploader, threading.Thread):
     def run(self):
         while True:
             object = self.queue.get()
-            self.upload(object)
+            try:
+                self.upload(object)
+            except:
+                # if there is an upload error,
+                # ignore it and move to the next file
+                pass
             self.queue.task_done()
