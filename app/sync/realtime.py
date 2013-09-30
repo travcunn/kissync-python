@@ -143,14 +143,14 @@ class RealtimeSync(threading.Thread):
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(serverPath)
 
+                # Throw delete fu at that file!
                 try:
-                    if json_data['isDir']:
-                        os.rmdir(absolutePath)
-                    else:
-                        os.remove(absolutePath)
+                    os.remove(absolutePath)
                 except:
-                    # the file/folder is not accessible
-                    # let the user decide the fate of their file/folder
+                    pass
+                try:
+                    os.rmdir(absolutePath)
+                except:
                     pass
             elif message_type == 'moved':
                 serverPath = json_data['path']
