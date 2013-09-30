@@ -180,7 +180,7 @@ class Synchronizer(threading.Thread):
         for object in objectsOnBoth:
             localObject = object[0]
             remoteObject = object[1]
-            if localObject.checksum is not remoteObject.checksum:
+            if localObject.checksum != remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     if self.syncLoaded:
                         self.syncUpQueue.put(localObject)
