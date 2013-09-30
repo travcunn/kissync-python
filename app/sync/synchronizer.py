@@ -213,6 +213,9 @@ class Synchronizer(threading.Thread):
                 self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
 
     def indexRemote(self, remotePath=None):
+        #TODO: keep a database on kissync.com to keep track of directories
+        # SmartFile has enough caching on both the /path/info and the logs
+        # endpoint, that it cannot be relied upon for real time updates
         """
         Index the files on SmartFile and dive into directories when necessary
         """

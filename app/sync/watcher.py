@@ -21,8 +21,12 @@ def checkPath():
     def _decorating_wrapper(func):
         def _wrapper(*args, **kwargs):
             path = args[1].src_path
-            # Ignore temp files
+            # Ignore temp files and repositories
             if not path.endswith("~"):
+                folder_list = path.split(os.sep)
+                for folder in folder_list:
+                    if folder.startswith(".svn") or folder.startswith(".git"):
+                        return
                 return func(*args, **kwargs)
         return _wrapper
     return _decorating_wrapper
