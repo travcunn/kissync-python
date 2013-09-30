@@ -90,6 +90,8 @@ class RealtimeSync(threading.Thread):
     def on_message(self, ws, message):
         json_data = json.loads(message)
 
+        print json_data
+
         if 'type' in json_data:
             if json_data['uuid'] == self.auth_uuid:
                 return

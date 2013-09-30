@@ -72,6 +72,7 @@ class EventHandler(FileSystemEventHandler):
 
     @checkPath()
     def on_moved(self, event):
+        print "path moved"
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         serverPathNew = fs.path.normpath(event.dest_path.replace(self._syncDir, ''))
         #serverPathNew = self._syncFS.unsyspath(event.dest_path.replace(self._syncDir, '')).strip("\\\\?\\")
@@ -98,6 +99,7 @@ class EventHandler(FileSystemEventHandler):
 
     @checkPath()
     def on_created(self, event):
+        print "path created"
         path = event.src_path
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         # First, check if the path exists
@@ -105,7 +107,10 @@ class EventHandler(FileSystemEventHandler):
             if serverPath not in self.parent.parent.ignoreFiles:
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-                    checksum = common.getFileHash(path)
+                    try:
+                        checksum = common.getFileHash(path)
+                    except:
+                        checksum = None
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
@@ -137,6 +142,7 @@ class EventHandler(FileSystemEventHandler):
 
     @checkPath()
     def on_modified(self, event):
+        print "path modified"
         #TODO: put everything in a try catch, in case a file is not available
         # at the time of access. Some apps create temp files and delete them
         # quickly, which can be a problem if we try to read them
