@@ -1,5 +1,6 @@
 import hashlib
 import os
+import shutil
 import ssl
 import thread
 import threading
@@ -90,8 +91,6 @@ class RealtimeSync(threading.Thread):
     def on_message(self, ws, message):
         json_data = json.loads(message)
 
-        print json_data
-
         if 'type' in json_data:
             if json_data['uuid'] == self.auth_uuid:
                 return
@@ -146,6 +145,11 @@ class RealtimeSync(threading.Thread):
                 # Throw delete fu at that file!
                 try:
                     os.remove(absolutePath)
+                except:
+                    pass
+                try:
+                    # notice: this thing goes ham
+                    shutil.rmtree(absolutePath)
                 except:
                     pass
                 try:
