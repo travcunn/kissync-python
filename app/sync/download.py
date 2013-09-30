@@ -1,4 +1,5 @@
 import datetime
+import history
 import os
 import shutil
 import threading
@@ -18,6 +19,7 @@ class Downloader(object):
         absolutePath = os.path.join(self._syncDir, path)
 
         print "[DOWNLOAD-QUEUE]", path, absolutePath
+        print "Here is the checksum:", object.checksum
 
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:
@@ -36,19 +38,23 @@ class Downloader(object):
 
             if object.checksum is None:
                 self._setAttributes(object)
+            else:
+                history.update(object)
 
     def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
-        checksum = common.getFileHash(path)
+        object.checksum = common.getFileHash(path)
         modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
 
-        checksumString = "checksum=%s" % checksum
+        checksumString = "checksum=%s" % object.checksum
         modifiedString = "modified=%s" % modified
         apiPath = "/path/info%s" % object.path
 
         #TODO: reduce this to one request
         self.api.post(apiPath, attributes=checksumString)
         self.api.post(apiPath, attributes=modifiedString)
+
+        history.update(object)
 
 
 class DownloadThread(Downloader, threading.Thread):

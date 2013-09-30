@@ -19,11 +19,21 @@ class Uploader(object):
     def upload(self, object):
         if history.isLatest(object):
             print "[UPLOAD]: (", object.path, ") ", object.system_path
-
             # First, check if the path exists
             if os.path.exists(object.system_path):
                 # If the object is a file
                 if not os.path.isdir(object.system_path):
+
+                    if object.checksum is None:
+                        try:
+                            object.checksum = common.getFileHash(object.system_path)
+                        except:
+                            # If file isnt available, set the checksum to None
+                            object.checksum = None
+                            # Put it back into the queue so it can process it later
+                            self.parent.queue.put(object)
+                            return
+
                     inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
                     if not inDir.startswith("/"):
                         inDir = os.path.join("/", inDir)
