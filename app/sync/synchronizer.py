@@ -180,6 +180,13 @@ class Synchronizer(threading.Thread):
         for object in objectsOnBoth:
             localObject = object[0]
             remoteObject = object[1]
+            print("Objects in both:")
+            print("Local Object:", localObject)
+            print("   path:", localObject.path)
+            print("   checksum:", localObject.checksum)
+            print("Remote Object:", remoteObject)
+            print("   path:", remoteObject.path)
+            print("   checksum:", remoteObject.checksum)
             if localObject.checksum != remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     if self.syncLoaded:
