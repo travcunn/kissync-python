@@ -45,7 +45,7 @@ def getFileHash(filepath):
     """
     Returns the MD5 hash of a local file
     """
-    fileToHash = open(filepath)
+    fileToHash = open(filepath, 'rb')
     md5 = hashlib.md5()
     while True:
         currentLine = fileToHash.readline()
