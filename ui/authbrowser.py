@@ -16,10 +16,12 @@ class AuthBrowser(QtWebKit.QWebView):
     def checkUrl(self, ok):
         currentUrl = str(self.url().toString())
 
+        print currentUrl
+
         #if on kissync.com, pass verifier to smartfile client
-        if currentUrl.startswith("http://www.kissync.com/oauth?verifier="):
+        if currentUrl.startswith("https://www.kissync.com/oauth?verifier="):
             try:
-                verifier = currentUrl.replace("http://www.kissync.com/oauth?verifier=", "")
+                verifier = currentUrl.replace("https://www.kissync.com/oauth?verifier=", "")
                 token, verifier = self.parent.parent.smartfile.get_access_token(None, verifier)
                 self.parent.parent.configuration.set("Login", "token", token)
                 self.parent.parent.configuration.set("Login", "verifier", verifier)

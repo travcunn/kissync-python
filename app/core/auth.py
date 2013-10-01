@@ -12,11 +12,15 @@ class Authenticator(QtCore.QThread):
         self.parent = parent
 
     def run(self):
+        token = "RcBMbit9N6Yty6VYFhSWAHCUG00PVZ"
+        secret = "9nbVTipa5RazUg2TGKxi9jMKbxnq6k"
+
         configToken = self.parent.configuration.get("Login", "token")
         configVerifier = self.parent.configuration.get("Login", "verifier")
+
         if configToken and configVerifier is not None:
             try:
-                self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq",
+                self.parent.smartfile = OAuthClient(token, secret,
                                                     configToken, configVerifier)
                 self.parent.smartfile.get('/whoami')
             except:
@@ -25,8 +29,9 @@ class Authenticator(QtCore.QThread):
                 self.success()
         else:
             try:
-                self.parent.smartfile = OAuthClient("puchob9x94AiYWFkIPhd6eoxlvrzCK", "X4M7CNooRuhAwUd5LFookOMV0ZSqYq")
+                self.parent.smartfile = OAuthClient(token, secret)
             except:
+                raise
                 self.networkError()
             else:
                 self.showLoginWindow()
@@ -35,7 +40,7 @@ class Authenticator(QtCore.QThread):
         """
         Sends a signal to the Main class to open the login window with the login url
         """
-        self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
+        self.parent.smartfile.get_request_token("https://www.kissync.com/oauth")
 
         authUrl = self.parent.smartfile.get_authorization_url()
         self.login.emit(QtCore.QUrl(authUrl))

@@ -29,7 +29,8 @@ class Downloader(object):
                     shutil.copyfileobj(f, o)
             except IOError, err:
                 if err.errno == 22:
-                    # Windows has file name restrictions. Ignore it.
+                    # Windows has file name restrictions. These types of files
+                    # are to be ignored
                     pass
                 else:
                     raise
