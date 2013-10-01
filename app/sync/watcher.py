@@ -91,7 +91,7 @@ class EventHandler(FileSystemEventHandler):
                     # Notify the realtime sync of the change
                     self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)
                 except:
-                    raise
+                    pass
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
                 self.parent.parent.ignoreFiles.remove(serverPathNew)
@@ -121,7 +121,7 @@ class EventHandler(FileSystemEventHandler):
                     try:
                         self._api.post('/path/oper/mkdir/', path=serverPath)
                     except:
-                        raise
+                        pass
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
 
@@ -134,7 +134,7 @@ class EventHandler(FileSystemEventHandler):
                 # Notify the realtime sync of the change
                 self.parent.realtime.update(serverPath, 'deleted', 0, False)
             except:
-                raise
+                pass
         else:
             self.parent.parent.ignoreFiles.remove(serverPath)
 

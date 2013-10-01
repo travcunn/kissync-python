@@ -90,6 +90,10 @@ class Synchronizer(threading.Thread):
     def synchronize(self):
         # Start the transfer threads to wait for tasks
         self.startTransferThreads()
+
+        # Watch the file system
+        self.watchFileSystem()
+
         # Clear the remote tables
         self.clearTables()
         # Index the remote files
@@ -108,12 +112,6 @@ class Synchronizer(threading.Thread):
         if _syncLoaded:
             self.syncUpQueue.join()
             self.syncDownQueue.join()
-
-        print "Initial sync finished"
-
-        # Now watch the file system for changes
-        # TODO: start this alongside the file comparisons
-        self.watchFileSystem()
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
@@ -173,6 +171,8 @@ class Synchronizer(threading.Thread):
                 if remoteObject.path == localObject.path:
                     found = True
             if not found:
+                ignorePath = os.path.join(self._syncDir, remoteObject.path)
+                self.ignoreFiles.append(ignorePath)
                 self.downloadQueue.put(remoteObject)
             found = False
 
@@ -180,13 +180,6 @@ class Synchronizer(threading.Thread):
         for object in objectsOnBoth:
             localObject = object[0]
             remoteObject = object[1]
-            print("Objects in both:")
-            print("Local Object:", localObject)
-            print("   path:", localObject.path)
-            print("   checksum:", localObject.checksum)
-            print("Remote Object:", remoteObject)
-            print("   path:", remoteObject.path)
-            print("   checksum:", remoteObject.checksum)
             if localObject.checksum != remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     if self.syncLoaded:
@@ -197,6 +190,8 @@ class Synchronizer(threading.Thread):
                     if self.syncLoaded:
                         self.syncDownQueue.put(localObject)
                     else:
+                        ignorePath = os.path.join(self._syncDir, remoteObject.path)
+                        self.ignoreFiles.append(ignorePath)
                         self.downloadQueue.put(remoteObject)
 
     def indexLocal(self, localPath=None):
