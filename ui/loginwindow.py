@@ -24,18 +24,10 @@ class LoginWindow(QtGui.QWidget):
         self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
         topText = QtGui.QLabel('Login to SmartFile')
-        #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        #font = QtGui.QFont("Vegur", 24, QtGui.QFont.Light, False)
-        #topText.setFont(font)
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        #topText.setStyleSheet("color: #FFFFFF
 
         detailsText = QtGui.QLabel('to get started')
-        #http://pyqt.sourceforge.net/Docs/PyQt4/qfont.html#Weight-enum
-        #fontsmall = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
-        #detailsText.setFont(fontsmall)
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        #topText.setStyleSheet("color: #FFFFFF;")
 
         self.htmlView = AuthBrowser(self)
 
@@ -67,6 +59,7 @@ class LoginWindow(QtGui.QWidget):
         self.centerOnScreen()
 
     def networkError(self):
+        QtGui.QMessageBox.question(self, 'SmartFile', "Error Connecting")
         self.neterrorText.show()
         self.errorText.hide()
         self.show()

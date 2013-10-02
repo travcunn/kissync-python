@@ -23,7 +23,7 @@ class Main(QtGui.QWidget):
         self.settingsDir = self.settingsDirectory()[0]
         self.settingsFile = self.settingsDirectory()[1]
 
-        self.directorySetup()  # create the directories that will be needed
+        self.directorySetup()# create the directories that will be needed
 
         self.configuration = Configuration(self.settingsFile)  # initialize the configuration
 
@@ -36,6 +36,7 @@ class Main(QtGui.QWidget):
         self.authenticator.login.connect(self.login)
         self.authenticator.done.connect(self.start)
         self.authenticator.setup.connect(self.setup)
+        self.authenticator.neterror.connect(self.neterror)
         self.authenticator.start()
 
         #################MAIN WINDOW GUI#####################
@@ -74,6 +75,9 @@ class Main(QtGui.QWidget):
         """First Run: Called if the authentication is successful"""
         self.setupwizard.show()
         self.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
+
+    def neterror(self):
+        QtGui.QMessageBox.critical(self, 'SmartFile Error', 'There was an error while connecting to SmartFile.', 1)
 
     def directorySetup(self):
         """Checks for sync and settings folder and creates if needed"""

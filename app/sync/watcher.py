@@ -74,14 +74,13 @@ class EventHandler(FileSystemEventHandler):
     def on_moved(self, event):
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         serverPathNew = fs.path.normpath(event.dest_path.replace(self._syncDir, ''))
-        #serverPathNew = self._syncFS.unsyspath(event.dest_path.replace(self._syncDir, '')).strip("\\\\?\\")
 
         # First, check if the path exists
         if os.path.exists(event.dest_path):
             isDir = os.path.isdir(event.dest_path)
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
                 try:
-                    #TODO: This doenst work
+                    #TODO: This doesnt work
                     # According to the logs, /cloud.png gets moved to
                     # /logo.png/cloud.png, where instead it should be moved to
                     # /logo.png.

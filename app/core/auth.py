@@ -6,6 +6,7 @@ class Authenticator(QtCore.QThread):
     login = QtCore.Signal(object)
     done = QtCore.Signal(object)
     setup = QtCore.Signal(object)
+    neterror = QtCore.Signal(object)
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -31,7 +32,6 @@ class Authenticator(QtCore.QThread):
             try:
                 self.parent.smartfile = OAuthClient(token, secret)
             except:
-                raise
                 self.networkError()
             else:
                 self.showLoginWindow()
@@ -40,14 +40,16 @@ class Authenticator(QtCore.QThread):
         """
         Sends a signal to the Main class to open the login window with the login url
         """
-        self.parent.smartfile.get_request_token("https://www.kissync.com/oauth")
+        try:
+            self.parent.smartfile.get_request_token("http://www.kissync.com/oauth")
 
-        authUrl = self.parent.smartfile.get_authorization_url()
-        self.login.emit(QtCore.QUrl(authUrl))
+            authUrl = self.parent.smartfile.get_authorization_url()
+            self.login.emit(QtCore.QUrl(authUrl))
+        except:
+            self.networkError()
 
     def networkError(self):
-        #TODO: make this work
-        self.parent.loginwindow.networkError()
+        self.neterror.emit('error')
 
     def success(self):
         """
