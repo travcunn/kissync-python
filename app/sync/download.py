@@ -18,11 +18,10 @@ class Downloader(object):
         path = common.basePath(object.path)
         absolutePath = os.path.join(self._syncDir, path)
 
-        print "[DOWNLOAD-QUEUE]", path, absolutePath
-        print "Here is the checksum:", object.checksum
-
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:
+            print "[DOWNLOAD-QUEUE]", path, absolutePath
+            print "Here is the checksum:", object.checksum
             try:
                 f = self._api.get('/path/data/', serverPath)
                 with open(absolutePath, 'wb') as o:

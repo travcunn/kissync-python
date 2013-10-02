@@ -79,6 +79,7 @@ class EventHandler(FileSystemEventHandler):
         if os.path.exists(event.dest_path):
             isDir = os.path.isdir(event.dest_path)
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
+                print "#######MOVE EVENT########"
                 try:
                     #TODO: This doesnt work
                     # According to the logs, /cloud.png gets moved to
@@ -102,6 +103,7 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
+                print "######CREATED EVENT#######"
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                     try:
@@ -128,6 +130,7 @@ class EventHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         if serverPath not in self.parent.parent.ignoreFiles:
+            print "######DELETED EVENT#######"
             try:
                 self._api.post('/path/oper/remove/', path=serverPath)
                 # Notify the realtime sync of the change
@@ -147,6 +150,7 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
+                print "######MODIFIED EVENT######"
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                     checksum = common.getFileHash(path)
