@@ -59,9 +59,7 @@ class LoginWindow(QtGui.QWidget):
         self.centerOnScreen()
 
     def networkError(self):
-        QtGui.QMessageBox.question(self, 'SmartFile', "Error Connecting")
-        self.neterrorText.show()
-        self.errorText.hide()
+        QtGui.QMessageBox.question(self, 'SmartFile', "Error connecting to SmartFile")
         self.show()
 
     def invaliderror(self):
