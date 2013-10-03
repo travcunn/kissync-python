@@ -45,8 +45,6 @@ class Uploader(object):
                     # set the new attributes
                     self._setAttributes(object)
 
-                    history.update(object)
-
                     # Notify the realtime sync of the change
                     if self.parent.watcherRunning:
                         self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
@@ -86,7 +84,6 @@ class Uploader(object):
             raise
 
     def __setAttributes(self, apiPath, fileChecksum, fileModified):
-        #TODO: reduce this to one request
         self._api.post(apiPath, attributes=fileChecksum)
         self._api.post(apiPath, attributes=fileModified)
 
@@ -101,9 +98,24 @@ class UploadThread(Uploader, threading.Thread):
         while True:
             object = self.queue.get()
             try:
-                self.upload(object)
+                if history.isLatest(object):
+                    self.upload(object)
+                    history.update(object)
+                    try:
+                        print "Here is the history hash:"
+                        print history._history[object.system_path]
+                    except:
+                        pass
+                    if os.path.exists(object.system_path):
+                        if not os.path.isdir(object.system_path):
+                            isDir = False
+                            type = 'created_file'
+                        else:
+                            isDir = True
+                            type = 'created_dir'
+                        if self.parent.watcherRunning:
+                            self.parent.localWatcher.realtime.update(object.path, type, 0, isDir)
             except:
                 # if there is an upload error,
-                # ignore it and move to the next file
                 pass
             self.queue.task_done()

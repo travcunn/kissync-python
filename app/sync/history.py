@@ -1,6 +1,6 @@
 """
 To avoid redundant network transfers, keep a history
-of files that are uploaded
+of files that are uploaded or downloaded
 """
 
 

@@ -38,8 +38,6 @@ class Downloader(object):
 
             if object.checksum is None:
                 self._setAttributes(object)
-            else:
-                history.update(object)
 
     def _setAttributes(self, object):
         path = os.path.join(self._syncDir, common.basePath(object.path))
@@ -54,8 +52,6 @@ class Downloader(object):
         self.api.post(apiPath, attributes=checksumString)
         self.api.post(apiPath, attributes=modifiedString)
 
-        history.update(object)
-
 
 class DownloadThread(Downloader, threading.Thread):
     def __init__(self, queue, api, syncDir):
@@ -66,5 +62,7 @@ class DownloadThread(Downloader, threading.Thread):
     def run(self):
         while True:
             object = self.queue.get()
-            self.download(object)
+            if history.isLatest(object):
+                self.download(object)
+                history.update(object)
             self.queue.task_done()
