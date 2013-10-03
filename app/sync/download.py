@@ -61,7 +61,14 @@ class DownloadThread(Downloader, threading.Thread):
     def run(self):
         while True:
             object = self.queue.get()
-            if history.isLatest(object):
-                self.download(object)
-                history.update(object)
+            try:
+                if history.isLatest(object):
+                    # Tell the history we are about to download the file
+                    history.update(object)
+                    self.download(object)
+            except:
+                # Set the history to None, since it failed
+                history._history[object.path] = None
+                # Put the object back into the queue and try later
+                self.queue.put(object)
             self.queue.task_done()

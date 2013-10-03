@@ -20,12 +20,15 @@ def checkPath():
         def _wrapper(*args, **kwargs):
             path = args[1].src_path
             # Ignore temp files and repositories
-            if not path.endswith("~"):
-                folder_list = path.split(os.sep)
-                for folder in folder_list:
-                    if folder.startswith(".svn") or folder.startswith(".git"):
-                        return
-                return func(*args, **kwargs)
+            try:
+                if not path.endswith("~"):
+                    folder_list = path.split(os.sep)
+                    for folder in folder_list:
+                        if folder.startswith(".svn") or folder.startswith(".git"):
+                            return
+                    return func(*args, **kwargs)
+            except:
+                return
         return _wrapper
     return _decorating_wrapper
 
@@ -153,10 +156,7 @@ class EventHandler(FileSystemEventHandler):
                     isDir = os.path.isdir(path)
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
-                    if self._synchronizer.syncLoaded:
-                        self._synchronizer.syncUpQueue.put(localfile)
-                    else:
-                        self._synchronizer.uploadQueue.put(localfile)
+                    self._synchronizer.uploadQueue.put(localfile)
                 """
                 else:
                     try:

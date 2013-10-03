@@ -98,8 +98,9 @@ class UploadThread(Uploader, threading.Thread):
             object = self.queue.get()
             try:
                 if history.isLatest(object):
-                    self.upload(object)
+                    # tell the history we are about to upload the file
                     history.update(object)
+                    self.upload(object)
                     if os.path.exists(object.system_path):
                         if not os.path.isdir(object.system_path):
                             isDir = False
@@ -110,6 +111,6 @@ class UploadThread(Uploader, threading.Thread):
                         if self.parent.watcherRunning:
                             self.parent.localWatcher.realtime.update(object.path, type, 0, isDir)
             except:
-                # if there is an upload error,
-                pass
+                # the upload failed, so tell the history
+                history._history[object.path] = None
             self.queue.task_done()

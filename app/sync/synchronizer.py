@@ -5,7 +5,6 @@ from Queue import Queue
 
 from download import DownloadThread
 from upload import UploadThread
-from sync import SyncUpThread, SyncDownThread
 from watcher import Watcher
 
 from fs.osfs import OSFS
@@ -16,18 +15,6 @@ from definitions import Base, RemoteFile, LocalFile, TempLocalFile
 
 import common
 
-# Sync should be implemented in a later version
-# -- for now, just use download/upload
-# Attempt loading the SyncClient
-try:
-    from smartfile.sync import SyncClient
-except:
-    _syncLoaded = False
-else:
-    _syncLoaded = True
-# Turn off SyncClient for now
-_syncLoaded = False
-
 
 class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
@@ -37,26 +24,17 @@ class Synchronizer(threading.Thread):
         self._syncDir = self.parent.syncDir
         # Set the thread to run as a daemon
         self.setDaemon(True)
-
         # Initialize the database
         self.dbInit()
-
+        # Setup queues for tasks
         self.uploadQueue = Queue()
         self.downloadQueue = Queue()
-        self.syncUpQueue = Queue()
-        self.syncDownQueue = Queue()
         # Queue for events to send to the realtime sync server
         self.changesQueue = Queue()
-
         # List of files that the watcher should ignore
         self.ignoreFiles = []
-
+        # Get the time offset to use in time calculations
         self._timeoffset = common.calculate_time_offset()
-
-        if _syncLoaded:
-            self.syncLoaded = True
-        else:
-            self.syncLoaded = False
 
         self.watcherRunning = False
 
@@ -64,21 +42,22 @@ class Synchronizer(threading.Thread):
         self.synchronize()
 
     def startTransferThreads(self):
-        # Initialize the uploader and downloader
-        self.uploader = UploadThread(self.uploadQueue, self.api,
-                self._syncDir, self)
-        self.downloader = DownloadThread(self.downloadQueue, self.api,
-                self._syncDir)
-        self.uploader.start()
-        self.downloader.start()
-        if _syncLoaded:
-            self._sync = SyncClient(self.api)
-            self.syncUp = SyncUpThread(self.syncUpQueue, self.api,
-                    self._sync, self._syncDir, self)
-            self.syncDown = SyncDownThread(self.syncDownQueue, self.api,
-                    self._sync, self._syncDir)
-            self.syncUp.start()
-            self.syncDown.start()
+        # Initialize the upload and download threads
+
+        upload = 3 # Specify amount of upload threads
+        download = 4 # Specify amount of download threads
+
+        self.uploadThreads = []
+        for i in range(upload):
+            uploader = UploadThread(self.uploadQueue, self.api, self._syncDir, self)
+            uploader.start()
+            self.uploadThreads.append(uploader)
+
+        self.downloadThreads = []
+        for i in range(download):
+            downloader = DownloadThread(self.downloadQueue, self.api, self._syncDir)
+            downloader.start()
+            self.downloadThreads.append(downloader)
 
     def dbInit(self):
         engine = create_engine('sqlite:///files.db', echo=False)
@@ -90,28 +69,18 @@ class Synchronizer(threading.Thread):
     def synchronize(self):
         # Start the transfer threads to wait for tasks
         self.startTransferThreads()
-
         # Watch the file system
         self.watchFileSystem()
-
-        # Clear the remote tables
+        # Clear the remote tables from DB
         self.clearTables()
-        # Index the remote files
+        # Index the remote files and store in DB
         self.indexRemote()
         self.dbCommit()
-        # Index the local files
+        # Index the local files and store in DB
         self.indexLocal()
         self.dbCommit()
-
-        # Now compare the lists and populate task queues
+        # Now compare the tables and populate task queues
         self.compare()
-
-        self.uploadQueue.join()
-        self.downloadQueue.join()
-
-        if _syncLoaded:
-            self.syncUpQueue.join()
-            self.syncDownQueue.join()
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
@@ -136,7 +105,6 @@ class Synchronizer(threading.Thread):
         self.__session.commit()
 
     def watchFileSystem(self):
-        #after uploading, downloading, and synchronizing are finished, start the watcher thread
         self.localWatcher = Watcher(self, self.api, self._syncDir)
         self.localWatcher.start()
         self.watcherRunning = True
@@ -146,8 +114,6 @@ class Synchronizer(threading.Thread):
         remote = self.__session.query(RemoteFile).all()
 
         objectsOnBoth = []
-
-        # Eventually this will be done with more SQLAlchemy queries...
 
         # Check which files exist on both and which local files dont exist on remote
         for localObject in local:
@@ -182,17 +148,14 @@ class Synchronizer(threading.Thread):
             remoteObject = object[1]
             if localObject.checksum != remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
-                    if self.syncLoaded:
-                        self.syncUpQueue.put(localObject)
-                    else:
-                        self.uploadQueue.put(localObject)
+                    self.uploadQueue.put(localObject)
                 elif localObject.modified_local < remoteObject.modified:
-                    if self.syncLoaded:
-                        self.syncDownQueue.put(localObject)
-                    else:
-                        ignorePath = os.path.join(self._syncDir, remoteObject.path)
-                        self.ignoreFiles.append(ignorePath)
-                        self.downloadQueue.put(remoteObject)
+                    ignorePath = os.path.join(self._syncDir, remoteObject.path)
+                    self.ignoreFiles.append(ignorePath)
+                    self.downloadQueue.put(remoteObject)
+
+        # Clear objects on both
+        objectsOnBoth = None
 
     def indexLocal(self, localPath=None):
         """
