@@ -67,8 +67,6 @@ class EventHandler(FileSystemEventHandler):
 
         self._syncFS = OSFS(self._syncDir)
 
-        # This helps the modifiedFix workaround
-        self.__modifiedFix = []
 
     @checkPath()
     def on_moved(self, event):
@@ -171,17 +169,3 @@ class EventHandler(FileSystemEventHandler):
                 """
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
-
-    def modifiedOnce(self, path):
-        """
-        This is a hack to workaround a bug in watchdog.
-        When a file is modified, watchdog calls on_modified twice instead of
-        only once. This method keeps track of both events and returns true
-        if the event has been previously called
-        """
-        if path in self.__modifiedFix:
-            self.__modifiedFix.remove(path)
-            return True
-        else:
-            self.__modifiedFix.append(path)
-            return False
