@@ -7,8 +7,6 @@ import fs.path
 from fs.osfs import OSFS
 
 from watchdog.observers import Observer
-# Move events arent called on Windows using the PollingObserver
-#from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
 import common
@@ -66,7 +64,6 @@ class EventHandler(FileSystemEventHandler):
         self._timeoffset = common.calculate_time_offset()
 
         self._syncFS = OSFS(self._syncDir)
-
 
     @checkPath()
     def on_moved(self, event):
