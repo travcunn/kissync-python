@@ -83,8 +83,14 @@ class Uploader(object):
             raise
 
     def __setAttributes(self, apiPath, fileChecksum, fileModified):
-        self._api.post(apiPath, attributes=fileChecksum)
-        self._api.post(apiPath, attributes=fileModified)
+        checksumString = "checksum=%s" % fileChecksum
+        modifiedString = "modified=%s" % fileModified
+
+        requestAttr = []
+        requestAttr.append(checksumString)
+        requestAttr.append(modifiedString)
+
+        self._api.post(apiPath, attributes=requestAttr)
 
 
 class UploadThread(Uploader, threading.Thread):

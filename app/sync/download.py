@@ -45,11 +45,14 @@ class Downloader(object):
 
         checksumString = "checksum=%s" % object.checksum
         modifiedString = "modified=%s" % modified
+
         apiPath = "/path/info%s" % object.path
 
-        #TODO: reduce this to one request
-        self._api.post(apiPath, attributes=checksumString)
-        self._api.post(apiPath, attributes=modifiedString)
+        requestAttr = []
+        requestAttr.append(checksumString)
+        requestAttr.append(modifiedString)
+
+        self._api.post(apiPath, attributes=requestAttr)
 
 
 class DownloadThread(Downloader, threading.Thread):
@@ -67,6 +70,7 @@ class DownloadThread(Downloader, threading.Thread):
                     history.update(object)
                     self.download(object)
             except:
+                raise
                 # Set the history to None, since it failed
                 history._history[object.path] = None
                 # Put the object back into the queue and try later
