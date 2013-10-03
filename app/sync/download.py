@@ -19,7 +19,6 @@ class Downloader(object):
         absolutePath = os.path.join(self._syncDir, path)
 
         print "[DOWNLOAD-QUEUE]", path, absolutePath
-        print "Here is the checksum:", object.checksum
 
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:

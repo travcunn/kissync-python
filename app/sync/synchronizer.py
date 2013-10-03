@@ -234,16 +234,20 @@ class Synchronizer(threading.Thread):
                 for i in dirListing['children']:
                     if i['isfile'] is False:
                         # If the path is a directory
-                        path = i['path'].encode("utf-8")
+                        path = i['path']
                         isDir = True
                         size = None
                         # Check if modified is in attributes and use that
-                        if "modified" in i['attributes']:
-                            modified = i['attributes']['modified'].encode("utf-8")
-                            modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                        # Or else, just use the modified time set by the api
-                        else:
-                            modified = i['time'].encode("utf-8")
+                        try:
+                            if "modified" in i['attributes']:
+                                modified = i['attributes']['modified']
+                                modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                            # Or else, just use the modified time set by the api
+                            else:
+                                modified = i['time']
+                                modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
+                        except:
+                            modified = i['time']
                             modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
                         checksum = None
 
@@ -253,19 +257,23 @@ class Synchronizer(threading.Thread):
                         self.indexRemote(i['path'])
                     else:
                         # If the path is a file
-                        path = i['path'].encode("utf-8")
+                        path = i['path']
                         isDir = False
                         size = int(i['size'])
                         # Check if modified is in attributes and use that
-                        if "modified" in i['attributes']:
-                            modified = i['attributes']['modified'].encode("utf-8")
-                            modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                        # Or else, just use the modified time set by the api
-                        else:
-                            modified = i['time'].encode("utf-8")
+                        try:
+                            if "modified" in i['attributes']:
+                                modified = i['attributes']['modified']
+                                modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
+                            # Or else, just use the modified time set by the api
+                            else:
+                                modified = i['time']
+                                modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
+                        except:
+                            modified = i['time']
                             modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
                         if 'checksum' in i['attributes']:
-                            checksum = i['attributes']['checksum'].encode("utf-8")
+                            checksum = i['attributes']['checksum']
                         else:
                             checksum = None
 
