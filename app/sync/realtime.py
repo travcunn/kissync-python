@@ -62,7 +62,7 @@ class RealtimeSync(threading.Thread):
                 self.ws.send(object)
                 self.parent.changesQueue.task_done()
                 taskInQueue = False
-            time.sleep(1)
+            time.sleep(.01)
 
     def _sendChanges(self, changes):
         # Prepare the dictionary to send
@@ -102,6 +102,9 @@ class RealtimeSync(threading.Thread):
                 size = json_data['size']
                 isDir = False
                 remotefile = RemoteFile(path, checksum, modified, size, isDir)
+
+                print "file created on the realtime"
+                print path
 
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(path)
