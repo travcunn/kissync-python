@@ -103,7 +103,6 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
-                print "######CREATED EVENT#######"
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                     try:
@@ -130,7 +129,6 @@ class EventHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
         if serverPath not in self.parent.parent.ignoreFiles:
-            print "######DELETED EVENT#######"
             try:
                 self._api.post('/path/oper/remove/', path=serverPath)
                 # Notify the realtime sync of the change
@@ -150,10 +148,12 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
-                print "######MODIFIED EVENT######"
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-                    checksum = common.getFileHash(path)
+                    try:
+                        checksum = common.getFileHash(path)
+                    except:
+                        checksum = None
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)

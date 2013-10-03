@@ -17,45 +17,44 @@ class Uploader(object):
         self.parent = parent
 
     def upload(self, object):
-        if history.isLatest(object):
-            print "[UPLOAD]: (", object.path, ") ", object.system_path
-            # First, check if the path exists
-            if os.path.exists(object.system_path):
-                # If the object is a file
-                if not os.path.isdir(object.system_path):
+        print "[UPLOAD]: (", object.path, ") ", object.system_path
+        # First, check if the path exists
+        if os.path.exists(object.system_path):
+            # If the object is a file
+            if not os.path.isdir(object.system_path):
 
-                    if object.checksum is None:
-                        try:
-                            object.checksum = common.getFileHash(object.system_path)
-                        except:
-                            # If file isnt available, set the checksum to None
-                            object.checksum = None
-                            # Put it back into the queue so it can process it later
-                            self.parent.queue.put(object)
-                            return
+                if object.checksum is None:
+                    try:
+                        object.checksum = common.getFileHash(object.system_path)
+                    except:
+                        # If file isnt available, set the checksum to None
+                        object.checksum = None
+                        # Put it back into the queue so it can process it later
+                        self.parent.queue.put(object)
+                        return
 
-                    inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
-                    if not inDir.startswith("/"):
-                        inDir = os.path.join("/", inDir)
-                    apiPath = "/path/data/%s" % inDir
-                    # create the directory to make sure it exists
-                    self._api.post('/path/oper/mkdir/', path=inDir)
-                    # upload the file
-                    self._api.post(apiPath, file=file(object.system_path, 'rb'))
-                    # set the new attributes
-                    self._setAttributes(object)
+                inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
+                if not inDir.startswith("/"):
+                    inDir = os.path.join("/", inDir)
+                apiPath = "/path/data/%s" % inDir
+                # create the directory to make sure it exists
+                self._api.post('/path/oper/mkdir/', path=inDir)
+                # upload the file
+                self._api.post(apiPath, file=file(object.system_path, 'rb'))
+                # set the new attributes
+                self._setAttributes(object)
 
-                    # Notify the realtime sync of the change
-                    if self.parent.watcherRunning:
-                        self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
-                # If the object is a folder
-                else:
-                    createDir = object.path
-                    self._api.post('/path/oper/mkdir/', path=createDir)
+                # Notify the realtime sync of the change
+                if self.parent.watcherRunning:
+                    self.parent.localWatcher.realtime.update(object.path, 'created_file', 0, False)
+            # If the object is a folder
+            else:
+                createDir = object.path
+                self._api.post('/path/oper/mkdir/', path=createDir)
 
-                    # Notify the realtime sync of the change
-                    if self.parent.watcherRunning:
-                        self.parent.localWatcher.realtime.update(createDir, 'created_dir', 0, True)
+                # Notify the realtime sync of the change
+                if self.parent.watcherRunning:
+                    self.parent.localWatcher.realtime.update(createDir, 'created_dir', 0, True)
 
     def _setAttributes(self, object):
         checksum = object.checksum
@@ -101,11 +100,6 @@ class UploadThread(Uploader, threading.Thread):
                 if history.isLatest(object):
                     self.upload(object)
                     history.update(object)
-                    try:
-                        print "Here is the history hash:"
-                        print history._history[object.system_path]
-                    except:
-                        pass
                     if os.path.exists(object.system_path):
                         if not os.path.isdir(object.system_path):
                             isDir = False

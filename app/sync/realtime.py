@@ -185,8 +185,7 @@ class RealtimeSync(threading.Thread):
                         pass
 
     def on_error(self, ws, error):
-        #ignore errors, as these will probably result in a socket reconnection
-        pass
+        self.create_connection()
 
     def on_close(self, ws):
         self.connected = False

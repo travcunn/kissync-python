@@ -21,7 +21,6 @@ class Downloader(object):
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:
             print "[DOWNLOAD-QUEUE]", path, absolutePath
-            print "Here is the checksum:", object.checksum
             try:
                 f = self._api.get('/path/data/', serverPath)
                 with open(absolutePath, 'wb') as o:
@@ -49,8 +48,8 @@ class Downloader(object):
         apiPath = "/path/info%s" % object.path
 
         #TODO: reduce this to one request
-        self.api.post(apiPath, attributes=checksumString)
-        self.api.post(apiPath, attributes=modifiedString)
+        self._api.post(apiPath, attributes=checksumString)
+        self._api.post(apiPath, attributes=modifiedString)
 
 
 class DownloadThread(Downloader, threading.Thread):
