@@ -82,10 +82,7 @@ class Uploader(object):
         except:
             raise
 
-    def __setAttributes(self, apiPath, fileChecksum, fileModified):
-        checksumString = "checksum=%s" % fileChecksum
-        modifiedString = "modified=%s" % fileModified
-
+    def __setAttributes(self, apiPath, checksumString, modifiedString):
         requestAttr = []
         requestAttr.append(checksumString)
         requestAttr.append(modifiedString)
