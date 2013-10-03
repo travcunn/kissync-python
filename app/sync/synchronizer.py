@@ -44,8 +44,8 @@ class Synchronizer(threading.Thread):
     def startTransferThreads(self):
         # Initialize the upload and download threads
 
-        upload = 3 # Specify amount of upload threads
-        download = 4 # Specify amount of download threads
+        upload = 3  # Specify amount of upload threads
+        download = 4  # Specify amount of download threads
 
         self.uploadThreads = []
         for i in range(upload):
