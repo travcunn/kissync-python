@@ -50,7 +50,7 @@ class Synchronizer(threading.Thread):
     def startTransferThreads(self):
         # Initialize the upload and download threads
 
-        upload = 5  # Specify amount of upload threads
+        upload = 4  # Specify amount of upload threads
         download = 5  # Specify amount of download threads
 
         self.uploadThreads = []
