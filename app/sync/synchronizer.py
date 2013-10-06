@@ -1,6 +1,7 @@
 import datetime
 import os
 import threading
+import time
 from Queue import Queue
 
 from download import DownloadThread
@@ -39,13 +40,18 @@ class Synchronizer(threading.Thread):
         self.watcherRunning = False
 
     def run(self):
+        # Start the transfer threads to wait for tasks
+        self.startTransferThreads()
+        # Watch the file system
+        self.watchFileSystem()
+        # Synchronize with SmartFile
         self.synchronize()
 
     def startTransferThreads(self):
         # Initialize the upload and download threads
 
-        upload = 3  # Specify amount of upload threads
-        download = 4  # Specify amount of download threads
+        upload = 4  # Specify amount of upload threads
+        download = 5  # Specify amount of download threads
 
         self.uploadThreads = []
         for i in range(upload):
@@ -67,20 +73,21 @@ class Synchronizer(threading.Thread):
         self.__session = Session()
 
     def synchronize(self):
-        # Start the transfer threads to wait for tasks
-        self.startTransferThreads()
-        # Watch the file system
-        self.watchFileSystem()
-        # Clear the remote tables from DB
-        self.clearTables()
-        # Index the remote files and store in DB
-        self.indexRemote()
-        self.dbCommit()
-        # Index the local files and store in DB
-        self.indexLocal()
-        self.dbCommit()
-        # Now compare the tables and populate task queues
-        self.compare()
+        while True:
+            # Clear the remote tables from DB
+            self.clearTables()
+            # Index the remote files and store in DB
+            self.indexRemote()
+            self.dbCommit()
+            # Index the local files and store in DB
+            self.indexLocal()
+            self.dbCommit()
+            # Now compare the tables and populate task queues
+            self.compare()
+
+            # Wait 5 minutes, then check with SmartFile again
+            wait_time = 5
+            time.sleep(wait_time * 60)
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
