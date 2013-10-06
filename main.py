@@ -3,6 +3,9 @@
 import os
 import platform
 import sys
+import webbrowser
+
+from app.core.common import is_latest_version
 from PySide import QtGui
 from tendo.singleton import SingleInstance
 
@@ -15,9 +18,15 @@ from ui.setupwizard import SetupWizard
 from ui.systemtray import SystemTray
 
 
+version = "1.0"
+
+
 class Main(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Main, self).__init__(parent)
+
+        # Check for updates
+        self.checkForUpdates()
 
         self.syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
         self.settingsDir = self.settingsDirectory()[0]
@@ -74,10 +83,29 @@ class Main(QtGui.QWidget):
     def setup(self):
         """First Run: Called if the authentication is successful"""
         self.setupwizard.show()
-        self.tray.notification("Kissync Setup", "Please complete the setup to start using Kissync")
+        #self.tray.notification("Smartfile Setup", "Please complete the setup to start using Kissync")
 
     def neterror(self):
         QtGui.QMessageBox.critical(self, 'SmartFile Error', 'There was an error while connecting to SmartFile.', 1)
+
+    def checkForUpdates(self):
+        """Checks the current version with the latest from the server"""
+        try:
+            if (is_latest_version(version) == False):
+                self.updateNotify()
+        except:
+            self.neterror()
+
+    def updateNotify(self):
+        """Display a notification when an update is available"""
+        updateReply = QtGui.QMessageBox.question(self, 'SmartFile Update',
+            'An update is available. Would you like to download now?',
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                QtGui.QMessageBox.Yes)
+
+        # Open a web browser if the user selects yes
+        if updateReply == QtGui.QMessageBox.Yes:
+            webbrowser.open("https://www.kissync.com/download", new=2)
 
     def directorySetup(self):
         """Checks for sync and settings folder and creates if needed"""
