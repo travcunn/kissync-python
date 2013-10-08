@@ -84,7 +84,7 @@ class EventHandler(FileSystemEventHandler):
                     # /logo.png/cloud.png, where instead it should be moved to
                     # /logo.png.
                     # post created: http://smartfile.forumbee.com/t/19b28
-                    self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+                    print self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
 
                     # Notify the realtime sync of the change
                     self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)

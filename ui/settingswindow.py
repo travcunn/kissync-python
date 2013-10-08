@@ -1,7 +1,5 @@
 from PySide import QtGui, QtCore
-
 from ui.accountwidget import AccountWidget
-from ui.style import KissyncStyle
 
 import ui.resources
 
@@ -12,13 +10,11 @@ class SettingsWindow(QtGui.QWidget):
         self.parent = parent
         self.tray = self.parent.tray
         self.settingsFile = self.parent.settingsFile
-        self.style = KissyncStyle()
 
-        self.setWindowTitle('SmartFile Folder Sync Settings')
+        self.setWindowTitle('SmartFile Settings')
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setFixedSize(520, 200)
+        self.setFixedSize(480, 350)
         self.setContentsMargins(0, 0, 0, 0)
-        #blue color: 699afb
 
         self.settingsWidget = SettingsPanel(self)
 
@@ -60,8 +56,8 @@ class TitleBar(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TitleBar, self).__init__()
         self.parent = parent
-        self.setMinimumSize(520, 60)
-        self.setMaximumSize(520, 60)
+        self.setMinimumSize(480, 60)
+        self.setMaximumSize(480, 60)
         self.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("color: #FFFFFF;")
         self.setStyleSheet("QWidget { border: 0px; }")
@@ -101,78 +97,39 @@ class SettingsPanel(QtGui.QWidget):
         spacer = QtGui.QWidget()
         spacer.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
 
+        tabWidget = QtGui.QTabWidget()
+        generalTab = QtGui.QWidget()
+        accountTab = QtGui.QWidget()
+        networkTab = QtGui.QWidget()
+
+        generalTabLayout = QtGui.QGridLayout(generalTab)
+        accountTabLayout = QtGui.QGridLayout(accountTab)
+        networkTabLayout = QtGui.QGridLayout(networkTab)
+
+        generalTabLayout.setAlignment(QtCore.Qt.AlignTop)
+        generalTab.setContentsMargins(10, 10, 0, 10)
+
+        tabWidget.addTab(generalTab, "General")
+        tabWidget.addTab(accountTab, "Account")
+        tabWidget.addTab(networkTab, "Network")
+
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
-        self.checkboxNotifications.setObjectName("notificationsCheckbox")
-        self.checkboxNotifications.setStyleSheet('QCheckBox { font-size: 12pt; }')
-        #font = QtGui.QFont("Vegur", 14, QtGui.QFont.Light, False)
-        #self.checkboxNotifications.setFont(font)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():
                 self.checkboxNotifications.toggle()
 
-        saveButton = SaveButton(self, 'Save')
+        generalTabLayout.addWidget(self.checkboxNotifications, 1, 1, 1, 1)
+
+        saveButton = QtGui.QPushButton("Save", self)
+        saveButton.clicked.connect(self.parent.saveSettings)
 
         self.accountWidget = AccountWidget(self.parent)
-        #add the objects to the grid
+
+        grid.addWidget(tabWidget, 1, 1, 1, 3)
+        """
         grid.addWidget(self.checkboxNotifications, 1, 1, 2, 2)
         grid.addWidget(self.accountWidget, 1, 2, 1, 2)
-        grid.addWidget(saveButton, 3, 3)
+        """
+        grid.addWidget(saveButton, 3, 3, 1, 1)
 
         self.setLayout(grid)
-
-
-class SaveButton(QtGui.QWidget):
-    def __init__(self, parent, text=None):
-        QtGui.QWidget.__init__(self)
-        self.parent = parent
-
-        self.squareWidth = 80
-        self.squareHeight = 30
-
-        self.setMaxSize()
-
-        #fontDatabase = QtGui.QFontDatabase()
-        #fontfile = QtCore.QFile("resources/Roboto-Light-webfont.ttf")
-        #fontDatabase.addApplicationFont(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-        #os.path.dirname(os.path.dirname(os.path.realpath(__file__)) + "/resources/Roboto-Light-webfont.ttf")
-
-        self.text = text
-        #self.font = QtGui.QFont("Vegur", 14, QtGui.QFont.Bold, False)
-        self.setStyleSheet('QWidget { font-size: 14pt; }')
-
-        self.color = '#8DBF41'
-        self.initUI()
-
-    def setMaxSize(self):
-        self.setMaximumSize(self.squareWidth, self.squareHeight)
-        self.setMinimumSize(self.squareWidth, self.squareHeight)
-
-    def initUI(self):
-        self.repaint()
-
-    def paintEvent(self, e):
-        painter = QtGui.QPainter()
-        painter.begin(self)
-        self.drawBackground(painter)
-        self.drawText(e, painter)
-        painter.end()
-
-    def drawBackground(self, painter):
-        penblank = QtGui.QPen(QtCore.Qt.black, -1, QtCore.Qt.SolidLine)
-        painter.setPen(penblank)
-        painter.setBrush(QtGui.QColor(self.color))
-        painter.drawRect(0, 0, self.squareWidth, self.squareHeight)
-
-    def drawText(self, event, painter):
-        painter.setPen(QtGui.QColor(255, 255, 255))
-        #painter.setFont(self.font)
-        painter.drawText(event.rect(), QtCore.Qt.AlignCenter, self.text)
-
-    def mousePressEvent(self, event):
-        self.parent.parent.saveSettings()
-
-    def enterEvent(self, event):
-        self.repaint()
-
-    def leaveEvent(self, event):
-        self.repaint()

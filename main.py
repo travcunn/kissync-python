@@ -87,6 +87,7 @@ class Main(QtGui.QWidget):
 
     def neterror(self):
         QtGui.QMessageBox.critical(self, 'SmartFile Error', 'There was an error while connecting to SmartFile.', 1)
+        self.exit()
 
     def checkForUpdates(self):
         """Checks the current version with the latest from the server"""
@@ -135,8 +136,13 @@ class Main(QtGui.QWidget):
         self.hide()
 
     def exit(self):
-        self.tray.hide()
-        os._exit(-1)
+        try:
+            self.tray.hide()
+        except:
+            # main.exit() could be called before tray is instanciated
+            pass
+        #TODO: clean up the exit
+        os._exit(1)
 
 
 if __name__ == "__main__":

@@ -127,8 +127,8 @@ class AccountWidget(QtGui.QWidget):
         self.gridlayout = QtGui.QGridLayout()
 
         #self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
-        self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 2, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         self.setLayout(self.gridlayout)
 

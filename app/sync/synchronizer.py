@@ -2,7 +2,7 @@ import datetime
 import os
 import threading
 import time
-from Queue import Queue
+from Queue import LifoQueue
 
 from download import DownloadThread
 from upload import UploadThread
@@ -28,10 +28,10 @@ class Synchronizer(threading.Thread):
         # Initialize the database
         self.dbInit()
         # Setup queues for tasks
-        self.uploadQueue = Queue()
-        self.downloadQueue = Queue()
+        self.uploadQueue = LifoQueue()
+        self.downloadQueue = LifoQueue()
         # Queue for events to send to the realtime sync server
-        self.changesQueue = Queue()
+        self.changesQueue = LifoQueue()
         # List of files that the watcher should ignore
         self.ignoreFiles = []
         # Get the time offset to use in time calculations
