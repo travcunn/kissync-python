@@ -2,7 +2,6 @@ from PySide import QtGui, QtCore
 from authbrowser import AuthBrowser
 
 import sys
-import os
 
 import ui.resources
 
@@ -30,14 +29,6 @@ class LoginWindow(QtGui.QWidget):
         detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
         self.htmlView = AuthBrowser(self)
-
-        fonterror = QtGui.QFont("Roboto", 18, QtGui.QFont.Normal, False)
-
-        self.neterrorText = QtGui.QLabel('Error Connecting to SmartFile')
-        self.neterrorText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        self.neterrorText.setStyleSheet("color: #FF0000;")
-        self.neterrorText.setFont(fonterror)
-        self.neterrorText.hide()
 
         cloud = CloudIconWidget()
         grid = QtGui.QGridLayout()

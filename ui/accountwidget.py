@@ -101,34 +101,39 @@ class AccountWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.parent = parent
 
-        self.setMinimumSize(300, 80)
-        self.setMaximumSize(300, 80)
+        self.setMinimumSize(300, 125)
+        self.setMaximumSize(300, 125)
 
-        self.setStyleSheet('QWidget { font-size: 14pt; }')
+        #self.setStyleSheet('QWidget { font-size: 14pt; }')
 
         ##get rid of the widget border
-        self.setStyleSheet("QWidget { border: 0px; }")
+        #self.setStyleSheet("QWidget { border: 0px; }")
 
         #Call API to get full name and email address.
         try:
             tree = self.parent.parent.smartfile.get('/whoami', '/')
             if 'user' in tree:
-                self.fullname = tree['user']['name'].encode("utf-8")
-                self.email = tree['user']['email'].encode("utf-8")
+                self.fullname = tree['user']['name']
+                self.email = tree['user']['email']
         except:
-            self.fullname = "Test FullName"
-            self.email = "web@google.com"
+            self.fullname = "SmartFile User"
+            self.email = "user@smartfile.com"
 
-        self.lbFullName = UsernameLabel(self, self.fullname)
-        self.lblogout = LogoutLabel(self)
+        textTitle = QtGui.QLabel()
+        textEmail = QtGui.QLabel()
+        self.textFullName = UsernameLabel(self, self.fullname)
+        self.textLogout = LogoutLabel(self)
 
-        #self.icon = AvatarWidget(self, self.email)
+        textEmail.setText(self.email)
+        textTitle.setText("Currently logged in as:")
 
         self.gridlayout = QtGui.QGridLayout()
 
-        #self.gridlayout.addWidget(self.icon, 0, 1, 2, 2, QtCore.Qt.AlignRight)
-        self.gridlayout.addWidget(self.lbFullName, 0, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.gridlayout.addWidget(self.lblogout, 1, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        #self.gridlayout.addWidget(self.textFullName, 0, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.gridlayout.addWidget(textTitle, 0, 0, 1, 1)
+        self.gridlayout.addWidget(self.textFullName, 1, 0, 1, 1)
+        self.gridlayout.addWidget(textEmail, 2, 0, 1, 1)
+        self.gridlayout.addWidget(self.textLogout, 3, 0, 1, 1)
 
         self.setLayout(self.gridlayout)
 

@@ -25,6 +25,9 @@ class Main(QtGui.QWidget):
     def __init__(self, parent=None):
         super(Main, self).__init__(parent)
 
+        # Set the version
+        self.version = version
+
         # Check for updates
         self.checkForUpdates()
 

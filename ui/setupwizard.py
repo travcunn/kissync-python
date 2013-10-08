@@ -73,7 +73,6 @@ class SetupWizard(QtGui.QWidget):
         self.parent.configuration.set('LocalSettings', 'first-run', False)
         self.hide()
         self.parent.configuration.save()
-        self.parent.tray.notification("Smartfile", "Starting Smartfile Folder Sync...")
         self.parent.start()
 
     def centerOnScreen(self):

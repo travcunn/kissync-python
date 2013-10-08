@@ -21,8 +21,7 @@ class Authenticator(QtCore.QThread):
 
         if configToken and configVerifier is not None:
             try:
-                self.parent.smartfile = OAuthClient(token, secret,
-                                                    configToken, configVerifier)
+                self.parent.smartfile = OAuthClient(token, secret, configToken, configVerifier)
                 self.parent.smartfile.get('/whoami')
             except:
                 self.showLoginWindow()

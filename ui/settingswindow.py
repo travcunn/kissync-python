@@ -13,7 +13,7 @@ class SettingsWindow(QtGui.QWidget):
 
         self.setWindowTitle('SmartFile Settings')
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setFixedSize(480, 350)
+        self.setFixedSize(475, 350)
         self.setContentsMargins(0, 0, 0, 0)
 
         self.settingsWidget = SettingsPanel(self)
@@ -32,6 +32,18 @@ class SettingsWindow(QtGui.QWidget):
             self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
+
+        """
+        if self.settingsWidget.radioProxyEnabled.isChecked():
+            httpText = self.settingsWidget.httpAddress.text()
+            httpsText = self.settingsWidget.httpsAddress.text()
+            if httpText is not '' and httpsText is not '':
+                self.parent.configuration.set('Network', 'http-proxy-address', str(httpText))
+                self.parent.configuration.set('Network', 'https-proxy-address', str(httpsText))
+                self.parent.configuration.set('Network', 'proxy-enabled', "yes")
+        else:
+            self.parent.configuration.set('Network', 'proxy-enabled', "no")
+        """
 
         self.hide()
         self.parent.configuration.save()
@@ -56,8 +68,8 @@ class TitleBar(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TitleBar, self).__init__()
         self.parent = parent
-        self.setMinimumSize(480, 60)
-        self.setMaximumSize(480, 60)
+        self.setMinimumSize(475, 60)
+        self.setMaximumSize(475, 60)
         self.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("color: #FFFFFF;")
         self.setStyleSheet("QWidget { border: 0px; }")
@@ -101,35 +113,116 @@ class SettingsPanel(QtGui.QWidget):
         generalTab = QtGui.QWidget()
         accountTab = QtGui.QWidget()
         networkTab = QtGui.QWidget()
+        aboutTab = QtGui.QWidget()
 
         generalTabLayout = QtGui.QGridLayout(generalTab)
         accountTabLayout = QtGui.QGridLayout(accountTab)
         networkTabLayout = QtGui.QGridLayout(networkTab)
-
-        generalTabLayout.setAlignment(QtCore.Qt.AlignTop)
-        generalTab.setContentsMargins(10, 10, 0, 10)
+        aboutTabLayout = QtGui.QGridLayout(aboutTab)
 
         tabWidget.addTab(generalTab, "General")
         tabWidget.addTab(accountTab, "Account")
-        tabWidget.addTab(networkTab, "Network")
+        #tabWidget.addTab(networkTab, "Network")
+        tabWidget.addTab(aboutTab, "About")
+
+        """ Start General Tab """
+
+        generalTabLayout.setAlignment(QtCore.Qt.AlignTop)
+        generalTab.setContentsMargins(10, 10, 0, 10)
 
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():
                 self.checkboxNotifications.toggle()
 
-        generalTabLayout.addWidget(self.checkboxNotifications, 1, 1, 1, 1)
+        generalTabLayout.addWidget(self.checkboxNotifications, 1, 0, 1, 1)
+
+        """ End General Tab """
+        """ Start Account Tab """
+
+        accountTabLayout.setAlignment(QtCore.Qt.AlignTop)
+        accountTab.setContentsMargins(10, 10, 0, 10)
+        self.accountWidget = AccountWidget(self.parent)
+
+        accountTabLayout.addWidget(self.accountWidget)
+
+        """ End Account Tab """
+        """ Start Network Tab """
+        formLayout = QtGui.QFormLayout()
+
+        networkTabLayout.setAlignment(QtCore.Qt.AlignTop)
+        networkTab.setContentsMargins(10, 10, 0, 10)
+
+        radioGroup = QtGui.QButtonGroup(networkTab)
+        self.radioProxyDisabled = QtGui.QRadioButton("Disabled")
+        radioGroup.addButton(self.radioProxyDisabled)
+        self.radioProxyEnabled = QtGui.QRadioButton("Enabled")
+        radioGroup.addButton(self.radioProxyEnabled)
+
+        self.connect(self.radioProxyDisabled, QtCore.SIGNAL("clicked()"), self.disableProxyInput)
+        self.connect(self.radioProxyEnabled, QtCore.SIGNAL("clicked()"), self.enableProxyInput)
+
+        formLayout.addRow("Proxy:", self.radioProxyDisabled)
+        formLayout.addRow("", self.radioProxyEnabled)
+
+        self.proxyWidget = QtGui.QWidget()
+        self.proxyWidget.setContentsMargins(0, 0, 0, 0)
+        proxyLayout = QtGui.QFormLayout()
+        self.proxyWidget.setContentsMargins(0, 0, 0, 0)
+        proxyLayout.setAlignment(QtCore.Qt.AlignLeft)
+        self.proxyWidget.setLayout(proxyLayout)
+
+        self.httpAddress = QtGui.QLineEdit(self)
+        self.httpAddress.setMaximumWidth(200)
+
+        proxyLayout.addRow("HTTP Proxy:", self.httpAddress)
+
+        self.httpsAddress = QtGui.QLineEdit(self)
+        self.httpsAddress.setMaximumWidth(200)
+
+        proxyLayout.addRow("HTTPS Proxy:", self.httpsAddress)
+
+        networkTabLayout.addLayout(formLayout, 0, 0)
+        networkTabLayout.addWidget(self.proxyWidget, 1, 0)
+
+        """ End Network Tab """
+
+        """ Start About Tab """
+
+        aboutTabLayout.setAlignment(QtCore.Qt.AlignCenter)
+        aboutTab.setContentsMargins(10, 10, 0, 10)
+
+        versionText = QtGui.QLabel()
+        versionText.setText("SmartFile desktop sync version: %s" % (self.parent.parent.version))
+
+        aboutTabLayout.addWidget(versionText)
+
+        """ End About Tab """
+
+        if self.parent.parent.configuration.get('Network', 'proxy-enabled') == "yes":
+            self.radioProxyEnabled.setChecked(True)
+            self.enableProxyInput()
+        else:
+            self.radioProxyDisabled.setChecked(True)
+            self.disableProxyInput()
+
+        httptext = self.parent.parent.configuration.get('Network', 'http-proxy-address')
+        if httptext is not None:
+            self.httpAddress.setText(httptext)
+        httpstext = self.parent.parent.configuration.get('Network', 'https-proxy-address')
+        if httpstext is not None:
+            self.httpsAddress.setText(httpstext)
 
         saveButton = QtGui.QPushButton("Save", self)
         saveButton.clicked.connect(self.parent.saveSettings)
 
-        self.accountWidget = AccountWidget(self.parent)
-
         grid.addWidget(tabWidget, 1, 1, 1, 3)
-        """
-        grid.addWidget(self.checkboxNotifications, 1, 1, 2, 2)
-        grid.addWidget(self.accountWidget, 1, 2, 1, 2)
-        """
         grid.addWidget(saveButton, 3, 3, 1, 1)
 
         self.setLayout(grid)
+
+    def disableProxyInput(self):
+        self.proxyWidget.hide()
+
+    def enableProxyInput(self):
+        self.proxyWidget.show()
