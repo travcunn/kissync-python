@@ -14,9 +14,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
         #menu before logging into Smartfile
         self.menu = QtGui.QMenu(parent)
-        #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setToolTip('SmartFile')
+        self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
@@ -86,7 +85,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.menu = QtGui.QMenu(self.parent)
         #TODO: Update this resource to be packaged with other resources
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setToolTip('Kissync')
+        self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
         self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
