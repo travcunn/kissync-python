@@ -145,7 +145,7 @@ class SettingsPanel(QtGui.QWidget):
         """ Start Account Tab """
 
         accountTabLayout.setAlignment(QtCore.Qt.AlignTop)
-        accountTab.setContentsMargins(10, 10, 0, 10)
+        accountTab.setContentsMargins(10, 0, 0, 10)
         self.accountWidget = AccountWidget(self.parent)
 
         accountTabLayout.addWidget(self.accountWidget)
