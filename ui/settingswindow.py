@@ -13,7 +13,7 @@ class SettingsWindow(QtGui.QWidget):
 
         self.setWindowTitle('SmartFile Settings')
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
-        self.setFixedSize(475, 350)
+        self.setFixedSize(375, 300)
         self.setContentsMargins(0, 0, 0, 0)
 
         self.settingsWidget = SettingsPanel(self)
