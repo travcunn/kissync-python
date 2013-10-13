@@ -2,6 +2,7 @@
 
 import os
 import platform
+import subprocess
 import sys
 import webbrowser
 
@@ -133,6 +134,15 @@ class Main(QtGui.QWidget):
             app_dir = os.path.join(os.path.expanduser("~"), ".smartfile")
             settings_dir = os.path.join(os.path.expanduser("~"), ".smartfile", "config.cfg")
         return app_dir, settings_dir
+
+    def openSyncFolder(self):
+        """Opens a file browser depending on the system"""
+        if platform.system() == 'Darwin':
+            subprocess.call(['open', '--', self.syncDir])
+        elif platform.system() == 'Linux':
+            subprocess.call(['gnome-open', self.syncDir])
+        elif platform.system() == 'Windows':
+            subprocess.call(['explorer', self.syncDir])
 
     def closeEvent(self, event):
         event.ignore()

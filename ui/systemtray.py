@@ -1,7 +1,6 @@
 import math
-import platform
-import subprocess
 import webbrowser
+
 from PySide import QtGui, QtCore
 
 from ui.settingswindow import SettingsWindow
@@ -18,7 +17,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
-        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.parent.openSyncFolder)
 
         startingup = self.menu.addAction("Connecting...")
         startingup.setEnabled(False)
@@ -39,15 +38,6 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
         #def loading(self):
         #self.setIcon(self.loadingIcon1)
-
-    def openSyncFolder(self):
-        """Opens a file browser depending on the system"""
-        if platform.system() == 'Darwin':
-            subprocess.call(['open', '--', self.parent.syncDir])
-        elif platform.system() == 'Linux':
-            subprocess.call(['gnome-open', self.parent.syncDir])
-        elif platform.system() == 'Windows':
-            subprocess.call(['explorer', self.parent.syncDir])
 
     def openWebsite(self):
         url = "https://app.smartfile.com"
@@ -83,12 +73,12 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
         #menu after logging into Smartfile
         self.menu = QtGui.QMenu(self.parent)
-        #TODO: Update this resource to be packaged with other resources
+
         self.setIcon(QtGui.QIcon(":/menuicon.png"))
         self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
-        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.openSyncFolder)
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.parent.openSyncFolder)
 
         openWebsite = self.menu.addAction("Launch SmartFile Website")
         self.connect(openWebsite, QtCore.SIGNAL("triggered()"), self.openWebsite)

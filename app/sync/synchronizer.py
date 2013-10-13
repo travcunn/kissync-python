@@ -20,11 +20,11 @@ import common
 class Synchronizer(threading.Thread):
     def __init__(self, parent=None):
         threading.Thread.__init__(self)
+        self.setDaemon(True)
         self.parent = parent
         self.api = self.parent.smartfile
         self._syncDir = self.parent.syncDir
-        # Set the thread to run as a daemon
-        self.setDaemon(True)
+
         # Initialize the database
         self.dbInit()
         # Setup queues for tasks
