@@ -11,6 +11,7 @@ from watchdog.events import FileSystemEventHandler
 
 import common
 from definitions import LocalFile
+import history
 from realtime import RealtimeSync
 
 
@@ -79,12 +80,23 @@ class EventHandler(FileSystemEventHandler):
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
                 print "#######MOVE EVENT########"
                 try:
-                    #TODO: This doesnt work
-                    # According to the logs, /cloud.png gets moved to
-                    # /logo.png/cloud.png, where instead it should be moved to
-                    # /logo.png.
-                    # post created: http://smartfile.forumbee.com/t/19b28
-                    print self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+                    # Delete the file from SmartFile
+                    self._api.post('/path/oper/remove/', path=serverPath)
+
+                    # Prepare some data for the file object
+                    modified = datetime.datetime.fromtimestamp(os.path.getmtime(event.dest_path)).replace(microsecond=0) - self._timeoffset
+                    try:
+                        checksum = common.getFileHash(event.dest_path)
+                    except:
+                        checksum = None
+                    size = int(os.path.getsize(event.dest_path))
+                    isDir = os.path.isdir(event.dest_path)
+
+                    # Create the file object to send to the queue
+                    localfile = LocalFile(serverPathNew, event.dest_path, checksum, None, modified, size, isDir)
+
+                    self._synchronizer.uploadQueue.put(localfile)
+                    history.fileMoved(event.src_path)
 
                     # Notify the realtime sync of the change
                     self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)
@@ -93,6 +105,35 @@ class EventHandler(FileSystemEventHandler):
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
                 self.parent.parent.ignoreFiles.remove(serverPathNew)
+
+    #### The Move API is broken, but when it is fixed, uncomment this
+    """
+    @checkPath()
+    def on_moved(self, event):
+        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
+        serverPathNew = fs.path.normpath(event.dest_path.replace(self._syncDir, ''))
+
+        # First, check if the path exists
+        if os.path.exists(event.dest_path):
+            isDir = os.path.isdir(event.dest_path)
+            if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
+                print "#######MOVE EVENT########"
+                try:
+                    #TODO: This doesnt work
+                    # According to the logs, /cloud.png gets moved to
+                    # /logo.png/cloud.png, where instead it should be moved to
+                    # /logo.png.
+                    # post created: http://smartfile.forumbee.com/t/19b28
+                    print self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
+                    history.fileMoved(event.src_path)
+                    # Notify the realtime sync of the change
+                    self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)
+                except:
+                    pass
+            else:
+                self.parent.parent.ignoreFiles.remove(serverPath)
+                self.parent.parent.ignoreFiles.remove(serverPathNew)
+    """
 
     @checkPath()
     def on_created(self, event):
@@ -109,6 +150,7 @@ class EventHandler(FileSystemEventHandler):
                         checksum = None
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
+
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)
@@ -154,6 +196,7 @@ class EventHandler(FileSystemEventHandler):
                         checksum = None
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
+
                     localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)

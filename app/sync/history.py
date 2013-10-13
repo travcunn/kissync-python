@@ -21,3 +21,8 @@ def isLatest(localFile):
             return False
     else:
         return True
+
+
+def fileMoved(srcPath):
+    """ If a file is moved, make sure the history knows """
+    _history.pop(srcPath, None)

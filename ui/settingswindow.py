@@ -28,11 +28,15 @@ class SettingsWindow(QtGui.QWidget):
         self.centerOnScreen()
 
     def saveSettings(self):
+        # Save general tab
+        """
         if self.settingsWidget.checkboxNotifications.isChecked():
             self.parent.configuration.set('LocalSettings', 'notifications', True)
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
+        """
 
+        # Save networking tab
         """
         if self.settingsWidget.radioProxyEnabled.isChecked():
             httpText = self.settingsWidget.httpAddress.text()
@@ -120,7 +124,7 @@ class SettingsPanel(QtGui.QWidget):
         networkTabLayout = QtGui.QGridLayout(networkTab)
         aboutTabLayout = QtGui.QGridLayout(aboutTab)
 
-        tabWidget.addTab(generalTab, "General")
+        #tabWidget.addTab(generalTab, "General")
         tabWidget.addTab(accountTab, "Account")
         #tabWidget.addTab(networkTab, "Network")
         tabWidget.addTab(aboutTab, "About")
