@@ -78,7 +78,6 @@ class EventHandler(FileSystemEventHandler):
         if os.path.exists(event.dest_path):
             isDir = os.path.isdir(event.dest_path)
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
-                print "#######MOVE EVENT########"
                 try:
                     # Delete the file from SmartFile
                     self._api.post('/path/oper/remove/', path=serverPath)

@@ -20,7 +20,6 @@ class Downloader(object):
 
         common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
         if object.isDir is False:
-            print "[DOWNLOAD-QUEUE]", path, absolutePath
             try:
                 f = self._api.get('/path/data/', serverPath)
                 with open(absolutePath, 'wb') as o:

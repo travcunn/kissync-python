@@ -17,8 +17,7 @@ class Uploader(object):
         self.parent = parent
 
     def upload(self, object):
-        print "[UPLOAD]: (", object.path, ") ", object.system_path
-        # First, check if the path exists
+        # Check if the path exists
         if os.path.exists(object.system_path):
             # If the object is a file
             if not os.path.isdir(object.system_path):
