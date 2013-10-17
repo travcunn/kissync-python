@@ -16,7 +16,6 @@ from pkg_resources import resource_filename
 
 def create_shortcut():
     if win32Loaded:
-        print winshell.startup()
         path = os.path.join(winshell.startup(), 'SmartFile Sync.lnk')
         target = os.path.join(get_main_dir(), 'SmartFile.exe')
         workingDir = get_main_dir()
@@ -32,7 +31,6 @@ def create_shortcut():
 
 def delete_shortcut():
     if win32Loaded:
-        print "deleting the shortcut"
         path = os.path.join(winshell.startup(), 'SmartFile Sync.lnk')
         if os.path.isfile(path):
             os.remove(path)
