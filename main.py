@@ -6,12 +6,11 @@ import subprocess
 import sys
 import webbrowser
 
-from app.core.common import is_latest_version
 from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
-from app.core.common import create_shortcut, delete_shortcut
+from app.core.common import create_shortcut, delete_shortcut, is_latest_version
 from app.core.configuration import Configuration
 from app.sync.synchronizer import Synchronizer
 
