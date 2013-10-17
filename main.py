@@ -53,25 +53,7 @@ class Main(QtGui.QWidget):
         self.authenticator.start()
 
         #################MAIN WINDOW GUI#####################
-        self.setWindowTitle('SmartFile Folder Sync')
-        self.displayFont = QtGui.QFont()
-        self.setGeometry(200, 200, 870, 600)
-        self.setMinimumSize(900, 600)
-
-        topText = QtGui.QLabel('SmartFile Folder Sync')
-        font = QtGui.QFont("Roboto", 32, QtGui.QFont.Light, False)
-        topText.setFont(font)
-
-        #Title Text Widget
-        self.titlewidget = QtGui.QWidget()
-        self.titlelayout = QtGui.QGridLayout()
-        self.titlelayout.addWidget(topText)
-        self.titlewidget.setLayout(self.titlelayout)
-        self.titlewidget.setMaximumHeight(70)
-
-        self.grid = QtGui.QGridLayout()
-        self.grid.setContentsMargins(0, 10, 10, 0)
-        self.setLayout(self.grid)
+        self.setWindowTitle('SmartFile Sync')
 
     def start(self):
         """Called if the authentication is successful"""
