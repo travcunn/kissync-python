@@ -10,9 +10,7 @@ from watcher import Watcher
 
 from fs.osfs import OSFS
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from definitions import Base, RemoteFile, LocalFile, TempLocalFile
+from definitions import RemoteFile, LocalFile
 
 import common
 
@@ -25,8 +23,9 @@ class Synchronizer(threading.Thread):
         self.api = self.parent.smartfile
         self._syncDir = self.parent.syncDir
 
-        # Initialize the database
-        self.dbInit()
+        # Setup arrays for local and remote file comparison
+        self.localFiles = []
+        self.remoteFiles = []
         # Setup queues for tasks
         self.uploadQueue = LifoQueue()
         self.downloadQueue = LifoQueue()
@@ -65,23 +64,12 @@ class Synchronizer(threading.Thread):
             downloader.start()
             self.downloadThreads.append(downloader)
 
-    def dbInit(self):
-        engine = create_engine('sqlite:///files.db', echo=False)
-        Base.metadata.create_all(engine)
-
-        Session = sessionmaker(bind=engine)
-        self.__session = Session()
-
     def synchronize(self):
         while True:
-            # Clear the remote tables from DB
-            self.clearTables()
             # Index the remote files and store in DB
             self.indexRemote()
-            self.dbCommit()
             # Index the local files and store in DB
             self.indexLocal()
-            self.dbCommit()
             # Now compare the tables and populate task queues
             self.compare()
 
@@ -91,25 +79,11 @@ class Synchronizer(threading.Thread):
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
         remotefile = RemoteFile(path, checksum, modified, size, isDir)
-        self.__session.add(remotefile)
+        self.remoteFiles.append(remotefile)
 
     def addLocalFile(self, path, system_path, checksum, modified, modified_local, size, isDir):
         localfile = LocalFile(path, system_path, checksum, modified, modified_local, size, isDir)
-        self.__session.add(localfile)
-
-    def addTempLocalFile(self, path, checksum, modified, isDir):
-        tempfile = TempLocalFile(path, checksum, modified, isDir)
-        self.__session.add(tempfile)
-
-    def clearTables(self):
-        for row in self.__session.query(RemoteFile):
-            self.__session.delete(row)
-
-        for row in self.__session.query(LocalFile):
-            self.__session.delete(row)
-
-    def dbCommit(self):
-        self.__session.commit()
+        self.localFiles.append(localfile)
 
     def watchFileSystem(self):
         self.localWatcher = Watcher(self, self.api, self._syncDir)
@@ -117,8 +91,8 @@ class Synchronizer(threading.Thread):
         self.watcherRunning = True
 
     def compare(self):
-        local = self.__session.query(LocalFile).all()
-        remote = self.__session.query(RemoteFile).all()
+        local = self.localFiles
+        remote = self.remoteFiles
 
         objectsOnBoth = []
 

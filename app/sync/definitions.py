@@ -1,19 +1,4 @@
-from sqlalchemy import Boolean, BigInteger, Column, DateTime, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
-
-class RemoteFile(Base):
-    __tablename__ = "remotefiles"
-
-    id = Column(Integer, primary_key=True)
-    path = Column(String)
-    checksum = Column(String)
-    modified = Column(DateTime)
-    size = Column(BigInteger)
-    isDir = Column(Boolean)
-
+class RemoteFile():
     def __init__(self, path, checksum, modified, size, isDir):
         self.path = path
         self.checksum = checksum
@@ -22,18 +7,7 @@ class RemoteFile(Base):
         self.isDir = isDir
 
 
-class LocalFile(Base):
-    __tablename__ = "localfiles"
-
-    id = Column(Integer, primary_key=True)
-    path = Column(String)
-    system_path = Column(String)
-    checksum = Column(String)
-    modified = Column(DateTime)
-    modified_local = Column(DateTime)
-    size = Column(BigInteger)
-    isDir = Column(Boolean)
-
+class LocalFile():
     def __init__(self, path, system_path, checksum, modified, modified_local, size, isDir):
         self.path = path
         self.system_path = system_path
@@ -44,15 +18,7 @@ class LocalFile(Base):
         self.isDir = isDir
 
 
-class TempLocalFile(Base):
-    __tablename__="templocalfiles"
-
-    id = Column(Integer, primary_key=True)
-    path = Column(String)
-    checksum = Column(String)
-    modified = Column(DateTime)
-    isDir = Column(Boolean)
-
+class TempLocalFile():
     def __init__(self, path, checksum, modified, isDir):
         self.path = path
         self.checksum = checksum
