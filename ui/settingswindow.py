@@ -1,6 +1,7 @@
 from PySide import QtGui, QtCore
 from ui.accountwidget import AccountWidget
 
+from app.core.common import create_shortcut, delete_shortcut
 import ui.resources
 
 
@@ -35,6 +36,13 @@ class SettingsWindow(QtGui.QWidget):
         else:
             self.parent.configuration.set('LocalSettings', 'notifications', False)
         """
+        if self.settingsWidget.startWithComputer.isChecked():
+            self.parent.configuration.set('LocalSettings', 'autostart', True)
+            # Create a startup entry
+            create_shortcut()
+        else:
+            self.parent.configuration.set('LocalSettings', 'autostart', False)
+            delete_shortcut()
 
         # Save networking tab
         """
@@ -124,7 +132,7 @@ class SettingsPanel(QtGui.QWidget):
         networkTabLayout = QtGui.QGridLayout(networkTab)
         aboutTabLayout = QtGui.QGridLayout(aboutTab)
 
-        #tabWidget.addTab(generalTab, "General")
+        tabWidget.addTab(generalTab, "General")
         tabWidget.addTab(accountTab, "Account")
         #tabWidget.addTab(networkTab, "Network")
         tabWidget.addTab(aboutTab, "About")
@@ -134,12 +142,21 @@ class SettingsPanel(QtGui.QWidget):
         generalTabLayout.setAlignment(QtCore.Qt.AlignTop)
         generalTab.setContentsMargins(10, 10, 0, 10)
 
+        """
         self.checkboxNotifications = QtGui.QCheckBox('Allow Desktop Notifications', self)
         if self.parent.parent.configuration.get('LocalSettings', 'notifications'):
             if not self.checkboxNotifications.isChecked():
                 self.checkboxNotifications.toggle()
 
         generalTabLayout.addWidget(self.checkboxNotifications, 1, 0, 1, 1)
+        """
+
+        self.startWithComputer = QtGui.QCheckBox('Start with my computer', self)
+        if self.parent.parent.configuration.get('LocalSettings', 'autostart'):
+            if not self.startWithComputer.isChecked():
+                self.startWithComputer.toggle()
+
+        generalTabLayout.addWidget(self.startWithComputer, 1, 0, 1, 1)
 
         """ End General Tab """
         """ Start Account Tab """

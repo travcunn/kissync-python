@@ -11,6 +11,7 @@ from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
+from app.core.common import create_shortcut, delete_shortcut
 from app.core.configuration import Configuration
 from app.sync.synchronizer import Synchronizer
 
@@ -51,6 +52,11 @@ class Main(QtGui.QWidget):
         self.authenticator.setup.connect(self.setup)
         self.authenticator.neterror.connect(self.neterror)
         self.authenticator.start()
+
+        if self.configuration.get('LocalSettings', 'autostart'):
+            create_shortcut()
+        else:
+            delete_shortcut()
 
         #################MAIN WINDOW GUI#####################
         self.setWindowTitle('SmartFile Folder Sync')

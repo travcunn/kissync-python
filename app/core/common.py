@@ -4,7 +4,38 @@ import platform
 import requests
 import sys
 
+try:
+    import winshell
+    from win32com.client import Dispatch
+    win32Loaded = True
+except:
+    win32Loaded = False
+
 from pkg_resources import resource_filename
+
+
+def create_shortcut():
+    if win32Loaded:
+        print winshell.startup()
+        path = os.path.join(winshell.startup(), 'SmartFile Sync.lnk')
+        target = os.path.join(get_main_dir(), 'SmartFile.exe')
+        workingDir = get_main_dir()
+        iconpath = os.path.join(get_main_dir(), 'icon.ico')
+
+        shell = Dispatch('WScript.Shell')
+        shortcut = shell.CreateShortCut(path)
+        shortcut.Targetpath = target
+        shortcut.WorkingDirectory = workingDir
+        shortcut.IconLocation = iconpath
+        shortcut.save()
+
+
+def delete_shortcut():
+    if win32Loaded:
+        print "deleting the shortcut"
+        path = os.path.join(winshell.startup(), 'SmartFile Sync.lnk')
+        if os.path.isfile(path):
+            os.remove(path)
 
 
 def main_is_frozen():

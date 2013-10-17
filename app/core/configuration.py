@@ -36,6 +36,7 @@ class Configuration(ConfigParser.RawConfigParser):
         self.configuration.set('Login', 'verifier', None)
         self.configuration.add_section('LocalSettings')
         self.configuration.set('LocalSettings', 'first-run', True)
+        self.configuration.set('LocalSettings', 'autostart', True)
         self.configuration.set('LocalSettings', 'network-timeout', 30)
         self.configuration.set('LocalSettings', 'notifications', True)
         self.configuration.set('LocalSettings', 'sync-offline', False)
