@@ -16,11 +16,3 @@ class LocalFile():
         self.modified_local = modified_local
         self.size = size
         self.isDir = isDir
-
-
-class TempLocalFile():
-    def __init__(self, path, checksum, modified, isDir):
-        self.path = path
-        self.checksum = checksum
-        self.modified = modified
-        self.isDir = isDir
