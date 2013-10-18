@@ -63,12 +63,7 @@ def cert_path():
     :rtype : str
     """
     if platform.system() == 'Windows':
-        app_dir = os.path.join(
-            os.getenv('appdata', os.path.expanduser('~')), 'Kissync'
-        )
-        if not os.path.exists(app_dir):
-            os.mkdir(app_dir)
-        stored_cert = os.path.join(app_dir, 'cacert.pem')
+        stored_cert = os.path.join(get_main_dir(), 'cacert.pem')
         if not os.path.exists(stored_cert):
             cert_content = open(os.path.join(get_main_dir(), 'cacert.pem')).read()
             with open(stored_cert, 'w') as f:

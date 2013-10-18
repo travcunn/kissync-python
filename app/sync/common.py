@@ -5,6 +5,8 @@ import hashlib
 import os
 import requests
 
+from app.core.common import cert_path
+
 _cache = {}
 
 
@@ -59,7 +61,7 @@ def get_server_time():
     """
     Returns the time of the SmartFile servers
     """
-    response = requests.get('https://www.smartfile.com')
+    response = requests.get('https://www.smartfile.com', verify=cert_path())
     time = parse(response.headers['Date']).replace(tzinfo=None, second=0)
     return time
 

@@ -9,6 +9,7 @@ mkdir %BUILDDIR%
 mkdir %BUILDDIR%/imageformats
 rmdir /s /q build
 %PYTHON% setup-build.py py2exe
+copy ui\images\icon.ico %BUILDDIR%
 copy dist\_ctypes.pyd %BUILDDIR%
 copy dist\_hashlib.pyd %BUILDDIR%
 copy dist\_multiprocessing.pyd %BUILDDIR%
@@ -44,6 +45,7 @@ copy dist\imageformats\qjpeg4.dll %BUILDDIR%\imageformats
 copy builder\kissync.nsi %BUILDDIR%
 pushd %BUILDDIR%
 %NSIS% kissync.nsi
+del icon.ico
 del _ctypes.pyd
 del _hashlib.pyd
 del _multiprocessing.pyd

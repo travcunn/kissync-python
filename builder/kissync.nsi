@@ -2,7 +2,7 @@
 SetCompressor lzma
 
 !define PRODUCT_NAME "Kissync"
-!define PRODUCT_VERSION "1.0"
+!define PRODUCT_VERSION "0.1"
 !define PRODUCT_SIMPLENAME "Kissync"
 !define PRODUCT_PUBLISHER "Travis Cunningham"
 !define PRODUCT_WEB_SITE "http://www.kissync.com/"
@@ -35,6 +35,7 @@ ShowUnInstDetails show
 Section "!Kissync (Required)" INSTALL_KISSYNC
   SectionIn 1 RO
   SetOutPath "$INSTDIR"
+  File "icon.ico"
   File "_ctypes.pyd"
   File "_hashlib.pyd"
   File "_multiprocessing.pyd"
@@ -70,7 +71,7 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   file "imageformats\qjpeg4.dll"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk" "$INSTDIR\Kissync.exe"
-  CreateShortCut "$SMSTARTUP\Kissync.lnk" "$INSTDIR\Kissync.exe"
+  CreateShortCut "$SMSTARTUP\SmartFile Sync.lnk" "$INSTDIR\Kissync.exe"
 SectionEnd
 
 Section -AdditionalIcons
@@ -134,7 +135,7 @@ Section "un.Kissync" UNINSTALL_KISSYNC
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
-  Delete "$SMSTARTUP\Kissync.lnk"
+  Delete "$SMSTARTUP\SmartFile Sync.lnk"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
 SectionEnd
