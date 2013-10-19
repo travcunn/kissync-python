@@ -1,4 +1,5 @@
 import os
+
 from PySide import QtGui, QtCore
 
 
@@ -9,7 +10,7 @@ class SetupWizard(QtGui.QWidget):
         self.setWindowTitle('Setup Smartfile')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
-        self.setFixedSize(465, 325)
+        self.setFixedSize(465, 200)
 
         palette = QtGui.QPalette()
 
@@ -37,18 +38,22 @@ class SetupWizard(QtGui.QWidget):
         self.checkboxNotifications.setFont(font)
         self.checkboxNotifications.toggle()
 
+        openFolderButton = QtGui.QPushButton("Open SmartFile Folder")
+        openFolderButton.clicked.connect(self.parent.openSyncFolder)
+
         finishButton = QtGui.QPushButton('Finish Setup')
         finishButton.clicked.connect(self.saveSettings)
 
         formgrid.addRow(self.checkboxNotifications)
         formgrid.addRow(spacer)
-        formgrid.addRow(finishButton)
 
         #add the objects to the grid
         grid.addWidget(spacer, 0, 0)
         grid.addWidget(spacer, 0, 2)
-        grid.addWidget(topText, 0, 1)
-        grid.addWidget(formwidget, 2, 1)
+        grid.addWidget(topText, 0, 1, 1, 2)
+        grid.addWidget(formwidget, 2, 1, 1, 2)
+        grid.addWidget(openFolderButton, 3, 1)
+        grid.addWidget(finishButton, 3, 2)
         grid.addWidget(spacer, 5, 1)
 
         #set the layout to grid layout
