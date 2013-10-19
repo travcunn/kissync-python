@@ -10,7 +10,7 @@ class SetupWizard(QtGui.QWidget):
         self.setWindowTitle('Setup Smartfile')
         #set the window type to a dialog
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.Dialog)
-        self.setFixedSize(465, 200)
+        self.setFixedSize(465, 175)
 
         palette = QtGui.QPalette()
 
@@ -49,12 +49,12 @@ class SetupWizard(QtGui.QWidget):
 
         #add the objects to the grid
         grid.addWidget(spacer, 0, 0)
-        grid.addWidget(spacer, 0, 2)
+        grid.addWidget(spacer, 0, 3)
         grid.addWidget(topText, 0, 1, 1, 2)
         grid.addWidget(formwidget, 2, 1, 1, 2)
-        grid.addWidget(openFolderButton, 3, 1)
-        grid.addWidget(finishButton, 3, 2)
-        grid.addWidget(spacer, 5, 1)
+        grid.addWidget(openFolderButton, 3, 1, 1, 1)
+        grid.addWidget(finishButton, 3, 2, 1, 1)
+        #grid.addWidget(spacer, 5, 1)
 
         #set the layout to grid layout
         self.setLayout(grid)
