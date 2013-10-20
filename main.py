@@ -19,7 +19,7 @@ from ui.setupwizard import SetupWizard
 from ui.systemtray import SystemTray
 
 
-version = "0.21"
+version = "0.22"
 
 
 class Main(QtGui.QWidget):
