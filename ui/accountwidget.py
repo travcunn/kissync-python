@@ -56,6 +56,15 @@ class UsernameLabel(QtGui.QLabel):
         pass
 
 
+class EmailLabel(QtGui.QLabel):
+    def __init__(self, parent=None, email=""):
+        QtGui.QLabel.__init__(self)
+        self.parent = parent
+        self.setText(email)
+        self.setStyleSheet("color: #888888; font-size: 12pt;")
+        self.repaint()
+
+
 class AvatarWidget(QtGui.QWidget):
     def __init__(self, parent=None, email=None):
         QtGui.QWidget.__init__(self)
@@ -120,20 +129,18 @@ class AccountWidget(QtGui.QWidget):
             self.email = "user@smartfile.com"
 
         textTitle = QtGui.QLabel()
-        textEmail = QtGui.QLabel()
+        textEmail = EmailLabel(self, self.email)
         self.textFullName = UsernameLabel(self, self.fullname)
         self.textLogout = LogoutLabel(self)
 
-        textEmail.setText(self.email)
         textTitle.setText("Currently logged in as:")
 
         self.gridlayout = QtGui.QGridLayout()
 
         #self.gridlayout.addWidget(self.textFullName, 0, 0, 1, 1, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.gridlayout.addWidget(textTitle, 0, 0, 1, 1)
-        self.gridlayout.addWidget(self.textFullName, 1, 0, 1, 1)
-        self.gridlayout.addWidget(textEmail, 2, 0, 1, 1)
-        self.gridlayout.addWidget(self.textLogout, 3, 0, 1, 1)
+        self.gridlayout.addWidget(self.textFullName, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.gridlayout.addWidget(textEmail, 1, 0, 1, 1, QtCore.Qt.AlignCenter)
+        #self.gridlayout.addWidget(self.textLogout, 3, 0, 1, 1)
 
         self.setLayout(self.gridlayout)
 

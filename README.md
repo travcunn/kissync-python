@@ -80,4 +80,8 @@ Links
 
 [MIT License](https://github.com/kissync/kissync-python/blob/master/LICENSE.MIT)
 
+Special Thanks
+==============
+Special thanks to Taylor Brazelton for testing [@Ryanb58](https://twitter.com/Ryanb58)
+
 [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/83ebee1008a3caf7f74f8a98c5b44cea "githalytics.com")](http://githalytics.com/kissync/kissync-python)

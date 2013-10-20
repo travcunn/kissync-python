@@ -54,22 +54,28 @@ class SystemTray(QtGui.QSystemTrayIcon):
         """
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")
-        usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
-        bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
-        percentUsed = usedBytes / bytesLimit
+        try:
+            usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
+            bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
+            percentUsed = usedBytes / bytesLimit
 
-        spaceLimit = bytesLimit
-        if spaceLimit < 1024:
-            measurement = "bytes"
-        elif spaceLimit < int(math.pow(1024, 2)):
-            spaceLimit /= 1024
-            measurement = "KB"
-        elif spaceLimit < int(math.pow(1024, 3)):
-            spaceLimit /= int(math.pow(1024, 2))
-            measurement = "MB"
-        else:
-            spaceLimit /= int(math.pow(1024, 3))
-            measurement = "GB"
+            canCalculateSpace = True
+        except:
+            canCalculateSpace = False
+
+        if canCalculateSpace:
+            spaceLimit = bytesLimit
+            if spaceLimit < 1024:
+                measurement = "bytes"
+            elif spaceLimit < int(math.pow(1024, 2)):
+                spaceLimit /= 1024
+                measurement = "KB"
+            elif spaceLimit < int(math.pow(1024, 3)):
+                spaceLimit /= int(math.pow(1024, 2))
+                measurement = "MB"
+            else:
+                spaceLimit /= int(math.pow(1024, 3))
+                measurement = "GB"
 
         #menu after logging into Smartfile
         self.menu = QtGui.QMenu(self.parent)
@@ -83,10 +89,11 @@ class SystemTray(QtGui.QSystemTrayIcon):
         openWebsite = self.menu.addAction("Launch SmartFile Website")
         self.connect(openWebsite, QtCore.SIGNAL("triggered()"), self.openWebsite)
 
-        self.menu.addSeparator()
+        if canCalculateSpace:
+            self.menu.addSeparator()
 
-        quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
-        quota.setEnabled(False)
+            quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
+            quota.setEnabled(False)
 
         self.menu.addSeparator()
 
