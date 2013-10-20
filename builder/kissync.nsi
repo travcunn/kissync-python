@@ -3,7 +3,7 @@
 SetCompressor lzma
 
 !define PRODUCT_NAME "Kissync"
-!define PRODUCT_VERSION "0.21"
+!define PRODUCT_VERSION "0.22"
 !define PRODUCT_SIMPLENAME "Kissync"
 !define PRODUCT_PUBLISHER "Travis Cunningham"
 !define PRODUCT_WEB_SITE "http://www.kissync.com/"
