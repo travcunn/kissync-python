@@ -12,6 +12,10 @@ class AuthBrowser(QtWebKit.QWebView):
         self.urlChanged.connect(self.checkUrl)
         self.loadStarted.connect(self._starttimer)
 
+        page = self.page()
+        # Warning: This could be dangerous
+        page.networkAccessManager().sslErrors.connect(self.sslErrorHandler)
+
         self.timer = QtCore.QTimeLine()
         self.setMinimumWidth(500)
 
@@ -48,3 +52,6 @@ class AuthBrowser(QtWebKit.QWebView):
         if value >= 1.0:
             self.stop()
             self.parent.networkError()
+
+    def sslErrorHandler(self, reply, errors):
+        reply.ignoreSslErrors()
