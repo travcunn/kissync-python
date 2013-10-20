@@ -42,6 +42,8 @@ copy dist\win32pipe.pyd %BUILDDIR%
 copy dist\win32wnet.pyd %BUILDDIR%
 copy dist\imageformats\qico4.dll %BUILDDIR%\imageformats
 copy dist\imageformats\qjpeg4.dll %BUILDDIR%\imageformats
+copy "C:\OpenSSL-Win32\libeay32.dll" %BUILDDIR%
+copy "C:\OpenSSL-Win32\ssleay32.dll" %BUILDDIR%
 copy builder\kissync.nsi %BUILDDIR%
 pushd %BUILDDIR%
 %NSIS% kissync.nsi
@@ -78,6 +80,8 @@ del win32pipe.pyd
 del win32wnet.pyd
 del imageformats\qico4.dll
 del imageformats\qjpeg4.dll
+del libeay32.dll
+del ssleay32.dll
 rmdir /s /q imageformats
 del kissync.nsi
 popd

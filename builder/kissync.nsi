@@ -3,7 +3,7 @@
 SetCompressor lzma
 
 !define PRODUCT_NAME "Kissync"
-!define PRODUCT_VERSION "0.2"
+!define PRODUCT_VERSION "0.21"
 !define PRODUCT_SIMPLENAME "Kissync"
 !define PRODUCT_PUBLISHER "Travis Cunningham"
 !define PRODUCT_WEB_SITE "http://www.kissync.com/"
@@ -68,6 +68,8 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   File "win32api.pyd"
   File "win32pipe.pyd"
   File "win32wnet.pyd"
+  File "libeay32.dll"
+  File "ssleay32.dll"
   SetOutPath "$INSTDIR\imageformats"
   file "imageformats\qico4.dll"
   file "imageformats\qjpeg4.dll"

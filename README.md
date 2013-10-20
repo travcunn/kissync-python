@@ -34,6 +34,7 @@ __Prerequisites:__
 1. [Python 2.7](http://www.python.org/ftp/python/2.7.5/python-2.7.5.msi)
 2. [py2exe](http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe/download)
 3. [NSIS 2.46](http://prdownloads.sourceforge.net/nsis/nsis-2.46-setup.exe?download)
+4. [Win32 OpenSSL](http://www.slproweb.com/products/Win32OpenSSL.html)
 
 Nsis requires the NsProcess plugin (http://nsis.sourceforge.net/NsProcess_plugin)
 
