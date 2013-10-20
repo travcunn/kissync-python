@@ -1,4 +1,5 @@
 !include "MUI.nsh"
+!include "nsProcess.nsh"
 SetCompressor lzma
 
 !define PRODUCT_NAME "Kissync"
@@ -26,7 +27,7 @@ SetCompressor lzma
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "${PRODUCT_SIMPLENAME}.exe"
+OutFile "KissyncInstaller.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -35,6 +36,7 @@ ShowUnInstDetails show
 Section "!Kissync (Required)" INSTALL_KISSYNC
   SectionIn 1 RO
   SetOutPath "$INSTDIR"
+  ${nsProcess::KillProcess} "Kissync.exe" $R4
   File "icon.ico"
   File "_ctypes.pyd"
   File "_hashlib.pyd"

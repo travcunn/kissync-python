@@ -45,6 +45,7 @@ copy dist\imageformats\qjpeg4.dll %BUILDDIR%\imageformats
 copy builder\kissync.nsi %BUILDDIR%
 pushd %BUILDDIR%
 %NSIS% kissync.nsi
+del Kissync.exe
 del icon.ico
 del _ctypes.pyd
 del _hashlib.pyd
