@@ -84,7 +84,7 @@ class ApiConnection(object):
                 if self.login_callback is not None:
                     self.login_callback(self._api)
                 else:
-                    # raise an exception if auth is bad
+                    # raise an exception if there is no auth yet
                     raise AuthException('Login required: Credentials are required to login.')
 
     def __getattr__(self, name):

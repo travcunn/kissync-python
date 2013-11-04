@@ -2,5 +2,5 @@
 omit =
     tests.py
 include =
-    core/*.py
-    sync/*.py
+    app/core/*.py
+    app/sync/*.py

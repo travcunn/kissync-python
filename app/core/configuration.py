@@ -1,4 +1,5 @@
 import ConfigParser
+import os
 
 
 class Configuration(ConfigParser.RawConfigParser):
@@ -19,13 +20,16 @@ class Configuration(ConfigParser.RawConfigParser):
         try:
             with open(self.configFile):
                 pass
-        except IOError:
+        except:
             self.setupConfig()
         else:
             self.configuration.read(self.configFile)
 
     def save(self):
         """Saves the configuration to the disk"""
+        filename = os.path.basename(self.configFile)
+        if not os.path.exists(self.configFile.strip(filename)):
+            os.makedirs(self.configFile.strip(filename))
         with open(self.configFile, 'wb') as configurationFile:
             self.configuration.write(configurationFile)
 

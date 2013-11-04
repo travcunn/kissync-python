@@ -43,7 +43,7 @@ class Main(QtGui.QWidget):
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
         self.tray = SystemTray(self)  # initiate the system tray
-        
+
         self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
         self.authenticator.login.connect(self.login)
         self.authenticator.done.connect(self.start)
