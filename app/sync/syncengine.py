@@ -10,41 +10,67 @@ from watcher import Watcher
 
 from fs.osfs import OSFS
 
-from definitions import RemoteFile, LocalFile
+from definitions import File
 
 import common
 
 
-class Synchronizer(threading.Thread):
-    def __init__(self, parent=None):
+class SyncObject(object):
+    """ Inherit this for any object that performs synchronization """
+    def __init__(self):
+        self._timeOffset = common.calculate_time_offset()
+        self._syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
+
+    @property
+    def syncDir(self):
+        """ Get the sync directory """
+        return self._syncDir
+
+    @property
+    def timeOffset(self):
+        """ Get the time offset to use in time calculations """
+        return self._timeOffset
+
+
+class SyncThread(threading.Thread):
+    def __init__(self, api):
         threading.Thread.__init__(self)
         self.setDaemon(True)
-        self.parent = parent
-        self.api = self.parent.smartfile
-        self._syncDir = self.parent.syncDir
+
+        self.api = api
+
+    def run(self):
+        self.syncEngine = SyncEngine(self.api)
+
+        # Start the transfer threads to wait for tasks
+        self.syncEngine.startTransferThreads()
+        # Watch the file system
+        self.syncEngine.watchFileSystem()
+        # Synchronize with SmartFile
+        self.syncEngine.synchronize()
+
+
+class SyncEngine(SyncObject):
+    def __init__(self, api):
+        SyncObject.__init__(self)
+
+        self.api = api
 
         # Setup arrays for local and remote file comparison
         self.localFiles = []
         self.remoteFiles = []
+
         # Setup queues for tasks
         self.uploadQueue = LifoQueue()
         self.downloadQueue = LifoQueue()
+
         # Queue for events to send to the realtime sync server
         self.changesQueue = LifoQueue()
+
         # List of files that the watcher should ignore
         self.ignoreFiles = []
-        # Get the time offset to use in time calculations
-        self._timeoffset = common.calculate_time_offset()
 
         self.watcherRunning = False
-
-    def run(self):
-        # Start the transfer threads to wait for tasks
-        self.startTransferThreads()
-        # Watch the file system
-        self.watchFileSystem()
-        # Synchronize with SmartFile
-        self.synchronize()
 
     def startTransferThreads(self):
         # Initialize the upload and download threads
@@ -54,13 +80,13 @@ class Synchronizer(threading.Thread):
 
         self.uploadThreads = []
         for i in range(upload):
-            uploader = UploadThread(self.uploadQueue, self.api, self._syncDir, self)
+            uploader = UploadThread(self.uploadQueue, self.api, self.syncDir, self)
             uploader.start()
             self.uploadThreads.append(uploader)
 
         self.downloadThreads = []
         for i in range(download):
-            downloader = DownloadThread(self.downloadQueue, self.api, self._syncDir)
+            downloader = DownloadThread(self.downloadQueue, self.api, self.syncDir)
             downloader.start()
             self.downloadThreads.append(downloader)
 
@@ -78,15 +104,15 @@ class Synchronizer(threading.Thread):
             time.sleep(wait_time * 60)
 
     def addRemoteFile(self, path, checksum, modified, size, isDir):
-        remotefile = RemoteFile(path, checksum, modified, size, isDir)
+        remotefile = File(path, checksum, modified, size, isDir)
         self.remoteFiles.append(remotefile)
 
-    def addLocalFile(self, path, system_path, checksum, modified, modified_local, size, isDir):
-        localfile = LocalFile(path, system_path, checksum, modified, modified_local, size, isDir)
+    def addLocalFile(self, path, checksum, modified, size, isDir):
+        localfile = File(path, checksum, modified, size, isDir)
         self.localFiles.append(localfile)
 
     def watchFileSystem(self):
-        self.localWatcher = Watcher(self, self.api, self._syncDir)
+        self.localWatcher = Watcher(self, self.api, self.syncDir)
         self.localWatcher.start()
         self.watcherRunning = True
 
@@ -118,7 +144,7 @@ class Synchronizer(threading.Thread):
                 if remoteObject.path == localObject.path:
                     found = True
             if not found:
-                ignorePath = os.path.join(self._syncDir, remoteObject.path)
+                ignorePath = os.path.join(self.syncDir, remoteObject.path)
                 self.ignoreFiles.append(ignorePath)
                 self.downloadQueue.put(remoteObject)
             found = False
@@ -131,7 +157,7 @@ class Synchronizer(threading.Thread):
                 if localObject.modified_local > remoteObject.modified:
                     self.uploadQueue.put(localObject)
                 elif localObject.modified_local < remoteObject.modified:
-                    ignorePath = os.path.join(self._syncDir, remoteObject.path)
+                    ignorePath = os.path.join(self.syncDir, remoteObject.path)
                     self.ignoreFiles.append(ignorePath)
                     self.downloadQueue.put(remoteObject)
 
@@ -143,25 +169,22 @@ class Synchronizer(threading.Thread):
         Indexes the local files
         """
         if localPath is None:
-            localPath = self._syncDir
+            localPath = self.syncDir
 
         syncFS = OSFS(localPath)
 
         for path in syncFS.walkfiles():
             systemPath = syncFS.getsyspath(path).strip("\\\\?\\")
             checksum = common.getFileHash(systemPath)
-            modified = datetime.datetime.fromtimestamp(os.path.getmtime(systemPath)).replace(microsecond=0) - self._timeoffset
+            modified = datetime.datetime.fromtimestamp(os.path.getmtime(systemPath)).replace(microsecond=0) - self.timeOffset
             size = syncFS.getsize(path)
             isDir = syncFS.isdir(path)
 
             if not path.endswith("~"):
                 # Add the file to the database
-                self.addLocalFile(path, systemPath, checksum, None, modified, size, isDir)
+                self.addLocalFile(path, checksum, modified, size, isDir)
 
     def indexRemote(self, remotePath=None):
-        #TODO: keep a database on kissync.com to keep track of directories
-        # SmartFile has enough caching on both the /path/info and the logs
-        # endpoint, that it cannot be relied upon for real time updates
         """
         Index the files on SmartFile and dive into directories when necessary
         """

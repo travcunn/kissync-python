@@ -53,7 +53,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         and update the system tray to display disk usage quota
         """
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
-        whoami = self.parent.smartfile.get("/whoami/")
+        whoami = self.parent.api.get("/whoami/")
         try:
             usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
             bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])

@@ -124,6 +124,8 @@ class AccountWidget(QtGui.QWidget):
             if 'user' in tree:
                 self.fullname = tree['user']['name']
                 self.email = tree['user']['email']
+            else:
+                raise
         except:
             self.fullname = "SmartFile User"
             self.email = "user@smartfile.com"

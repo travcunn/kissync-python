@@ -10,9 +10,9 @@ from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
-from app.core.common import create_shortcut, delete_shortcut, is_latest_version
+from app.core.common import *
 from app.core.configuration import Configuration
-from app.sync.synchronizer import Synchronizer
+from app.sync.syncengine import SyncThread
 
 from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
@@ -33,18 +33,17 @@ class Main(QtGui.QWidget):
         self.checkForUpdates()
 
         self.syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
-        self.settingsDir = self.settingsDirectory()[0]
-        self.settingsFile = self.settingsDirectory()[1]
+        self.settingsDir = settingsDirectory()
+        self.settingsFile = settingsFile()
 
         self.directorySetup()# create the directories that will be needed
 
         self.configuration = Configuration(self.settingsFile)  # initialize the configuration
 
-        self.smartfile = None  # this will be initiated later in Authenticator()
-
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
         self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
         self.tray = SystemTray(self)  # initiate the system tray
+        
         self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
         self.authenticator.login.connect(self.login)
         self.authenticator.done.connect(self.start)
@@ -62,7 +61,8 @@ class Main(QtGui.QWidget):
 
     def start(self):
         """Called if the authentication is successful"""
-        self.synchronizer = Synchronizer(self)  # initiate the synchronizer
+        print "now initializing the sync thread"
+        self.synchronizer = SyncThread(self)  # initiate the synchronizer
         self.synchronizer.start()
         self.tray.onLogin()
 
@@ -106,21 +106,6 @@ class Main(QtGui.QWidget):
 
         if not os.path.exists(self.syncDir):
             os.makedirs(self.syncDir)
-
-    def settingsDirectory(self):
-        if platform.system() == 'Windows':
-            app_dir = os.path.join(
-                os.getenv('appdata', os.path.expanduser('~')), 'Smartfile'
-            )
-            settings_dir = os.path.join(
-                os.getenv('appdata', os.path.expanduser('~')), 'Smartfile', 'config.cfg'
-            )
-            if not os.path.exists(app_dir):
-                os.mkdir(app_dir)
-        else:
-            app_dir = os.path.join(os.path.expanduser("~"), ".smartfile")
-            settings_dir = os.path.join(os.path.expanduser("~"), ".smartfile", "config.cfg")
-        return app_dir, settings_dir
 
     def openSyncFolder(self):
         """Opens a file browser depending on the system"""

@@ -13,7 +13,7 @@ except ImportError:
     import json
 
 import common
-from definitions import RemoteFile
+from definitions import File
 
 
 class RealtimeSync(threading.Thread):
@@ -101,7 +101,7 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = json_data['size']
                 isDir = False
-                remotefile = RemoteFile(path, checksum, modified, size, isDir)
+                remotefile = File(path, checksum, modified, size, isDir)
 
                 print "file created on the realtime"
                 print path
@@ -116,7 +116,7 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = 0
                 isDir = True
-                remotefile = RemoteFile(path, checksum, modified, size, isDir)
+                remotefile = File(path, checksum, modified, size, isDir)
 
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(path)
@@ -128,7 +128,7 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = json_data['size']
                 isDir = False
-                remotefile = RemoteFile(path, checksum, modified, size, isDir)
+                remotefile = File(path, checksum, modified, size, isDir)
 
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(path)

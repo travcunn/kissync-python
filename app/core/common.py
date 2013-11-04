@@ -85,17 +85,13 @@ def cert_path():
 
 
 def check_latest_version():
-    """
-    Checks the server for the latest version number
-    """
+    """ Checks the server for the latest version number """
     version = requests.get("http://www.kissync.com/check-version").text
     return version
 
 
 def is_latest_version(current_version):
-    """
-    Checks a specified current_version with the latest version
-    """
+    """ Checks a specified current_version with the latest version """
     latest_version = check_latest_version()
     if (version(current_version) < version(latest_version)):
         return False
@@ -105,3 +101,25 @@ def is_latest_version(current_version):
 
 def version(version_number):
     return tuple(map(int, (version_number.split("."))))
+
+
+def settingsDirectory():
+    if platform.system() == 'Windows':
+        app_dir = os.path.join(
+            os.getenv('appdata', os.path.expanduser('~')), 'Smartfile'
+        )
+        if not os.path.exists(app_dir):
+            os.mkdir(app_dir)
+    else:
+        app_dir = os.path.join(os.path.expanduser("~"), ".smartfile")
+    return app_dir
+
+
+def settingsFile():
+    if platform.system() == 'Windows':
+        settings_file = os.path.join(
+            os.getenv('appdata', os.path.expanduser('~')), 'Smartfile', 'config.cfg'
+        )
+    else:
+        settings_file = os.path.join(os.path.expanduser("~"), ".smartfile", "config.cfg")
+    return settings_file

@@ -10,7 +10,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 import common
-from definitions import LocalFile
+from definitions import File
 import history
 from realtime import RealtimeSync
 
@@ -92,7 +92,7 @@ class EventHandler(FileSystemEventHandler):
                     isDir = os.path.isdir(event.dest_path)
 
                     # Create the file object to send to the queue
-                    localfile = LocalFile(serverPathNew, event.dest_path, checksum, None, modified, size, isDir)
+                    localfile = File(serverPathNew, checksum, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)
                     history.fileMoved(event.src_path)
@@ -150,7 +150,7 @@ class EventHandler(FileSystemEventHandler):
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
 
-                    localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
+                    localfile = File(serverPath, checksum, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)
 
@@ -196,15 +196,8 @@ class EventHandler(FileSystemEventHandler):
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
 
-                    localfile = LocalFile(serverPath, path, checksum, None, modified, size, isDir)
+                    localfile = File(serverPath, checksum, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)
-                """
-                else:
-                    try:
-                        self.parent.smartfile.post('/path/oper/mkdir/', path=serverPath)
-                    except:
-                        raise
-                """
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
