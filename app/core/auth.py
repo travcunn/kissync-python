@@ -49,17 +49,12 @@ class ApiConnection(object):
                 self._api = OAuthClient(self._token, self._secret)
         except RequestError as e:
             self._isAuthenticated = False
-            if e.detail.startswith("HTTPSConnectionPool"):
-                log.warning('HTTPS connection error during login.')
-                if self.neterror_callback is not None:
-                    return self.neterror_callback()
-                else:
-                    # raise an exception if there is no network connectivity
-                    raise NetConnectionException(e)
+            log.warning('Connection error during login.')
+            if self.neterror_callback is not None:
+                return self.neterror_callback()
             else:
-                log.warning('Uncaught exception raised with RequestError.')
-                # raise an exception if there is no connection issue
-                raise
+                # raise an exception if there is no network connectivity
+                raise NetConnectionException(e)
         except ResponseError as e:
             if e.status_code == 403:
                 log.warning('Bad login credentials.')
