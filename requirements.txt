@@ -6,7 +6,7 @@ pathtools
 python-librsync
 requests
 requests-oauthlib
--e https://github.com/travcunn/client-python.git#egg=smartfile
+-e git://github.com/travcunn/client-python.git#egg=smartfile
 tendo
 watchdog
 websocket-client
