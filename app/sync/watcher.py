@@ -1,33 +1,39 @@
 import datetime
 import os
+import re
 import threading
 import time
 
 import fs.path
-from fs.osfs import OSFS
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 import common
-from definitions import File
-import history
-from realtime import RealtimeSync
+from definitions import FileDefinition
+import events
 
 
 def checkPath():
-    """ Ignore certain types of files """
+    """ Ignore certain types of files and folders"""
     def _decorating_wrapper(func):
         def _wrapper(*args, **kwargs):
             path = args[1].src_path
             # Ignore temp files and repositories
             try:
-                if not path.endswith("~"):
-                    folder_list = path.split(os.sep)
-                    for folder in folder_list:
-                        if folder.startswith(".svn") or folder.startswith(".git"):
+                _default_startswith_filter = lambda x: not x.startswith(".")
+                _default_endswith_filter = lambda x: not x.endswith("~")
+                filters = [_default_startswith_filter, _default_endswith_filter]
+
+                path_list = path.split(os.sep)
+                for filename in path_list:
+                    for _filter in filters:
+                        if callable(_filter):
+                            if not _filter(filename):
+                                return
+                        elif not re.search(_filter, filename, re.UNICODE):
                             return
-                    return func(*args, **kwargs)
+                return func(*args, **kwargs)
             except:
                 return
         return _wrapper
@@ -47,10 +53,6 @@ class Watcher(threading.Thread):
         self.observer.schedule(self.event_handler, self.syncDir, recursive=True)
         self.observer.start()
 
-        # realtime sync thread
-        self.realtime = RealtimeSync(self.parent)
-        self.realtime.start()
-
         try:
             while True:
                 time.sleep(1)
@@ -67,8 +69,6 @@ class EventHandler(FileSystemEventHandler):
         self._syncDir = self.parent.syncDir
         self._timeoffset = common.calculate_time_offset()
 
-        self._syncFS = OSFS(self._syncDir)
-
     @checkPath()
     def on_moved(self, event):
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
@@ -79,24 +79,15 @@ class EventHandler(FileSystemEventHandler):
             isDir = os.path.isdir(event.dest_path)
             if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
                 try:
+                    #TODO: allow the event handler to make this api call
                     # Delete the file from SmartFile
                     self._api.post('/path/oper/remove/', path=serverPath)
 
-                    # Prepare some data for the file object
-                    modified = datetime.datetime.fromtimestamp(os.path.getmtime(event.dest_path)).replace(microsecond=0) - self._timeoffset
-                    try:
-                        checksum = common.getFileHash(event.dest_path)
-                    except:
-                        checksum = None
-                    size = int(os.path.getsize(event.dest_path))
-                    isDir = os.path.isdir(event.dest_path)
+                    moveEvent = events.LocalMovedEvent(event.dest_path, event.src_path)
 
-                    # Create the file object to send to the queue
-                    localfile = File(serverPathNew, checksum, modified, size, isDir)
+                    self._synchronizer.addEvent(moveEvent)
 
-                    self._synchronizer.uploadQueue.put(localfile)
-                    history.fileMoved(event.src_path)
-
+                    #TODO: allow the event handler to notify the realtime engine
                     # Notify the realtime sync of the change
                     self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)
                 except:
@@ -104,35 +95,6 @@ class EventHandler(FileSystemEventHandler):
             else:
                 self.parent.parent.ignoreFiles.remove(serverPath)
                 self.parent.parent.ignoreFiles.remove(serverPathNew)
-
-    #### The Move API is broken, but when it is fixed, uncomment this
-    """
-    @checkPath()
-    def on_moved(self, event):
-        serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
-        serverPathNew = fs.path.normpath(event.dest_path.replace(self._syncDir, ''))
-
-        # First, check if the path exists
-        if os.path.exists(event.dest_path):
-            isDir = os.path.isdir(event.dest_path)
-            if serverPath not in self.parent.parent.ignoreFiles and serverPathNew not in self.parent.parent.ignoreFiles:
-                print "#######MOVE EVENT########"
-                try:
-                    #TODO: This doesnt work
-                    # According to the logs, /cloud.png gets moved to
-                    # /logo.png/cloud.png, where instead it should be moved to
-                    # /logo.png.
-                    # post created: http://smartfile.forumbee.com/t/19b28
-                    print self._api.post('/path/oper/move/', src=serverPath, dst=serverPathNew)
-                    history.fileMoved(event.src_path)
-                    # Notify the realtime sync of the change
-                    self.parent.realtime.update(serverPath, 'moved', 0, isDir, serverPathNew)
-                except:
-                    pass
-            else:
-                self.parent.parent.ignoreFiles.remove(serverPath)
-                self.parent.parent.ignoreFiles.remove(serverPathNew)
-    """
 
     @checkPath()
     def on_created(self, event):
@@ -142,22 +104,12 @@ class EventHandler(FileSystemEventHandler):
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
                 if not event.is_directory:
-                    modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
-                    try:
-                        checksum = common.getFileHash(path)
-                    except:
-                        checksum = None
-                    size = int(os.path.getsize(path))
-                    isDir = os.path.isdir(path)
+                    createdEvent = events.LocalCreatedEvent(event.src_path)
 
-                    localfile = File(serverPath, checksum, modified, size, isDir)
-
-                    self._synchronizer.uploadQueue.put(localfile)
-
-                    # No realtime notification occurs since this operation
-                    # takes place in the upload thread
+                    self._synchronizer.addEvent(createdEvent)
                 else:
                     try:
+                        #TODO: convert this into an event in events.py
                         self._api.post('/path/oper/mkdir/', path=serverPath)
                     except:
                         pass
@@ -167,9 +119,15 @@ class EventHandler(FileSystemEventHandler):
     @checkPath()
     def on_deleted(self, event):
         serverPath = fs.path.normpath(event.src_path.replace(self._syncDir, ''))
+
+        deletedEvent = events.LocalDeletedEvent(event.src_path)
+        self._synchronizer.addEvent(deletedEvent)
+
         if serverPath not in self.parent.parent.ignoreFiles:
             try:
+                #TODO: allow the event handler to make this api call
                 self._api.post('/path/oper/remove/', path=serverPath)
+                #TODO: allow the event handler to notify the realtime engine
                 # Notify the realtime sync of the change
                 self.parent.realtime.update(serverPath, 'deleted', 0, False)
             except:
@@ -187,6 +145,10 @@ class EventHandler(FileSystemEventHandler):
         # First, check if the path exists
         if os.path.exists(path):
             if serverPath not in self.parent.parent.ignoreFiles:
+
+                modifiedEvent = events.LocalModifiedEvent(event.src_path)
+                self._synchronizer.addEvent(modifiedEvent)
+
                 if not event.is_directory:
                     modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
                     try:
@@ -196,7 +158,7 @@ class EventHandler(FileSystemEventHandler):
                     size = int(os.path.getsize(path))
                     isDir = os.path.isdir(path)
 
-                    localfile = File(serverPath, checksum, modified, size, isDir)
+                    localfile = FileDefinition(serverPath, checksum, modified, size, isDir)
 
                     self._synchronizer.uploadQueue.put(localfile)
             else:

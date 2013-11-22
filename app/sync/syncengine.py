@@ -1,38 +1,21 @@
 import datetime
 import os
+import re
 import threading
 import time
 from Queue import LifoQueue
 
+from definitions import FileDefinition
 from download import DownloadThread
+from errors import BadEventException
+import events
+from realtime import RealtimeSync
+from syncobject import SyncObject
 from upload import UploadThread
 from watcher import Watcher
 
-from fs.osfs import OSFS
 
-from definitions import File
-
-import common
-
-
-class SyncObject(object):
-    """ Inherit this for any object that performs synchronization """
-    def __init__(self):
-        self._timeOffset = common.calculate_time_offset()
-        self._syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
-
-    @property
-    def syncDir(self):
-        """ Get the sync directory """
-        return self._syncDir
-
-    @property
-    def timeOffset(self):
-        """ Get the time offset to use in time calculations """
-        return self._timeOffset
-
-
-class SyncThread(threading.Thread):
+class SyncThread(threading.Thread):  # pragma: no cover
     def __init__(self, api):
         threading.Thread.__init__(self)
         self.setDaemon(True)
@@ -44,85 +27,89 @@ class SyncThread(threading.Thread):
 
         # Start the transfer threads to wait for tasks
         self.syncEngine.startTransferThreads()
+
         # Watch the file system
-        self.syncEngine.watchFileSystem()
+        self.localWatcher = Watcher(self.syncEngine, self.syncEngine.api,
+                                    self.syncEngine.syncDir)
+        self.localWatcher.start()
+
+        # Start the realtime engine
+        self.realtime = RealtimeSync(self.syncEngine)
+        self.realtime.start()
         # Synchronize with SmartFile
         self.syncEngine.synchronize()
 
 
 class SyncEngine(SyncObject):
+    """
+    Handles file synchronization, including local and remote filesystem
+    events, transfer queues, and conflict resolution.
+    """
     def __init__(self, api):
         SyncObject.__init__(self)
-
         self.api = api
 
         # Setup arrays for local and remote file comparison
         self.localFiles = []
         self.remoteFiles = []
 
-        # Setup queues for tasks
+        # Simple task queue
+        self.simpleTasks = LifoQueue()
+        # Upload task queue
         self.uploadQueue = LifoQueue()
+        # Download task queue
         self.downloadQueue = LifoQueue()
 
-        # Queue for events to send to the realtime sync server
-        self.changesQueue = LifoQueue()
-
-        # List of files that the watcher should ignore
+        # List of files the watcher should ignore
         self.ignoreFiles = []
 
-        self.watcherRunning = False
-
-    def startTransferThreads(self):
-        # Initialize the upload and download threads
+    def startTransferThreads(self):  # pragma: no cover
+        """ Initialize the upload and download threads. """
 
         upload = 4  # Specify amount of upload threads
         download = 5  # Specify amount of download threads
 
         self.uploadThreads = []
         for i in range(upload):
-            uploader = UploadThread(self.uploadQueue, self.api, self.syncDir, self)
+            uploader = UploadThread(self.uploadQueue, self.api,
+                                    self.syncDir, self)
             uploader.start()
             self.uploadThreads.append(uploader)
 
         self.downloadThreads = []
         for i in range(download):
-            downloader = DownloadThread(self.downloadQueue, self.api, self.syncDir)
+            downloader = DownloadThread(self.downloadQueue, self.api,
+                                        self.syncDir)
             downloader.start()
             self.downloadThreads.append(downloader)
 
-    def synchronize(self):
+    def synchronize(self):  # pragma: no cover
+        """ Compare local files with the SmartFile servers. """
+        # Wait time in between indexing remote
+        wait_time = 5
         while True:
-            # Index the remote files and store in DB
-            self.indexRemote()
-            # Index the local files and store in DB
-            self.indexLocal()
-            # Now compare the tables and populate task queues
-            self.compare()
+            # Index remote files
+            remoteIndexer = RemoteIndexer(self.api)
+            self.remoteFiles = remoteIndexer.collected_files
 
+            # Index local files
+            localIndexer = LocalIndexer()
+            self.localFiles = localIndexer.collected_files
+
+            # Now compare the lists and populate task queues
+            self.compare()
             # Wait 5 minutes, then check with SmartFile again
-            wait_time = 5
             time.sleep(wait_time * 60)
 
-    def addRemoteFile(self, path, checksum, modified, size, isDir):
-        remotefile = File(path, checksum, modified, size, isDir)
-        self.remoteFiles.append(remotefile)
-
-    def addLocalFile(self, path, checksum, modified, size, isDir):
-        localfile = File(path, checksum, modified, size, isDir)
-        self.localFiles.append(localfile)
-
-    def watchFileSystem(self):
-        self.localWatcher = Watcher(self, self.api, self.syncDir)
-        self.localWatcher.start()
-        self.watcherRunning = True
-
     def compare(self):
+        """ Compare the local and remote file lists. """
         local = self.localFiles
         remote = self.remoteFiles
 
         objectsOnBoth = []
 
-        # Check which files exist on both and which local files dont exist on remote
+        # Check which files exist locally and SmartFile and which local files
+        # dont exist on SmartFile
         for localObject in local:
             found = False
             foundObject = None
@@ -137,7 +124,7 @@ class SyncEngine(SyncObject):
             found = False
             foundObject = None
 
-        # Check which remote files dont exist on local
+        # Check which remote SmartFile files dont exist locally
         for remoteObject in remote:
             found = False
             for localObject in local:
@@ -150,9 +137,9 @@ class SyncEngine(SyncObject):
             found = False
 
         # Check which way to synchronize files
-        for object in objectsOnBoth:
-            localObject = object[0]
-            remoteObject = object[1]
+        for item in objectsOnBoth:
+            localObject = item[0]
+            remoteObject = item[1]
             if localObject.checksum != remoteObject.checksum:
                 if localObject.modified_local > remoteObject.modified:
                     self.uploadQueue.put(localObject)
@@ -161,89 +148,145 @@ class SyncEngine(SyncObject):
                     self.ignoreFiles.append(ignorePath)
                     self.downloadQueue.put(remoteObject)
 
-        # Clear objects on both
-        objectsOnBoth = None
+        # Clear items in the lists
+        objectsOnBoth = []
+        self.localFiles = []
+        self.remoteFiles = []
 
-    def indexLocal(self, localPath=None):
-        """
-        Indexes the local files
-        """
-        if localPath is None:
-            localPath = self.syncDir
+    def addEvent(self, event):
+        """ Add a single event to the appropriate queue. """
+        if (isinstance(event, events.FileMovedEvent) or
+          isinstance(event, events.RemoteMovedEvent)):
+            self.simpleTasks.put(event)
+        elif isinstance(event, events.FileCreatedEvent):
+            self.uploadQueue.put(event)
+        elif isinstance(event, events.RemoteCreatedEvent):
+            self.downloadQueue.put(event)
+        elif (isinstance(event, events.FileDeletedEvent) or
+          isinstance(event, events.RemoteDeletedEvent)):
+            self.simpleTasks.put(event)
+        elif isinstance(event, events.FileModifiedEvent):
+            self.uploadQueue.put(event)
+        elif isinstance(event, events.RemoteModifiedEvent):
+            self.downloadQueue.put(event)
+        else:
+            raise BadEventException("Not a valid event: ", event.__name__)
 
-        syncFS = OSFS(localPath)
+    def _checkRedundantEvents(self, event):
+        #TODO: write this method
+        """ Check for redundant events in the various queues. """
+        pass
+
+
+class Indexer(object):
+    """
+    Indexer objects inherit this object to build an array of indexed files.
+    Later, we can use this to get directory listings for P2P.
+    """
+    def __init__(self):
+        self.results = []
+        self.index()
+
+    def collect(self, file_object):
+        """ Collect each file definition. """
+        self.results.append(file_object)
+
+    def index(self):
+        """ Override this function to perform indexing. """
+        def index(self):
+            raise NotImplementedError
+
+
+class LocalIndexer(Indexer, SyncObject):
+    """ Index the local filesystem. """
+    def __init__(self):
+        Indexer.__init__(self)
+        SyncObject.__init__(self)
+
+    def index(self):
+        _default_startswith_filter = lambda x: not x.startswith(".")
+        _default_endswith_filter = lambda x: not x.endswith("~")
+        filters = [_default_startswith_filter, _default_endswith_filter]
+
+        syncFS = self.syncFS
 
         for path in syncFS.walkfiles():
             systemPath = syncFS.getsyspath(path).strip("\\\\?\\")
-            checksum = common.getFileHash(systemPath)
-            modified = datetime.datetime.fromtimestamp(os.path.getmtime(systemPath)).replace(microsecond=0) - self.timeOffset
-            size = syncFS.getsize(path)
-            isDir = syncFS.isdir(path)
+            filename = os.path.basename(systemPath)
 
-            if not path.endswith("~"):
-                # Add the file to the database
-                self.addLocalFile(path, checksum, modified, size, isDir)
+            # Do some filtering
+            for _filter in filters:
+                if callable(_filter):
+                    if not _filter(filename):
+                        continue
+                elif not re.search(_filter, filename, re.UNICODE):
+                    continue
 
-    def indexRemote(self, remotePath=None):
-        """
-        Index the files on SmartFile and dive into directories when necessary
-        """
+            # Create a file definition and generate some properties
+            local_file = FileDefinition(path)
+            local_file.generate_properties()
+
+            # Collect the local file in the indexer
+            self.collect(local_file)
+
+
+class RemoteIndexer(Indexer):
+    """
+    Index the files on SmartFile and dive into directories when necessary.
+    """
+    def __init__(self, api):
+        self.api = api
+        Indexer.__init__(self)
+
+    def index(self, remotePath=None):
         filesIndexed = False
-        while filesIndexed is not True:
+        while not filesIndexed:
             if remotePath is None:
                 remotePath = "/"
             apiPath = '/path/info%s' % remotePath
             try:
-                dirListing = self.api.get(apiPath, children=True)
+                dir_listing = self.api.get(apiPath, children=True)
             except:
                 continue
-            if "children" in dirListing:
-                for i in dirListing['children']:
-                    if i['isfile'] is False:
-                        # If the path is a directory
-                        path = i['path']
-                        isDir = True
-                        size = None
-                        # Check if modified is in attributes and use that
-                        try:
-                            if "modified" in i['attributes']:
-                                modified = i['attributes']['modified']
-                                modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                            # Or else, just use the modified time set by the api
-                            else:
-                                modified = i['time']
-                                modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                        except:
-                            modified = i['time']
-                            modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                        checksum = None
-
-                        # Add the folder to the database
-                        self.addRemoteFile(path, checksum, modified, size, isDir)
-                        # Dive into the directory and look for more
-                        self.indexRemote(i['path'])
+            if "children" not in dir_listing:
+                break
+            for json_data in dir_listing['children']:
+                path = json_data['path']
+                isDir = json_data['isfile']
+                # Check if modified is in attributes and use that
+                try:
+                    if "modified" in json_data['attributes']:
+                        modifiedstr = json_data['attributes']['modified']
+                        modified = datetime.datetime.strptime(modifiedstr,
+                                                        '%Y-%m-%d %H:%M:%S')
+                    # Or else, just use the modified time set by the api
                     else:
-                        # If the path is a file
-                        path = i['path']
-                        isDir = False
-                        size = int(i['size'])
-                        # Check if modified is in attributes and use that
-                        try:
-                            if "modified" in i['attributes']:
-                                modified = i['attributes']['modified']
-                                modified = datetime.datetime.strptime(modified, '%Y-%m-%d %H:%M:%S')
-                            # Or else, just use the modified time set by the api
-                            else:
-                                modified = i['time']
-                                modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                        except:
-                            modified = i['time']
-                            modified = datetime.datetime.strptime(modified, '%Y-%m-%dT%H:%M:%S')
-                        if 'checksum' in i['attributes']:
-                            checksum = i['attributes']['checksum']
-                        else:
-                            checksum = None
+                        modifiedstr = json_data['time']
+                        modified = datetime.datetime.strptime(modifiedstr,
+                                                          '%Y-%m-%dT%H:%M:%S')
+                except:
+                    # Just use the modified time set by the api
+                    modifiedstr = json_data['time']
+                    modified = datetime.datetime.strptime(modifiedstr,
+                                                          '%Y-%m-%dT%H:%M:%S')
+                if not isDir:
+                    checksum = None
+                    size = None
+                else:
+                    if 'checksum' in json_data['attributes']:
+                        checksum = json_data['attributes']['checksum']
+                    else:
+                        checksum = None
+                    size = int(json_data['size'])
 
-                        # Add the file to the database
-                        self.addRemoteFile(path, checksum, modified, size, isDir)
+                # Add the folder to the list of files
+                remotefile = FileDefinition(path, checksum, modified, size,
+                                            isDir)
+
+                # Collect the remote file in the indexer
+                self.collect(remotefile)
+
+                # If the file is a directory, dive in and look for more
+                if isDir:
+                    self.index(json_data['path'])
             filesIndexed = True

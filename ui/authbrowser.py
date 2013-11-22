@@ -34,7 +34,6 @@ class AuthBrowser(QtWebKit.QWebView):
                 self.__configuration.set("Login", "token", token)
                 self.__configuration.set("Login", "verifier", verifier)
             except:
-                raise
                 #logged in successfully, but something happened with passing the verifier
                 self.parent.parent.authenticator.networkError()
             else:

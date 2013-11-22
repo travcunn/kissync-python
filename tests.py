@@ -1,10 +1,110 @@
 import os
+import pprint
 import unittest
 
 from app.core.common import settingsFile
 from app.core.configuration import Configuration
 from app.core.errors import AuthException
 from app.core.auth import ApiConnection
+
+from app.sync.dictqueue import LifoDictQueue, Task
+from app.sync.syncengine import RemoteIndexer
+
+
+class MockAPI(object):
+    def __init__(self):
+        pass
+
+    def get(self, path, *args, **kwargs):
+        if path.startswith("/path/info"):
+            path = path.replace("/path/info", "")
+        return self._dirListing(path)
+
+    def _dirListing(self, path):
+        """ Create a directory listing. """
+        file1 = MockAPIFile('/home/test/file1.txt', isFile=True,
+                            checksum='098f6bcd4621d373cade4e832627b4f6',
+                            modified='2013-07-03 05:01:46')
+        file2 = MockAPIFile('/home/test/file2.txt', isFile=True,
+                            checksum='8c7dd922ad47494fc02c388e12c00eac',
+                            modified='2013-07-03 06:01:46')
+        folder1 = MockAPIFile('/home/test/testfolder', isFile=False,
+                              checksum=None, modified='2013-07-03 02:01:46')
+
+        if path == '/':
+            files = [file1.properties, file2.properties, folder1.properties]
+            return self._baseDirListing(files)
+        elif path is '/home/test/file1.txt':
+            return file1.properties
+        elif path is '/home/test/file2.txt':
+            return file2.properties
+        elif path is '/home/test/testfolder':
+            return folder1.properties
+        else:
+            return path
+
+    def _baseDirListing(self, children):
+        """ Create a base directory listing. """
+        mock_response = {
+            "acl": {
+                "list": True,
+                "read": True,
+                "remove": True,
+                "write": True
+            },
+            "attributes": {},
+            "children": children,
+            "extension": "",
+            "id": 1,
+            "isdir": True,
+            "isfile": False,
+            "items": 0,
+            "mime": "application/x-directory",
+            "name": "",
+            "owner": None,
+            "path": "/",
+            "size": 0,
+            "tags": [],
+            "time": "2013-10-21T15:24:02",
+            "url": "https://app.smartfile.com/api/2/path/info/"
+            }
+        return mock_response
+
+
+class MockAPIFile(object):
+    def __init__(self, path, isFile, checksum, modified):
+        self.properties = {
+            "acl": {
+                "list": True,
+                "read": True,
+                "remove": True,
+                "write": True
+            },
+            "attributes": {
+                "checksum": checksum,
+                "modified": modified
+            },
+            "extension": os.path.splitext(path)[1],
+            "id": 1,
+            "isdir": not isFile,
+            "isfile": isFile,
+            "items": None,
+            "mime": "text/html",
+            "name": path,
+            "owner": {
+                "email": "travcunn@umail.iu.edu",
+                "first_name": "Test",
+                "last_name": "Account",
+                "name": "Test Account",
+                "url": "https://app.smartfile.com/api/2/user/testaccount/",
+                "username": "TestAccount"
+            },
+            "path": "/%s" % (path),
+            "size": 1,
+            "tags": [],
+            "time": modified.split(" ")[0] + "T" + modified.split(" ")[1],
+            "url": "https://app.smartfile.com/api/2/path/info/%s" % (path)
+        }
 
 
 class ApiConnectionTest(unittest.TestCase):
@@ -58,6 +158,65 @@ class ApiConnectionTest(unittest.TestCase):
 
         with self.assertRaises(AuthException):
             ApiConnection()
+
+
+class LifoDictQueueTest(unittest.TestCase):
+    def test_insert_task_and_get(self):
+        queue = LifoDictQueue()
+        task = Task("test_id", "test_properties")
+        queue.put(task)
+        self.assertEqual(task, queue.get())
+
+    def test_task_order(self):
+        """ Make sure the queue is LIFO. """
+        queue = LifoDictQueue()
+        task1 = Task("test_id1", "test_properties1")
+        task2 = Task("test_id2", "test_properties2")
+        task3 = Task("test_id2", "test_properties3")
+        queue.put(task1)
+        queue.put(task2)
+        queue.put(task3)
+        self.assertEqual(3, queue.qsize())
+        self.assertEqual(task3, queue.get())
+        self.assertEqual(2, queue.qsize())
+        self.assertEqual(task2, queue.get())
+        self.assertEqual(1, queue.qsize())
+        self.assertEqual(task1, queue.get())
+        self.assertEqual(0, queue.qsize())
+
+    def test_regular_tasks(self):
+        queue = LifoDictQueue()
+        task = "test_task_object"
+        queue.put(task)
+        # A task object with a generated hash id will be created
+        get_task = queue.get()
+        self.assertTrue(hash(task) == get_task.key)
+        self.assertTrue(task == get_task.properties)
+
+    def test_update_task_key(self):
+        queue = LifoDictQueue()
+        task = Task("/test/path/SmartFile", "test object")
+        queue.put(task)
+        new_task_key = "/test/newpath/SmartFile"
+        queue.updateTaskKey("/test/path/SmartFile", new_task_key)
+        self.assertEqual(new_task_key, queue.get().key)
+        # try updating a key that does not exist
+        with self.assertRaises(KeyError):
+            queue.updateTaskKey("/badkey", "/foo")
+
+
+class RemoteIndexerTest(unittest.TestCase):
+    def test_index(self):
+        api = MockAPI()
+        remote_indexer = RemoteIndexer(api)
+
+        expected_paths = [
+                '/home/test/file1.txt', 
+                '/home/test/file2.txt',
+                '/home/test/testfolder'
+                ]
+        for result in remote_indexer.results:
+            self.assertTrue(result.path in expected_paths)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,7 @@ except ImportError:
     import json
 
 import common
-from definitions import File
+from definitions import FileDefinition
 
 
 class RealtimeSync(threading.Thread):
@@ -101,7 +101,8 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = json_data['size']
                 isDir = False
-                remotefile = File(path, checksum, modified, size, isDir)
+                remotefile = FileDefinition(path, checksum, modified,
+                                            size, isDir)
 
                 print "file created on the realtime"
                 print path
@@ -116,7 +117,8 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = 0
                 isDir = True
-                remotefile = File(path, checksum, modified, size, isDir)
+                remotefile = FileDefinition(path, checksum, modified,
+                                            size, isDir)
 
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(path)
@@ -128,7 +130,8 @@ class RealtimeSync(threading.Thread):
                 modified = None
                 size = json_data['size']
                 isDir = False
-                remotefile = File(path, checksum, modified, size, isDir)
+                remotefile = FileDefinition(path, checksum, modified,
+                                            size, isDir)
 
                 # Ignore this file in the watcher
                 self.parent.ignoreFiles.append(path)
@@ -166,7 +169,8 @@ class RealtimeSync(threading.Thread):
 
                 destination = json_data['dest']
                 destPath = common.basePath(destination)
-                absoluteDest = os.path.join(self.parent._syncDir, destPath)
+                absoluteDest = os.path.join(self.parent._syncDir,
+                                            destPath)
                 try:
                     common.createLocalDirs(os.path.dirname(os.path.realpath(absoluteDest)))
                 except:
@@ -208,7 +212,8 @@ class RealtimeSync(threading.Thread):
         else:
             realtime_key = realtime_key['value']
 
-        auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
+        auth_data = {'authentication': realtime_key,
+                     'uuid': self.auth_uuid}
         json_data = json.dumps(auth_data)
 
         # send the auth data to the server
