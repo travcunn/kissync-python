@@ -1,5 +1,6 @@
 import os
-import pprint
+import shutil
+import tempfile
 import unittest
 
 from app.core.common import settingsFile
@@ -8,10 +9,12 @@ from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
 from app.sync.dictqueue import LifoDictQueue, Task
-from app.sync.syncengine import RemoteIndexer
+from app.sync.syncengine import Indexer, LocalIndexer, RemoteIndexer
+from app.sync.syncobject import SyncObject
 
 
 class MockAPI(object):
+    """ Mock the SmartFile API. This mock class includes some test files. """
     def __init__(self):
         pass
 
@@ -22,17 +25,22 @@ class MockAPI(object):
 
     def _dirListing(self, path):
         """ Create a directory listing. """
-        file1 = MockAPIFile('/home/test/file1.txt', isFile=True,
+        file1 = MockAPIFile('file1.txt', isFile=True,
                             checksum='098f6bcd4621d373cade4e832627b4f6',
                             modified='2013-07-03 05:01:46')
-        file2 = MockAPIFile('/home/test/file2.txt', isFile=True,
+        file2 = MockAPIFile('file2.txt', isFile=True,
                             checksum='8c7dd922ad47494fc02c388e12c00eac',
                             modified='2013-07-03 06:01:46')
-        folder1 = MockAPIFile('/home/test/testfolder', isFile=False,
+        file3 = MockAPIFile('file3.txt', isFile=True,
+                            checksum='16fe50845e10b5fa815dbfa2bc566f1a',
+                            modified='2013-07-03 06:01:46', 
+                            hasAttributes=False)
+        folder1 = MockAPIFile('testfolder', isFile=False,
                               checksum=None, modified='2013-07-03 02:01:46')
 
         if path == '/':
-            files = [file1.properties, file2.properties, folder1.properties]
+            files = [file1.properties, file2.properties, file3.properties,
+                     folder1.properties]
             return self._baseDirListing(files)
         elif path is '/home/test/file1.txt':
             return file1.properties
@@ -72,7 +80,15 @@ class MockAPI(object):
 
 
 class MockAPIFile(object):
-    def __init__(self, path, isFile, checksum, modified):
+    """ Mock the json for a single file returned by the API. """
+    def __init__(self, path, isFile, checksum, modified, hasAttributes=True):
+        if hasAttributes:
+            attributes = {
+                "checksum": checksum,
+                "modified": modified
+            }
+        else:
+            attributes = {}
         self.properties = {
             "acl": {
                 "list": True,
@@ -80,10 +96,7 @@ class MockAPIFile(object):
                 "remove": True,
                 "write": True
             },
-            "attributes": {
-                "checksum": checksum,
-                "modified": modified
-            },
+            "attributes": attributes,
             "extension": os.path.splitext(path)[1],
             "id": 1,
             "isdir": not isFile,
@@ -205,15 +218,43 @@ class LifoDictQueueTest(unittest.TestCase):
             queue.updateTaskKey("/badkey", "/foo")
 
 
+class IndexerTest(unittest.TestCase):
+    def test_require_override(self):
+        with self.assertRaises(NotImplementedError):
+            Indexer()
+
+
+class LocalIndexerTest(unittest.TestCase):
+    def setUp(self):
+        # Create a temp dir
+        self.temp_dir = tempfile.mkdtemp()
+        sync_object = SyncObject(self.temp_dir)
+        self.syncFS = sync_object.syncFS
+
+        self.temp_files = []
+        # Put some files in the temp dir
+        for i in range(10):
+            self.temp_files.append(tempfile.NamedTemporaryFile(
+                dir=self.temp_dir, delete=False))
+
+
+    def test_index(self):
+        local_indexer = LocalIndexer(self.syncFS)
+
+    def tearDown(self):
+        # Recursively delete the temp dir
+        shutil.rmtree(self.temp_dir)
+
 class RemoteIndexerTest(unittest.TestCase):
     def test_index(self):
         api = MockAPI()
         remote_indexer = RemoteIndexer(api)
 
         expected_paths = [
-                '/home/test/file1.txt', 
-                '/home/test/file2.txt',
-                '/home/test/testfolder'
+                '/file1.txt', 
+                '/file2.txt',
+                '/file3.txt',
+                '/testfolder'
                 ]
         for result in remote_indexer.results:
             self.assertTrue(result.path in expected_paths)

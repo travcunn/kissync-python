@@ -1,16 +1,14 @@
 import datetime
 import os
-import re
 import threading
 import time
 from Queue import LifoQueue
 
-from definitions import FileDefinition
+from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadThread
 from errors import BadEventException
 import events
 from realtime import RealtimeSync
-from syncobject import SyncObject
 from upload import UploadThread
 from watcher import Watcher
 
@@ -40,18 +38,13 @@ class SyncThread(threading.Thread):  # pragma: no cover
         self.syncEngine.synchronize()
 
 
-class SyncEngine(SyncObject):
+class SyncEngine(object):
     """
     Handles file synchronization, including local and remote filesystem
     events, transfer queues, and conflict resolution.
     """
     def __init__(self, api):
-        SyncObject.__init__(self)
         self.api = api
-
-        # Setup arrays for local and remote file comparison
-        self.localFiles = []
-        self.remoteFiles = []
 
         # Simple task queue
         self.simpleTasks = LifoQueue()
@@ -59,9 +52,6 @@ class SyncEngine(SyncObject):
         self.uploadQueue = LifoQueue()
         # Download task queue
         self.downloadQueue = LifoQueue()
-
-        # List of files the watcher should ignore
-        self.ignoreFiles = []
 
     def startTransferThreads(self):  # pragma: no cover
         """ Initialize the upload and download threads. """
@@ -90,26 +80,22 @@ class SyncEngine(SyncObject):
         while True:
             # Index remote files
             remoteIndexer = RemoteIndexer(self.api)
-            self.remoteFiles = remoteIndexer.collected_files
+            remote_files = remoteIndexer.collected_files
 
             # Index local files
-            localIndexer = LocalIndexer()
-            self.localFiles = localIndexer.collected_files
+            localIndexer = LocalIndexer(self.syncFS)
+            local_files = localIndexer.collected_files
 
-            # Now compare the lists and populate task queues
-            self.compare()
+            # Compare the lists and populate task queues
+            self.compare(remote=remote_files, local=local_files)
+
             # Wait 5 minutes, then check with SmartFile again
             time.sleep(wait_time * 60)
 
-    def compare(self):
+    def compare(self, remote, local):
         """ Compare the local and remote file lists. """
-        local = self.localFiles
-        remote = self.remoteFiles
-
         objectsOnBoth = []
 
-        # Check which files exist locally and SmartFile and which local files
-        # dont exist on SmartFile
         for localObject in local:
             found = False
             foundObject = None
@@ -131,8 +117,6 @@ class SyncEngine(SyncObject):
                 if remoteObject.path == localObject.path:
                     found = True
             if not found:
-                ignorePath = os.path.join(self.syncDir, remoteObject.path)
-                self.ignoreFiles.append(ignorePath)
                 self.downloadQueue.put(remoteObject)
             found = False
 
@@ -144,16 +128,13 @@ class SyncEngine(SyncObject):
                 if localObject.modified_local > remoteObject.modified:
                     self.uploadQueue.put(localObject)
                 elif localObject.modified_local < remoteObject.modified:
-                    ignorePath = os.path.join(self.syncDir, remoteObject.path)
-                    self.ignoreFiles.append(ignorePath)
                     self.downloadQueue.put(remoteObject)
 
-        # Clear items in the lists
+        # Clear the array
         objectsOnBoth = []
-        self.localFiles = []
-        self.remoteFiles = []
 
     def addEvent(self, event):
+        #TODO: use a dictionary here
         """ Add a single event to the appropriate queue. """
         if (isinstance(event, events.FileMovedEvent) or
           isinstance(event, events.RemoteMovedEvent)):
@@ -174,7 +155,7 @@ class SyncEngine(SyncObject):
 
     def _checkRedundantEvents(self, event):
         #TODO: write this method
-        """ Check for redundant events in the various queues. """
+        """ Check for r)dundant events in the various queues. """
         pass
 
 
@@ -193,39 +174,30 @@ class Indexer(object):
 
     def index(self):
         """ Override this function to perform indexing. """
-        def index(self):
-            raise NotImplementedError
+        raise NotImplementedError
 
 
-class LocalIndexer(Indexer, SyncObject):
+class LocalIndexer(Indexer):
     """ Index the local filesystem. """
-    def __init__(self):
+    def __init__(self, syncFS):
+        self.syncFS = syncFS
         Indexer.__init__(self)
-        SyncObject.__init__(self)
 
     def index(self):
         _default_startswith_filter = lambda x: not x.startswith(".")
         _default_endswith_filter = lambda x: not x.endswith("~")
         filters = [_default_startswith_filter, _default_endswith_filter]
 
-        syncFS = self.syncFS
-
-        for path in syncFS.walkfiles():
-            systemPath = syncFS.getsyspath(path).strip("\\\\?\\")
-            filename = os.path.basename(systemPath)
-
+        for path in self.syncFS.walkfiles():
+            filename = os.path.basename(path)
             # Do some filtering
             for _filter in filters:
                 if callable(_filter):
                     if not _filter(filename):
                         continue
-                elif not re.search(_filter, filename, re.UNICODE):
-                    continue
-
             # Create a file definition and generate some properties
-            local_file = FileDefinition(path)
-            local_file.generate_properties()
-
+            helper = LocalDefinitionHelper(path, self.syncFS)
+            local_file = helper.create_definition()
             # Collect the local file in the indexer
             self.collect(local_file)
 
@@ -244,28 +216,22 @@ class RemoteIndexer(Indexer):
             if remotePath is None:
                 remotePath = "/"
             apiPath = '/path/info%s' % remotePath
-            try:
-                dir_listing = self.api.get(apiPath, children=True)
-            except:
-                continue
+
+            #TODO: check other errors here later
+            dir_listing = self.api.get(apiPath, children=True)
+
             if "children" not in dir_listing:
                 break
             for json_data in dir_listing['children']:
                 path = json_data['path']
                 isDir = json_data['isfile']
                 # Check if modified is in attributes and use that
-                try:
-                    if "modified" in json_data['attributes']:
-                        modifiedstr = json_data['attributes']['modified']
-                        modified = datetime.datetime.strptime(modifiedstr,
+                if "modified" in json_data['attributes']:
+                    modifiedstr = json_data['attributes']['modified']
+                    modified = datetime.datetime.strptime(modifiedstr,
                                                         '%Y-%m-%d %H:%M:%S')
-                    # Or else, just use the modified time set by the api
-                    else:
-                        modifiedstr = json_data['time']
-                        modified = datetime.datetime.strptime(modifiedstr,
-                                                          '%Y-%m-%dT%H:%M:%S')
-                except:
-                    # Just use the modified time set by the api
+                # Or else, just use the modified time set by the api
+                else:
                     modifiedstr = json_data['time']
                     modified = datetime.datetime.strptime(modifiedstr,
                                                           '%Y-%m-%dT%H:%M:%S')
