@@ -11,6 +11,9 @@ class BaseEvent(object):
         """ Return a timestamp of when the event was created. """
         return self.__timestamp
 
+    def __hash__(self):
+        return hash(self.__class__.__name__)
+
 
 class LocalMovedEvent(BaseEvent):
     def __init__(self, path, src):

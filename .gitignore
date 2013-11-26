@@ -1,8 +1,11 @@
 #python specific
 *.pyc
-configuration.cfg
 *.settings
 *~
 .project
 .pydevproject
 *.db
+
+#vim swp files
+*.swo
+*.swp

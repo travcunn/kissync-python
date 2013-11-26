@@ -3,14 +3,17 @@ import shutil
 import tempfile
 import unittest
 
+import fs
+from fs.osfs import OSFS
+
 from app.core.common import settingsFile
 from app.core.configuration import Configuration
 from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
 from app.sync.dictqueue import LifoDictQueue, Task
-from app.sync.syncengine import Indexer, LocalIndexer, RemoteIndexer
-from app.sync.syncobject import SyncObject
+import app.sync.events as events
+import app.sync.syncengine as syncengine
 
 
 class MockAPI(object):
@@ -221,34 +224,38 @@ class LifoDictQueueTest(unittest.TestCase):
 class IndexerTest(unittest.TestCase):
     def test_require_override(self):
         with self.assertRaises(NotImplementedError):
-            Indexer()
+            syncengine.Indexer()
 
 
 class LocalIndexerTest(unittest.TestCase):
     def setUp(self):
         # Create a temp dir
         self.temp_dir = tempfile.mkdtemp()
-        sync_object = SyncObject(self.temp_dir)
-        self.syncFS = sync_object.syncFS
+        self.syncFS = OSFS(self.temp_dir)
 
         self.temp_files = []
         # Put some files in the temp dir
         for i in range(10):
-            self.temp_files.append(tempfile.NamedTemporaryFile(
-                dir=self.temp_dir, delete=False))
-
+            path = os.path.join(self.temp_dir, str(i))
+            with open(path, "a+") as f:
+                f.write("test contents")
+            absolute_name = fs.path.abspath(str(i))
+            self.temp_files.append(absolute_name)
 
     def test_index(self):
-        local_indexer = LocalIndexer(self.syncFS)
+        local_indexer = syncengine.LocalIndexer(self.syncFS)
+        for result in local_indexer.results:
+            self.assertTrue(result.path in self.temp_files)
 
     def tearDown(self):
         # Recursively delete the temp dir
         shutil.rmtree(self.temp_dir)
 
+
 class RemoteIndexerTest(unittest.TestCase):
     def test_index(self):
         api = MockAPI()
-        remote_indexer = RemoteIndexer(api)
+        remote_indexer = syncengine.RemoteIndexer(api)
 
         expected_paths = [
                 '/file1.txt', 
@@ -258,6 +265,19 @@ class RemoteIndexerTest(unittest.TestCase):
                 ]
         for result in remote_indexer.results:
             self.assertTrue(result.path in expected_paths)
+
+
+class SyncEngineEvents(unittest.TestCase):
+    def setUp(self):
+        api = MockAPI()
+        self.syncEngine = syncengine.SyncEngine(api)
+
+    """
+    def test_create_event(self):
+        test_event = events.LocalMovedEvent('/source.txt', '/destination.txt')
+        test_deleted_event = events.LocalDeletedEvent('/home/Smartfile/test.txt')
+        self.syncEngine.addEvent(test_event)
+    """
 
 
 if __name__ == '__main__':

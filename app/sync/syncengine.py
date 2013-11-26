@@ -134,8 +134,14 @@ class SyncEngine(object):
         objectsOnBoth = []
 
     def addEvent(self, event):
-        #TODO: use a dictionary here
         """ Add a single event to the appropriate queue. """
+
+        all_events = {
+                    events.LocalMovedEvent.__class__.__name__: "hello world"
+                }
+
+        print event.__class__.__name__
+        """
         if (isinstance(event, events.FileMovedEvent) or
           isinstance(event, events.RemoteMovedEvent)):
             self.simpleTasks.put(event)
@@ -151,7 +157,9 @@ class SyncEngine(object):
         elif isinstance(event, events.RemoteModifiedEvent):
             self.downloadQueue.put(event)
         else:
-            raise BadEventException("Not a valid event: ", event.__name__)
+            raise BadEventException("Not a valid event: ",
+                                    event.__class__.__name__)
+        """
 
     def _checkRedundantEvents(self, event):
         #TODO: write this method
