@@ -87,12 +87,12 @@ class SyncEngine(object):
             local_files = localIndexer.collected_files
 
             # Compare the lists and populate task queues
-            self.compare(remote=remote_files, local=local_files)
+            self.compare_results(remote=remote_files, local=local_files)
 
             # Wait 5 minutes, then check with SmartFile again
             time.sleep(wait_time * 60)
 
-    def compare(self, remote, local):
+    def compare_results(self, remote, local):
         """ Compare the local and remote file lists. """
         objectsOnBoth = []
 
@@ -133,38 +133,80 @@ class SyncEngine(object):
         # Clear the array
         objectsOnBoth = []
 
-    def addEvent(self, event):
-        """ Add a single event to the appropriate queue. """
-
-        all_events = {
-                    events.LocalMovedEvent.__class__.__name__: "hello world"
-                }
-
-        print event.__class__.__name__
-        """
-        if (isinstance(event, events.FileMovedEvent) or
-          isinstance(event, events.RemoteMovedEvent)):
+    def movedEvent(self, event):
+        if (isinstance(event, events.LocalMovedEvent) or
+                isinstance(event, events.RemoteMovedEvent)):
+            for task in self.simpleTasks:
+                if not (isinstance(task, event.LocalMovedEvent) or
+                        isinstance(task, event.RemoteMovedEvent)):
+                    if task.path == event.src:
+                        moved_task = task
+                        moved_task.path = event.path
+                        self.simpleTasks.put(moved_task)
+            # Put the task in the queue
             self.simpleTasks.put(event)
-        elif isinstance(event, events.FileCreatedEvent):
+        else:
+            raise BadEventException("Not a valid event: ",
+                    event.__class__.__name__)
+
+    def createdEvent(self, event):
+        if isinstance(event, events.LocalCreatedEvent):
+            # Check the upload queue for redundant events
+            for task in self.uploadQueue.queue:
+                if task.path == event.path:
+                    self.uploadQueue.queue.remove(task)
+            # Put the task in the queue
             self.uploadQueue.put(event)
         elif isinstance(event, events.RemoteCreatedEvent):
-            self.downloadQueue.put(event)
-        elif (isinstance(event, events.FileDeletedEvent) or
-          isinstance(event, events.RemoteDeletedEvent)):
-            self.simpleTasks.put(event)
-        elif isinstance(event, events.FileModifiedEvent):
-            self.uploadQueue.put(event)
-        elif isinstance(event, events.RemoteModifiedEvent):
+            # Check the download queue for redundant events
+            for task in self.downloadQueue.queue:
+                if task.path == event.path:
+                    self.downloadQueue.queue.remove(task)
+            # Put the task in the queue
             self.downloadQueue.put(event)
         else:
             raise BadEventException("Not a valid event: ",
-                                    event.__class__.__name__)
-        """
+                    event.__class__.__name__)
 
-    def _checkRedundantEvents(self, event):
-        #TODO: write this method
-        """ Check for r)dundant events in the various queues. """
-        pass
+    def deletedEvent(self, event):
+        if (isinstance(event, events.LocalDeletedEvent) or
+                isinstance(event, events.RemoteDeletedEvent)):
+            # Cancel any task in the simpleTasks queues since it was deleted
+            for task in self.simpleTasks.queue:
+                if task.path == event.path:
+                    self.simpleTasks.queue.remove(task)
+            # The file wont need to be downloaded since it was deleted
+            for task in self.downloadQueue.queue:
+                if task.path == event.path:
+                    self.downloadQueue.queue.remove(task)
+            # The file wont need to be uploaded since it was deleted
+            for task in self.uploadQueue.queue:
+                if task.path == event.path:
+                    self.uploadQueue.queue.remove(task)
+            # Put the task in the queue
+            self.simpleTasks.put(event)
+        else:
+            raise BadEventException("Not a valid event: ",
+                    event.__class__.__name__)
+
+    def modifiedEvent(self, event):
+        if isinstance(event, events.LocalModifiedEvent):
+            # Check the upload queue for redundant events
+            for task in self.uploadQueue.queue:
+                if task.path == event.path:
+                    self.uploadQueue.queue.remove(task)
+            # Put the task in the queue
+            self.uploadQueue.put(event)
+        elif isinstance(event, events.RemoteModifiedEvent):
+            # Check the download queue for redundant events
+            for task in self.downloadQueue.queue:
+                if task.path == event.path:
+                    self.downloadQueue.queue.remove(task)
+            # Put the task in the queue
+            self.downloadQueue.put(event)
+        else:
+            raise BadEventException("Not a valid event: ",
+                    event.__class__.__name__)
 
 
 class Indexer(object):

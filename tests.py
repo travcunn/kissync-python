@@ -1,3 +1,4 @@
+from collections import namedtuple
 import os
 import shutil
 import tempfile
@@ -11,7 +12,7 @@ from app.core.configuration import Configuration
 from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
-from app.sync.dictqueue import LifoDictQueue, Task
+from app.sync.errors import BadEventException
 import app.sync.events as events
 import app.sync.syncengine as syncengine
 
@@ -176,51 +177,6 @@ class ApiConnectionTest(unittest.TestCase):
             ApiConnection()
 
 
-class LifoDictQueueTest(unittest.TestCase):
-    def test_insert_task_and_get(self):
-        queue = LifoDictQueue()
-        task = Task("test_id", "test_properties")
-        queue.put(task)
-        self.assertEqual(task, queue.get())
-
-    def test_task_order(self):
-        """ Make sure the queue is LIFO. """
-        queue = LifoDictQueue()
-        task1 = Task("test_id1", "test_properties1")
-        task2 = Task("test_id2", "test_properties2")
-        task3 = Task("test_id2", "test_properties3")
-        queue.put(task1)
-        queue.put(task2)
-        queue.put(task3)
-        self.assertEqual(3, queue.qsize())
-        self.assertEqual(task3, queue.get())
-        self.assertEqual(2, queue.qsize())
-        self.assertEqual(task2, queue.get())
-        self.assertEqual(1, queue.qsize())
-        self.assertEqual(task1, queue.get())
-        self.assertEqual(0, queue.qsize())
-
-    def test_regular_tasks(self):
-        queue = LifoDictQueue()
-        task = "test_task_object"
-        queue.put(task)
-        # A task object with a generated hash id will be created
-        get_task = queue.get()
-        self.assertTrue(hash(task) == get_task.key)
-        self.assertTrue(task == get_task.properties)
-
-    def test_update_task_key(self):
-        queue = LifoDictQueue()
-        task = Task("/test/path/SmartFile", "test object")
-        queue.put(task)
-        new_task_key = "/test/newpath/SmartFile"
-        queue.updateTaskKey("/test/path/SmartFile", new_task_key)
-        self.assertEqual(new_task_key, queue.get().key)
-        # try updating a key that does not exist
-        with self.assertRaises(KeyError):
-            queue.updateTaskKey("/badkey", "/foo")
-
-
 class IndexerTest(unittest.TestCase):
     def test_require_override(self):
         with self.assertRaises(NotImplementedError):
@@ -272,12 +228,87 @@ class SyncEngineEvents(unittest.TestCase):
         api = MockAPI()
         self.syncEngine = syncengine.SyncEngine(api)
 
-    """
-    def test_create_event(self):
-        test_event = events.LocalMovedEvent('/source.txt', '/destination.txt')
-        test_deleted_event = events.LocalDeletedEvent('/home/Smartfile/test.txt')
-        self.syncEngine.addEvent(test_event)
-    """
+    def test_local_created_events(self):
+        created_events = [
+                        events.LocalCreatedEvent('/test.txt'),
+                        events.LocalCreatedEvent('/links.txt'),
+                        events.LocalCreatedEvent('/test.txt')
+                ]
+        for event in created_events:
+            self.syncEngine.createdEvent(event)
+
+        # Make sure the redundant task was deleted
+        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 2)
+
+    def test_remote_created_events(self):
+        created_events = [
+                        events.RemoteCreatedEvent('/helloworld.txt'),
+                        events.RemoteCreatedEvent('/family.jpg'),
+                        events.RemoteCreatedEvent('/helloworld.txt')
+                ]
+        for event in created_events:
+            self.syncEngine.createdEvent(event)
+
+        # Make sure the redundant task was deleted
+        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
+
+    def test_bad_created_event(self):
+        with self.assertRaises(BadEventException):
+            self.syncEngine.createdEvent("bad event")
+
+
+    def test_local_deleted_events(self):
+        Task = namedtuple('Task', ['path'])
+        self.syncEngine.uploadQueue.put(Task('/helloworld.txt'))
+        self.syncEngine.downloadQueue.put(Task('/helloworld.txt'))
+
+        deleted_events = [
+                        events.LocalDeletedEvent('/helloworld.txt'),
+                        events.LocalDeletedEvent('/hellomoon.txt'),
+                        events.LocalDeletedEvent('/helloworld.txt')
+                ]
+        for event in deleted_events:
+            self.syncEngine.deletedEvent(event)
+
+        # Make sure matching tasks in the queues were deleted
+        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 0)
+        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 0)
+
+    def test_bad_deleted_event(self):
+        with self.assertRaises(BadEventException):
+            self.syncEngine.deletedEvent("bad event")
+
+    def test_local_modified_event(self):
+        Task = namedtuple('Task', ['path'])
+        self.syncEngine.uploadQueue.put(Task('/modifiedfile.txt'))
+
+        modified_events = [
+                        events.LocalModifiedEvent('/modifiedfile.txt'),
+                        events.LocalModifiedEvent('/anothermodifiedfile.txt')
+                ]
+        for event in modified_events:
+            self.syncEngine.modifiedEvent(event)
+
+        # Make sure the redundant task was removed
+        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 2)
+
+    def test_remote_modified_event(self):
+        Task = namedtuple('Task', ['path'])
+        self.syncEngine.downloadQueue.put(Task('/remotemodified.txt'))
+
+        modified_events = [
+                        events.RemoteModifiedEvent('/remotemodified.txt'),
+                        events.RemoteModifiedEvent('/remotefile.txt')
+                ]
+        for event in modified_events:
+            self.syncEngine.modifiedEvent(event)
+
+        # Maks sure the redundant task was removed
+        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
+
+    def test_bad_modified_event(self):
+        with self.assertRaises(BadEventException):
+            self.syncEngine.modifiedEvent("bad event")
 
 
 if __name__ == '__main__':

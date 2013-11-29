@@ -30,7 +30,7 @@ class BadEventException(BaseException):
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(DownloadException, self).__init__(*args, **kwargs)
+        super(BadEventException, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
