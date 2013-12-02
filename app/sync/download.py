@@ -1,39 +1,40 @@
 import datetime
-import history
 import os
 import threading
 
-import common
+import fs.path
 
+import common
 from errors import DownloadException
 from errors import FileNameException
+from worker import Worker
 
 
-class Downloader(object):
-    def __init__(self, api, syncDir):
-        self.api = api
-        self.syncDir = syncDir
+class Downloader(Worker):
+    def __init__(self, api, sync_dir):
+        Worker.__init__(self)
+
+        self._api = api
+        self._sync_dir = sync_dir
         self._timeoffset = common.calculate_time_offset()
 
-        self.cancelled = False
+    def _process_task(self, task):
+        basepath = fs.path.normpath(task.path)
+        absolute_path = os.path.join(self._sync_dir, basepath)
 
-    def download(self, syncObject):
-        serverPath = syncObject.path
-        path = common.basePath(syncObject.path)
-        absolutePath = os.path.join(self.syncDir, path)
+        task_directory = os.path.dirname(os.path.realpath(absolute_path))
 
-        common.createLocalDirs(os.path.dirname(os.path.realpath(absolutePath)))
+        # Create the directories necessary to download the file
+        common.createLocalDirs(task_directory)
 
-        if syncObject.isDir is False:
+        if task.isDir is False:
             try:
-                with open(absolutePath, 'wb') as f:
-                    r = self.api.get('/path/data/', serverPath)
-                    for chunk in r.iter_content(chunk_size=1024):
+                with open(absolute_path, 'wb') as f:
+                    response = self._api.get('/path/data', basepath)
+                    for chunk in response.iter_content(chunk_size=1024):
                         if not self.cancelled and chunk:
                             f.write(chunk)
                             f.flush()
-                if self.cancelled:
-                    self.cancelled = False
             except IOError as err:
                 if err.errno == 22:
                     # Depending on the OS, there may be filename restrictions
@@ -43,48 +44,64 @@ class Downloader(object):
             except Exception as err:
                 raise DownloadException(err)
 
-            if syncObject.checksum is None:
-                self._setAttributes(syncObject)
+            if not self.cancelled:
+                if not hasattr(task, 'checksum'):
+                    self._setAttributes(task)
 
-    def _setAttributes(self, syncObject):
-        if not self.cancelled:
-            path = os.path.join(self.syncDir, syncObject.system_path)
-            syncObject.checksum = common.getFileHash(path)
-            modified = datetime.datetime.fromtimestamp(os.path.getmtime(path)).replace(microsecond=0) - self._timeoffset
+            # Notify the worker the task is complete
+            self.task_done()
 
-            checksumString = "checksum=%s" % syncObject.checksum
-            modifiedString = "modified=%s" % modified
+    def _setAttributes(self, task):
+        """ Set attributes for the file on the SmartFile API. """
+        path = os.path.join(self._sync_dir, task.path)
+        task.checksum = common.getFileHash(path)
+        # Get the local modified time
+        file_time = os.path.getmtime(path)
+        # Generate a timestamp
+        modified_local = datetime.datetime.fromtimestamp(file_time)
+        # Strip off microseconds. We only care about seconds.
+        local_time = modified_local.replace(microsecond=0)
+        # Shift the time accordingly to the time server offset
+        shifted_time = local_time - self._timeoffset
 
-            requestAttr = [checksumString, modifiedString]
+        checksum_string = "checksum=%s" % task.checksum
+        modified_string = "modified=%s" % shifted_time
 
-            apiPath = "/path/info%s" % syncObject.path
-            self.api.post(apiPath, attributes=requestAttr)
+        request_properties = [checksum_string, modified_string]
+
+        apiPath = "/path/info%s" % task.path
+        self._api.post(apiPath, attributes=request_properties)
 
     def _cancel(self):
         self.cancelled = True
 
 
-class DownloadThread(Downloader, threading.Thread):
-    def __init__(self, queue, api, syncDir):
+class DownloadThread(threading.Thread):
+    def __init__(self, queue, api, sync_dir):
         threading.Thread.__init__(self)
-        Downloader.__init__(self, api, syncDir)
-        self.queue = queue
+        self._downloader = Downloader(api, sync_dir)
+        self._queue = queue
+
+        self._current_task = None
 
     def run(self):
         while True:
-            syncObject = self.queue.get()
+            self._current_task = self._queue.get()
             try:
-                if history.isLatest(syncObject):
-                    # Tell the history we are about to download the file
-                    history.update(syncObject)
-                    self.download(syncObject)
+                self._downloader.processTask(self._current_task)
+            except FileNameException:
+                # Files that have invalid names should not be downloaded
+                pass
             except:
-                # Set the history to None, since it failed
-                history._history[syncObject.path] = None
-                # Put the syncObject back into the queue and try later
-                self.queue.put(syncObject)
-            self.queue.task_done()
+                # Put the task back into the queue and try later
+                self._queue.put(self._current_task)
+
+            self._queue.task_done()
 
     def cancel(self):
-        self._cancel()
-        self.queue.task_done()
+        self._downloader.cancel_task()
+        self._queue.task_done()
+
+    @property
+    def current_task(self):
+        return self._current_task

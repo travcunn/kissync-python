@@ -10,7 +10,7 @@ from PySide import QtGui
 from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
-from app.core.common import *
+import app.core.common as common
 from app.core.configuration import Configuration
 from app.sync.syncengine import SyncThread
 
@@ -19,7 +19,7 @@ from ui.setupwizard import SetupWizard
 from ui.systemtray import SystemTray
 
 
-version = "0.22"
+version = "0.23"
 
 
 class Main(QtGui.QWidget):
@@ -32,19 +32,19 @@ class Main(QtGui.QWidget):
         # Check for updates
         self.checkForUpdates()
 
-        self.syncDir = os.path.join(os.path.expanduser("~"), "Smartfile")
-        self.settingsDir = settingsDirectory()
-        self.settingsFile = settingsFile()
+        self.sync_dir = os.path.join(os.path.expanduser("~"), "Smartfile")
+        self.settingsDir = common.settingsDirectory()
+        self.settingsFile = common.settingsFile()
 
-        self.directorySetup()# create the directories that will be needed
+        self.directorySetup() # Make sure proper directories are created
 
-        self.configuration = Configuration(self.settingsFile)  # initialize the configuration
+        self.configuration = Configuration(self.settingsFile)
 
-        self.setupwizard = SetupWizard(self)  # initiate setup wizard UI instead of creating it when needed
-        self.loginwindow = LoginWindow(self)  # initiate login window UI instead of creating it when needed
-        self.tray = SystemTray(self)  # initiate the system tray
+        self.setupwizard = SetupWizard(self)  # initiate setup wizard UI
+        self.loginwindow = LoginWindow(self)  # initiate login window UI
+        self.tray = SystemTray(self)
 
-        self.authenticator = Authenticator(self)  # initiate and runs the login on initialization
+        self.authenticator = Authenticator(self)
         self.authenticator.login.connect(self.login)
         self.authenticator.done.connect(self.start)
         self.authenticator.setup.connect(self.setup)
@@ -52,44 +52,40 @@ class Main(QtGui.QWidget):
         self.authenticator.start()
 
         if self.configuration.get('LocalSettings', 'autostart'):
-            create_shortcut()
+            common.create_shortcut()
         else:
-            delete_shortcut()
-
-        #################MAIN WINDOW GUI#####################
-        self.setWindowTitle('SmartFile Folder Sync')
+            common.delete_shortcut()
 
     def start(self):
-        """Called if the authentication is successful"""
-        print "now initializing the sync thread"
-        self.synchronizer = SyncThread(self)  # initiate the synchronizer
+        """ Called if authentication is successful. """
+        self.synchronizer = SyncThread(self, self.sync_dir)
         self.synchronizer.start()
         self.tray.onLogin()
 
     def login(self, qturl):
-        """Opens the login window"""
+        """ Opens the login window. """
         self.loginwindow.htmlView.load(qturl)
         self.loginwindow.show()
 
     def setup(self):
-        """First Run: Called if the authentication is successful"""
+        """ First Run: Called if the authentication is successful. """
         self.setupwizard.show()
-        #self.tray.notification("Smartfile Setup", "Please complete the setup to start using Kissync")
 
     def neterror(self):
-        QtGui.QMessageBox.critical(self, 'SmartFile Error', 'There was an error while connecting to SmartFile.', 1)
+        QtGui.QMessageBox.critical(self, 'SmartFile Error', 
+                'There was an error while connecting to SmartFile.', 1)
         self.exit()
 
     def checkForUpdates(self):
-        """Checks the current version with the latest from the server"""
+        """ Checks the current version with the latest from the server. """
         try:
-            if (is_latest_version(version) == False):
+            if not common.latest_version(version):
                 self.updateNotify()
         except:
             self.neterror()
 
     def updateNotify(self):
-        """Display a notification when an update is available"""
+        """ Display a notification when an update is available. """
         updateReply = QtGui.QMessageBox.question(self, 'SmartFile Update',
             'An update is available. Would you like to download now?',
                 QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
@@ -100,7 +96,7 @@ class Main(QtGui.QWidget):
             webbrowser.open("https://www.kissync.com/download", new=2)
 
     def directorySetup(self):
-        """Checks for sync and settings folder and creates if needed"""
+        """ Checks for sync and settings folder and creates if needed. """
         if not os.path.exists(self.settingsDir):
             os.makedirs(self.settingsDir)
 
@@ -108,7 +104,7 @@ class Main(QtGui.QWidget):
             os.makedirs(self.syncDir)
 
     def openSyncFolder(self):
-        """Opens a file browser depending on the system"""
+        """ Opens a file browser depending on the system. """
         if platform.system() == 'Darwin':
             subprocess.call(['open', '--', self.syncDir])
         elif platform.system() == 'Linux':

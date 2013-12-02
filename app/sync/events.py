@@ -16,18 +16,23 @@ class BaseEvent(object):
 
 
 class LocalMovedEvent(BaseEvent):
-    def __init__(self, path, src):
+    def __init__(self, src, path):
         BaseEvent.__init__(self, path)
-        self.__src = src
+        self._src = src
 
     @property
     def src(self):
-        return self.__src
+        return self._src
 
 
 class LocalCreatedEvent(BaseEvent):
-    def __init__(self, path):
+    def __init__(self, path, isDir):
         BaseEvent.__init__(self, path)
+        self._isDir = isDir
+
+    @property
+    def isDir(self):
+        return self._isDir
 
 
 class LocalDeletedEvent(BaseEvent):
@@ -41,18 +46,23 @@ class LocalModifiedEvent(BaseEvent):
 
 
 class RemoteMovedEvent(BaseEvent):
-    def __init__(self, path, src):
+    def __init__(self, src, path):
         BaseEvent.__init__(self, path)
-        self.__src = src
+        self._src = src
 
     @property
     def src(self):
-        return self.__src
+        return self._src
 
 
 class RemoteCreatedEvent(BaseEvent):
-    def __init__(self, path):
+    def __init__(self, path, isDir):
         BaseEvent.__init__(self, path)
+        self._isDir = isDir
+
+    @property
+    def isDir(self):
+        return self._isDir
 
 
 class RemoteDeletedEvent(BaseEvent):

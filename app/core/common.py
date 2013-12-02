@@ -90,7 +90,7 @@ def check_latest_version():
     return version
 
 
-def is_latest_version(current_version):
+def latest_version(current_version):
     """ Checks a specified current_version with the latest version """
     latest_version = check_latest_version()
     if (version(current_version) < version(latest_version)):

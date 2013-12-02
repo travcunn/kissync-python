@@ -1,5 +1,6 @@
 import hashlib
 import os
+from Queue import Queue
 import shutil
 import ssl
 import thread
@@ -16,14 +17,25 @@ import common
 from definitions import FileDefinition
 
 
-class RealtimeSync(threading.Thread):
-    def __init__(self, parent):
+class RealtimeMessages(threading.Thread):
+    def __init__(self, api, moved_callback=None, created_callback=None,
+                 deleted_callback=None, modified_callback=None):
         threading.Thread.__init__(self)
-        self.parent = parent
+
+        self.moved_callback = moved_callback
+        self.created_callback = created_callback
+        self.deleted_callback = deleted_callback
+        self.modified_callback = modified_callback
+
         self.websocket_address = "wss://www.kissync.com/sync"
 
-        # Generate a UUID for this client
-        self.auth_uuid = str(uuid.uuid1())
+        # Generate a unique authentication UUID for this client
+        hash = hashlib.sha1()
+        hash.update(str(time.time()))
+        self.auth_uuid = hash.hexdigest()[:10]
+
+        # Queue for offline messages
+        self.offline_queue = Queue()
 
         self.connected = False
         self.authenticated = False
@@ -31,23 +43,23 @@ class RealtimeSync(threading.Thread):
     def run(self):
         while True:
             self.create_connection()
-            self.ws.run_forever(sslopt={"ssl_version": ssl.PROTOCOL_TLSv1}, ping_interval=45)
+            self.ws.run_forever(sslopt={"ssl_version": ssl.PROTOCOL_TLSv1},
+                                ping_interval=45)
 
             # if the client disconnects, delay, then reconnect
             time.sleep(10)
 
     def create_connection(self):
-        #websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp(self.websocket_address,
-                                on_message=self.on_message,
-                                on_error=self.on_error,
-                                on_close=self.on_close,
-                                on_open=self.on_open)
+                                         on_message=self._on_message,
+                                         on_error=self._on_error,
+                                         on_close=self._on_close,
+                                         on_open=self._on_open)
 
-    def processSendQueue(self, *args):
+    def _processSendQueue(self, *args):
         """
-        Send changes that occured when the client was offline
-        to the realtime sync server
+        Send changes that occured when the client was offline to the realtime
+        sync server.
         """
         taskInQueue = False
         while True:
@@ -55,16 +67,17 @@ class RealtimeSync(threading.Thread):
                 # Check if a task is already loaded
                 if taskInQueue is False:
                     # This blocks until it gets a task
-                    object = self.parent.changesQueue.get()
+                    object = self.offline_queue.get()
                 taskInQueue = True
                 if self.connected is False or self.authenticated is False:
                     break
                 self.ws.send(object)
-                self.parent.changesQueue.task_done()
+                self.offline_queue.task_done()
                 taskInQueue = False
             time.sleep(.01)
 
     def _sendChanges(self, changes):
+        """ Prepares data to be sent to the websocket. """
         # Prepare the dictionary to send
         send_data = {'uuid': self.auth_uuid}
         send_data.update(changes)
@@ -78,17 +91,16 @@ class RealtimeSync(threading.Thread):
             # process the message when the websocket is available
             self.parent.changesQueue.put(data)
 
-    def update(self, path, change_type, size, isDir, destination=None):
-        """
-        use this method to send updates to the server
-        use the following for change_type:
-            created_file, created_dir, modified, deleted, moved
-        """
-        send_data = {'path': path, 'type': change_type, 'size': size, 'isDir':
-                isDir, 'dest': destination}
+    def update(self, event):
+        """ Send an event to the websocket. """
+        send_data = {'event_type': event.path, 'path': event.path}
+        if hasattr(event, 'src'):
+            destination = {'src': event.src}
+            send_data.update(destination)
+
         self._sendChanges(send_data)
 
-    def on_message(self, ws, message):
+    def _on_message(self, ws, message):
         json_data = json.loads(message)
 
         if 'type' in json_data:
@@ -188,14 +200,16 @@ class RealtimeSync(threading.Thread):
                         # again, paths arent accessible, so let the user handle it
                         pass
 
-    def on_error(self, ws, error):
+    def _on_error(self, ws, error):
+        self.connected = False
+        self.authenticated = False
         self.create_connection()
 
-    def on_close(self, ws):
+    def _on_close(self, ws):
         self.connected = False
         self.authenticated = False
 
-    def on_open(self, ws):
+    def _on_open(self, ws):
         self.connected = True
 
         # Get the user realtime_key from the SmartFile preferences
@@ -222,4 +236,4 @@ class RealtimeSync(threading.Thread):
         self.authenticated = True
 
         # start the thread to process the queue of changes
-        thread.start_new_thread(self.processSendQueue, ())
+        thread.start_new_thread(self._processSendQueue, ())

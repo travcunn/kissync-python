@@ -2,12 +2,12 @@
 !include "nsProcess.nsh"
 SetCompressor lzma
 
-!define PRODUCT_NAME "Kissync"
-!define PRODUCT_VERSION "0.22"
-!define PRODUCT_SIMPLENAME "Kissync"
+!define PRODUCT_NAME "SmartFile Sync"
+!define PRODUCT_VERSION "0.23"
+!define PRODUCT_SIMPLENAME "SmartFile Sync"
 !define PRODUCT_PUBLISHER "Travis Cunningham"
 !define PRODUCT_WEB_SITE "http://www.kissync.com/"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}\Kissync.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}\SmartFile.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define MUI_ABORTWARNING
@@ -15,7 +15,7 @@ SetCompressor lzma
 !define MUI_UNICON "..\ui\images\icon.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "..\builder\installer.bmp"
 !define MUI_COMPONENTSPAGE_SMALLDESC
-!define MUI_FINISHPAGE_RUN "$INSTDIR\Kissync.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\SmartFile.exe"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
@@ -27,16 +27,16 @@ SetCompressor lzma
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "KissyncInstaller.exe"
+OutFile "SmartFileInstaller.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
-Section "!Kissync (Required)" INSTALL_KISSYNC
+Section "!SmartFile (Required)" INSTALL_SMARTFILE
   SectionIn 1 RO
   SetOutPath "$INSTDIR"
-  ${nsProcess::KillProcess} "Kissync.exe" $R4
+  ${nsProcess::KillProcess} "SmartFile.exe" $R4
   File "icon.ico"
   File "_ctypes.pyd"
   File "_hashlib.pyd"
@@ -46,7 +46,7 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   File "API-MS-Win-Core-LocalRegistry-L1-1-0.dll"
   File "bz2.pyd"
   File "cacert.pem"
-  File "Kissync.exe"
+  File "SmartFile.exe"
   File "library.zip"
   File "MPR.dll"
   File "pyexpat.pyd"
@@ -74,8 +74,8 @@ Section "!Kissync (Required)" INSTALL_KISSYNC
   file "imageformats\qico4.dll"
   file "imageformats\qjpeg4.dll"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk" "$INSTDIR\Kissync.exe"
-  CreateShortCut "$SMSTARTUP\SmartFile Sync.lnk" "$INSTDIR\Kissync.exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\SmartFile.lnk" "$INSTDIR\SmartFile.exe"
+  CreateShortCut "$SMSTARTUP\SmartFile.lnk" "$INSTDIR\SmartFile.exe"
 SectionEnd
 
 Section -AdditionalIcons
@@ -84,21 +84,21 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\Kissync.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\SmartFile.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\Kissync.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\SmartFile.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${INSTALL_KISSYNC} "The Kissync file synchronizer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${INSTALL_SMARTFILE} "SmartFile Synchronizer."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
-Section "un.Kissync" UNINSTALL_KISSYNC
+Section "un.SmartFile" UNINSTALL_SMARTFILE
   SectionIn 1 RO
   Delete "$INSTDIR\_ctypes.pyd"
   Delete "$INSTDIR\_hashlib.pyd"
@@ -108,8 +108,8 @@ Section "un.Kissync" UNINSTALL_KISSYNC
   Delete "$INSTDIR\API-MS-Win-Core-LocalRegistry-L1-1-0.dll"
   Delete "$INSTDIR\bz2.pyd"
   Delete "$INSTDIR\cacert.pem"
-  Delete "$INSTDIR\Kissync.exe"
-  Delete "$INSTDIR\Kissync.exe.log"
+  Delete "$INSTDIR\SmartFile.exe"
+  Delete "$INSTDIR\SmartFile.exe.log"
   Delete "$INSTDIR\library.zip"
   Delete "$INSTDIR\MPR.dll"
   Delete "$INSTDIR\pyexpat.pyd"
@@ -137,13 +137,13 @@ Section "un.Kissync" UNINSTALL_KISSYNC
   RMDir "$INSTDIR\imageformats"
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
-  Delete "$SMPROGRAMS\${PRODUCT_NAME}\Kissync.lnk"
+  Delete "$SMPROGRAMS\${PRODUCT_NAME}\SmartFile.lnk"
   RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
-  Delete "$SMSTARTUP\SmartFile Sync.lnk"
+  Delete "$SMSTARTUP\SmartFile.lnk"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
 SectionEnd
 
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${UNINSTALL_KISSYNC} "Uninstalls Kissync from your computer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${UNINSTALL_KISSYNC} "Uninstalls SmartFile Sync from your computer."
 !insertmacro MUI_UNFUNCTION_DESCRIPTION_END

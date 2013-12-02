@@ -1,4 +1,5 @@
 from collections import namedtuple
+import datetime
 import os
 import shutil
 import tempfile
@@ -12,9 +13,11 @@ from app.core.configuration import Configuration
 from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
+from app.sync.definitions import FileDefinition
 from app.sync.errors import BadEventException
 import app.sync.events as events
 import app.sync.syncengine as syncengine
+from app.sync.watcher import EventHandler
 
 
 class MockAPI(object):
@@ -124,6 +127,14 @@ class MockAPIFile(object):
         }
 
 
+class MockWorker(object):
+    def __init__(self, current_task=None):
+        self.current_task = current_task
+
+    def cancel(self):
+        pass
+
+
 class ApiConnectionTest(unittest.TestCase):
     def test_blank_api_keys(self):
         """ Test blank api keys to make sure they are set """
@@ -192,10 +203,14 @@ class LocalIndexerTest(unittest.TestCase):
         self.temp_files = []
         # Put some files in the temp dir
         for i in range(10):
-            path = os.path.join(self.temp_dir, str(i))
+            basename = i
+            # produce a file that wont be picked up due to the indexer filter
+            if i is 9:
+                basename = str(i) + '~'
+            path = os.path.join(self.temp_dir, str(basename))
             with open(path, "a+") as f:
                 f.write("test contents")
-            absolute_name = fs.path.abspath(str(i))
+            absolute_name = fs.path.abspath(str(basename))
             self.temp_files.append(absolute_name)
 
     def test_index(self):
@@ -226,13 +241,22 @@ class RemoteIndexerTest(unittest.TestCase):
 class SyncEngineEvents(unittest.TestCase):
     def setUp(self):
         api = MockAPI()
-        self.syncEngine = syncengine.SyncEngine(api)
+        dummy_dir = '/'
+        self.syncEngine = syncengine.SyncEngine(api, dummy_dir)
+
+        # create a dummy download worker
+        dummy_remote_event = events.RemoteCreatedEvent('/helloworld.txt', isDir=False)
+        self.syncEngine.downloadWorkers = [MockWorker(dummy_remote_event)]
+
+        # create a dummy upload worker
+        dummy_local_event = events.LocalCreatedEvent('/helloworld.txt', isDir=False)
+        self.syncEngine.uploadWorkers = [MockWorker(dummy_local_event)]
 
     def test_local_created_events(self):
         created_events = [
-                        events.LocalCreatedEvent('/test.txt'),
-                        events.LocalCreatedEvent('/links.txt'),
-                        events.LocalCreatedEvent('/test.txt')
+                        events.LocalCreatedEvent('/test.txt', isDir=False),
+                        events.LocalCreatedEvent('/links.txt', isDir=False),
+                        events.LocalCreatedEvent('/test.txt', isDir=False)
                 ]
         for event in created_events:
             self.syncEngine.createdEvent(event)
@@ -242,9 +266,9 @@ class SyncEngineEvents(unittest.TestCase):
 
     def test_remote_created_events(self):
         created_events = [
-                        events.RemoteCreatedEvent('/helloworld.txt'),
-                        events.RemoteCreatedEvent('/family.jpg'),
-                        events.RemoteCreatedEvent('/helloworld.txt')
+                        events.RemoteCreatedEvent('/helloworld.txt', isDir=False),
+                        events.RemoteCreatedEvent('/family.jpg', isDir=False),
+                        events.RemoteCreatedEvent('/helloworld.txt', isDir=False)
                 ]
         for event in created_events:
             self.syncEngine.createdEvent(event)
@@ -309,6 +333,182 @@ class SyncEngineEvents(unittest.TestCase):
     def test_bad_modified_event(self):
         with self.assertRaises(BadEventException):
             self.syncEngine.modifiedEvent("bad event")
+
+    def test_local_moved_event(self):
+        deleted_events = [
+                        events.LocalDeletedEvent('/destination.txt'),
+                        events.LocalDeletedEvent('/source.txt')
+                ]
+        for event in deleted_events:
+            self.syncEngine.deletedEvent(event)
+
+        moved_events = [
+                        events.LocalMovedEvent('/source.txt',
+                            '/destination.txt'),
+                        events.LocalMovedEvent('/source.txt',
+                            '/destination.txt')
+                ]
+        for event in moved_events:
+            self.syncEngine.movedEvent(event)
+
+        for event in self.syncEngine.simpleTasks.queue:
+            if isinstance(event, events.LocalDeletedEvent):
+                # Since the event path is moved, make sure other events are moved
+                self.assertTrue(event.path == '/destination.txt')
+
+    def test_bad_moved_event(self):
+        with self.assertRaises(BadEventException):
+            self.syncEngine.movedEvent('bad event')
+
+
+class SyncEngineComparisons(unittest.TestCase):
+    def setUp(self):
+        api = MockAPI()
+        dummy_dir = '/'
+        self.syncEngine = syncengine.SyncEngine(api, dummy_dir)
+
+        self.local_files = [
+                    FileDefinition(path='/file1.txt',
+                                   checksum='fc5e038d38a57032085441e7fe7010b0',
+                                   modified='2013-07-03 21:46:53',
+                                   size=10000,
+                                   isDir=False
+                                   ),
+                    FileDefinition(path='/folder1',
+                                   checksum=None,
+                                   modified='2013-07-03 21:45:53',
+                                   size=None,
+                                   isDir=True),
+                    FileDefinition(path='/folder1/file2.txt',
+                                   checksum='467746e92e5325503b2769c80563c870',
+                                   modified='2013-03-03 21:45:53',
+                                   size=5000,
+                                   isDir=False),
+                    FileDefinition(path='/file3.txt',
+                                   checksum='sdflkjsdfkjw23ijfkljlkjdslkfjjkj',
+                                   modified='2013-07-03 21:40:20',
+                                   size=30,
+                                   isDir=False)
+                ]
+
+        self.remote_files = [
+                    FileDefinition(path='/file1.txt',
+                                   checksum='fc5e038d38a57032085441e7fe7010c4',
+                                   modified='2013-07-03 21:48:53',
+                                   size=12000,
+                                   isDir=False
+                                   ),
+                    FileDefinition(path='/folder1',
+                                   checksum=None,
+                                   modified='2013-07-03 21:45:53',
+                                   size=None,
+                                   isDir=True),
+                    FileDefinition(path='/folder1/file2.txt',
+                                   checksum='467746e92e5325503b2769c80563c875',
+                                   modified='2013-03-03 21:44:53',
+                                   size=5000,
+                                   isDir=False),
+                    FileDefinition(path='/file4.txt',
+                                   checksum='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+                                   modified='2013-03-03 19:44:53',
+                                   size=90,
+                                   isDir=False)
+                ]
+
+    def test_result_comparison(self):
+        self.syncEngine.compare_results(self.remote_files, self.local_files)
+
+        self.assertTrue(self.remote_files[0] in self.syncEngine.downloadQueue.queue)
+
+        # Ensure that file 4 in local_files is put into the upload queue
+        self.assertTrue(self.local_files[3] in self.syncEngine.uploadQueue.queue)
+
+
+class WatcherEventsTest(unittest.TestCase):
+    def setUp(self):
+        # Create a temp dir
+        self.temp_dir = tempfile.mkdtemp()
+        self.syncFS = OSFS(self.temp_dir)
+
+        self.temp_files = []
+
+        # Put 2 files into the temporary directory
+        for i in range(2):
+            path = os.path.join(self.temp_dir, str(i))
+            with open(path, "a+") as f:
+                f.write("test contents")
+            self.temp_files.append(path)
+
+        DummyEvent = namedtuple('Event', ['src_path', 'dest_path', 'is_directory'])
+
+        # Create a dummy event to use in each test
+        self.dummy_event = DummyEvent(self.temp_files[0], self.temp_files[1], False)
+
+    def test_moved_event(self):
+        callback_called = [None, None, None, None]
+        def movecallback(event):
+            callback_called[0] = event
+        def createcallback(event):
+            callback_called[1] = event
+        def deletecallback(event):
+            callback_called[2] = event
+        def modifycallback(event):
+            callback_called[3] = event
+
+        handler = EventHandler(sync_dir=self.temp_dir,
+                               moved_callback=movecallback,
+                               created_callback=createcallback,
+                               deleted_callback=deletecallback,
+                               modified_callback=modifycallback)
+        handler.on_moved(self.dummy_event)
+        handler.on_created(self.dummy_event)
+        handler.on_deleted(self.dummy_event)
+        handler.on_modified(self.dummy_event)
+
+        self.assertTrue(isinstance(callback_called[0], events.LocalMovedEvent))
+        self.assertTrue(isinstance(callback_called[1], events.LocalCreatedEvent))
+        self.assertTrue(isinstance(callback_called[2], events.LocalDeletedEvent))
+        self.assertTrue(isinstance(callback_called[3], events.LocalModifiedEvent))
+
+    def tearDown(self):
+        # Recursively delete the temp dir
+        shutil.rmtree(self.temp_dir)
+
+
+class EventInitTest(unittest.TestCase):
+    def test_event_init(self):
+        base_event = events.BaseEvent('/testfile.txt')
+        self.assertTrue(isinstance(base_event.timestamp, datetime.datetime))
+        self.assertTrue(hash(base_event) == hash('BaseEvent'))
+
+        lme = events.LocalMovedEvent('/testdir', '/newdir')
+        self.assertTrue(lme.src == '/testdir')
+        self.assertTrue(lme.path == '/newdir')
+
+        lce = events.LocalCreatedEvent('/testfile.txt', isDir=True)
+        self.assertTrue(lce.path == '/testfile.txt')
+        self.assertTrue(lce.isDir)
+
+        lde = events.LocalDeletedEvent('/testfile.txt')
+        self.assertTrue(lde.path == '/testfile.txt')
+
+        lme = events.LocalModifiedEvent('/testfile.txt')
+        self.assertTrue(lde.path == '/testfile.txt')
+
+        rme = events.RemoteMovedEvent('/testfile.txt', '/file.txt')
+        self.assertTrue(rme.src == '/testfile.txt')
+        self.assertTrue(rme.path == '/file.txt')
+
+        rce = events.RemoteCreatedEvent('/testfile.txt', isDir=False)
+        self.assertTrue(rce.path == '/testfile.txt')
+        self.assertTrue(rce.isDir == False)
+
+        rde = events.RemoteDeletedEvent('/testfile.txt')
+        self.assertTrue(rde.path == '/testfile.txt')
+
+        rmode = events.RemoteModifiedEvent('/testfile.txt')
+        self.assertTrue(rmode.path == '/testfile.txt')
+
 
 
 if __name__ == '__main__':

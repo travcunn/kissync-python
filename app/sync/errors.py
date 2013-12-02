@@ -34,3 +34,14 @@ class BadEventException(BaseException):
 
         def __str__(self):
             return self.detail
+
+
+class FileNotAvailableException(BaseException):
+    """ Exception when files are not yet available for the upload worker. """
+    def __init__(self, exc, *args, **kwargs):
+        self.exc = exc
+        self.detail = str(exc)
+        super(FileNotAvailableException, self).__init__(*args, **kwargs)
+
+        def __str__(self):
+            return self.detail

@@ -136,6 +136,8 @@ try:
                 self.setup.emit('done')
             else:
                 self.done.emit('done')
+
+
 except ImportError:
     # Pyside is not available
     def Authenticator(*args, **kwargs):

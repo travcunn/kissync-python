@@ -2,12 +2,11 @@ import datetime
 import os
 
 import common
-from syncobject import SyncObject
 
 
-class FileDefinition(SyncObject):
+class FileDefinition(object):
     def __init__(self, path, checksum=None, modified=None,
-            size=None, isDir=None, isLocal=False):
+            size=None, isDir=None):
         self.path = path
         self.checksum = checksum
         self.modified = modified

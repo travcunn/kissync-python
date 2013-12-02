@@ -1,3 +1,4 @@
+from collections import namedtuple
 import datetime
 import os
 import threading
@@ -8,34 +9,38 @@ from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadThread
 from errors import BadEventException
 import events
-from realtime import RealtimeSync
+from realtime import RealtimeMessages
 from upload import UploadThread
 from watcher import Watcher
 
 
-class SyncThread(threading.Thread):  # pragma: no cover
-    def __init__(self, api):
+class SyncThread(threading.Thread):
+    def __init__(self, api, sync_dir):
         threading.Thread.__init__(self)
         self.setDaemon(True)
 
         self.api = api
+        self.sync_dir = sync_dir
 
     def run(self):
-        self.syncEngine = SyncEngine(self.api)
+        self.sync_engine = SyncEngine(self.api, self.sync_dir)
 
-        # Start the transfer threads to wait for tasks
-        self.syncEngine.startTransferThreads()
+        # Start the workers to wait for tasks
+        self.sync_engine.startWorkers()
 
         # Watch the file system
-        self.localWatcher = Watcher(self.syncEngine, self.syncEngine.api,
-                                    self.syncEngine.syncDir)
-        self.localWatcher.start()
+        self.local_watcher = Watcher(sync_dir=self.sync_dir,
+                moved_callback=self.sync_engine.movedEvent,
+                created_callback=self.sync_engine.createdEvent,
+                deleted_callback=self.sync_engine.deletedEvent,
+                modified_callback=self.sync_engine.modifiedEvent)
+        self.local_watcher.start()
 
         # Start the realtime engine
-        self.realtime = RealtimeSync(self.syncEngine)
+        self.realtime = RealtimeMessages(self.sync_engine)
         self.realtime.start()
         # Synchronize with SmartFile
-        self.syncEngine.synchronize()
+        self.sync_engine.synchronize()
 
 
 class SyncEngine(object):
@@ -43,8 +48,9 @@ class SyncEngine(object):
     Handles file synchronization, including local and remote filesystem
     events, transfer queues, and conflict resolution.
     """
-    def __init__(self, api):
+    def __init__(self, api, sync_dir):
         self.api = api
+        self.sync_dir = sync_dir
 
         # Simple task queue
         self.simpleTasks = LifoQueue()
@@ -53,27 +59,27 @@ class SyncEngine(object):
         # Download task queue
         self.downloadQueue = LifoQueue()
 
-    def startTransferThreads(self):  # pragma: no cover
-        """ Initialize the upload and download threads. """
+    def startWorkers(self):
+        """ Initialize the upload and download workers. """
 
         upload = 4  # Specify amount of upload threads
         download = 5  # Specify amount of download threads
 
-        self.uploadThreads = []
+        self.uploadWorkers = []
         for i in range(upload):
             uploader = UploadThread(self.uploadQueue, self.api,
-                                    self.syncDir, self)
+                                    self.sync_dir)
             uploader.start()
-            self.uploadThreads.append(uploader)
+            self.uploadWorkers.append(uploader)
 
-        self.downloadThreads = []
+        self.downloadWorkers = []
         for i in range(download):
             downloader = DownloadThread(self.downloadQueue, self.api,
-                                        self.syncDir)
+                                        self.sync_dir)
             downloader.start()
-            self.downloadThreads.append(downloader)
+            self.downloadWorkers.append(downloader)
 
-    def synchronize(self):  # pragma: no cover
+    def synchronize(self):
         """ Compare local files with the SmartFile servers. """
         # Wait time in between indexing remote
         wait_time = 5
@@ -94,55 +100,68 @@ class SyncEngine(object):
 
     def compare_results(self, remote, local):
         """ Compare the local and remote file lists. """
-        objectsOnBoth = []
+        matching_files = []
 
-        for localObject in local:
-            found = False
-            foundObject = None
+        # Used for pairs of files that need compared
+        FileMatch = namedtuple('FileMatch', ['local', 'remote'])
+
+        for local_file in local:
+            match_found = False
+            matching_file = None
             for remoteObject in remote:
-                if localObject.path == remoteObject.path:
-                    found = True
-                    foundObject = remoteObject
-            if found:
-                objectsOnBoth.append((localObject, foundObject))
+                if local_file.path == remoteObject.path:
+                    match_found = True
+                    matching_file = remoteObject
+            if match_found:
+                match = FileMatch(local_file, matching_file)
+                matching_files.append(match)
             else:
-                self.uploadQueue.put(localObject)
-            found = False
-            foundObject = None
+                self.uploadQueue.put(local_file)
+            match_found = False
+            matching_file = None
 
         # Check which remote SmartFile files dont exist locally
-        for remoteObject in remote:
-            found = False
+        for remote_file in remote:
+            found_on_local = False
             for localObject in local:
-                if remoteObject.path == localObject.path:
-                    found = True
-            if not found:
-                self.downloadQueue.put(remoteObject)
-            found = False
+                if remote_file.path == localObject.path:
+                    found_on_local = True
+            if not found_on_local:
+                self.downloadQueue.put(remote_file)
+            found_on_local = False
 
         # Check which way to synchronize files
-        for item in objectsOnBoth:
-            localObject = item[0]
-            remoteObject = item[1]
-            if localObject.checksum != remoteObject.checksum:
-                if localObject.modified_local > remoteObject.modified:
-                    self.uploadQueue.put(localObject)
-                elif localObject.modified_local < remoteObject.modified:
-                    self.downloadQueue.put(remoteObject)
+        for item in matching_files:
+            if item.local.checksum != item.remote.checksum:
+                if item.local.modified > item.remote.modified:
+                    self.uploadQueue.put(item.local)
+                elif item.local.modified < item.remote.modified:
+                    self.downloadQueue.put(item.remote)
 
         # Clear the array
-        objectsOnBoth = []
+        matching_files = []
 
     def movedEvent(self, event):
         if (isinstance(event, events.LocalMovedEvent) or
                 isinstance(event, events.RemoteMovedEvent)):
-            for task in self.simpleTasks:
-                if not (isinstance(task, event.LocalMovedEvent) or
-                        isinstance(task, event.RemoteMovedEvent)):
+            moved_tasks = []
+            for task in self.simpleTasks.queue:
+                # if the task is not a move task
+                if not (isinstance(task, events.LocalMovedEvent) or
+                        isinstance(task, events.RemoteMovedEvent)):
                     if task.path == event.src:
                         moved_task = task
                         moved_task.path = event.path
-                        self.simpleTasks.put(moved_task)
+                        moved_tasks.append(moved_task)
+                        self.simpleTasks.queue.remove(task)
+                else:
+                    # if the task is a move task, get rid of tasks that move
+                    # the same file
+                    if task.src == event.src:
+                        self.simpleTasks.queue.remove(task)
+            # tasks that were moved should be put back into the queue
+            for task in moved_tasks:
+                self.simpleTasks.put(task)
             # Put the task in the queue
             self.simpleTasks.put(event)
         else:
@@ -183,6 +202,12 @@ class SyncEngine(object):
             for task in self.uploadQueue.queue:
                 if task.path == event.path:
                     self.uploadQueue.queue.remove(task)
+
+            # Cancel any upload task on the event path
+            self.cancelUploadTask(event.path)
+            # Cancel any download task on the event path
+            self.cancelDownloadTask(event.path)
+
             # Put the task in the queue
             self.simpleTasks.put(event)
         else:
@@ -207,6 +232,18 @@ class SyncEngine(object):
         else:
             raise BadEventException("Not a valid event: ",
                     event.__class__.__name__)
+
+    def cancelUploadTask(self, path):
+        """ Cancels an upload task given a file path. """
+        for worker in self.uploadWorkers:
+            if worker.current_task.path == path:
+                worker.cancel()
+
+    def cancelDownloadTask(self, path):
+        """ Cancels a download task given a file path. """
+        for worker in self.downloadWorkers:
+            if worker.current_task.path == path:
+                worker.cancel()
 
 
 class Indexer(object):
@@ -239,17 +276,19 @@ class LocalIndexer(Indexer):
         filters = [_default_startswith_filter, _default_endswith_filter]
 
         for path in self.syncFS.walkfiles():
+            isValid = True
             filename = os.path.basename(path)
-            # Do some filtering
             for _filter in filters:
                 if callable(_filter):
                     if not _filter(filename):
-                        continue
-            # Create a file definition and generate some properties
-            helper = LocalDefinitionHelper(path, self.syncFS)
-            local_file = helper.create_definition()
-            # Collect the local file in the indexer
-            self.collect(local_file)
+                        # Make the discovered file invalid
+                        isValid = False
+            if isValid:
+                # Create a file definition and generate some properties
+                helper = LocalDefinitionHelper(path, self.syncFS)
+                local_file = helper.create_definition()
+                # Collect the local file in the indexer
+                self.collect(local_file)
 
 
 class RemoteIndexer(Indexer):
