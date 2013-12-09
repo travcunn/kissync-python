@@ -54,6 +54,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
         """
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.smartfile.get("/whoami/")
+        
+        """
         usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
         bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
         percentUsed = usedBytes / bytesLimit
@@ -70,6 +72,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         else:
             spaceLimit /= int(math.pow(1024, 3))
             measurement = "GB"
+        """
 
         #menu after logging into Smartfile
         self.menu = QtGui.QMenu(self.parent)
@@ -85,8 +88,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
 
         self.menu.addSeparator()
 
-        quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
-        quota.setEnabled(False)
+        #quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
+        #quota.setEnabled(False)
 
         self.menu.addSeparator()
 
