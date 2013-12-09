@@ -17,8 +17,8 @@ class BaseEvent(object):
 
 class LocalMovedEvent(BaseEvent):
     def __init__(self, src, path):
-        BaseEvent.__init__(self, path)
         self._src = src
+        super(LocalMovedEvent, self).__init__(path)
 
     @property
     def src(self):
@@ -27,8 +27,8 @@ class LocalMovedEvent(BaseEvent):
 
 class LocalCreatedEvent(BaseEvent):
     def __init__(self, path, isDir):
-        BaseEvent.__init__(self, path)
         self._isDir = isDir
+        super(LocalCreatedEvent, self).__init__(path)
 
     @property
     def isDir(self):
@@ -37,18 +37,18 @@ class LocalCreatedEvent(BaseEvent):
 
 class LocalDeletedEvent(BaseEvent):
     def __init__(self, path):
-        BaseEvent.__init__(self, path)
+        super(LocalDeletedEvent, self).__init__(path)
 
 
 class LocalModifiedEvent(BaseEvent):
     def __init__(self, path):
-        BaseEvent.__init__(self, path)
+        super(LocalModifiedEvent, self).__init__(path)
 
 
 class RemoteMovedEvent(BaseEvent):
     def __init__(self, src, path):
-        BaseEvent.__init__(self, path)
         self._src = src
+        super(RemoteMovedEvent, self).__init__(path)
 
     @property
     def src(self):
@@ -57,8 +57,8 @@ class RemoteMovedEvent(BaseEvent):
 
 class RemoteCreatedEvent(BaseEvent):
     def __init__(self, path, isDir):
-        BaseEvent.__init__(self, path)
         self._isDir = isDir
+        super(RemoteCreatedEvent, self).__init__(path)
 
     @property
     def isDir(self):
@@ -67,9 +67,9 @@ class RemoteCreatedEvent(BaseEvent):
 
 class RemoteDeletedEvent(BaseEvent):
     def __init__(self, path):
-        BaseEvent.__init__(self, path)
+        super(RemoteDeletedEvent, self).__init__(path)
 
 
 class RemoteModifiedEvent(BaseEvent):
     def __init__(self, path):
-        BaseEvent.__init__(self, path)
+        super(RemoteModifiedEvent, self).__init__(path)

@@ -7,6 +7,10 @@ import unittest
 
 import fs
 from fs.osfs import OSFS
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 from app.core.common import settingsFile
 from app.core.configuration import Configuration
@@ -16,6 +20,7 @@ from app.core.auth import ApiConnection
 from app.sync.definitions import FileDefinition
 from app.sync.errors import BadEventException
 import app.sync.events as events
+from app.sync.realtime import RealtimeMessages
 import app.sync.syncengine as syncengine
 from app.sync.watcher import EventHandler
 
@@ -26,9 +31,17 @@ class MockAPI(object):
         pass
 
     def get(self, path, *args, **kwargs):
+        # Return a realtime sync key
+        if path == ("/pref/user/sync.realtime-key"):
+            response = {'value': 'abcdefghijklmnopqrstuvwxyz'}
+            return response
+        # Return a directory listing
         if path.startswith("/path/info"):
             path = path.replace("/path/info", "")
-        return self._dirListing(path)
+            return self._dirListing(path)
+
+    def put(self, path, *args, **kwargs):
+        pass
 
     def _dirListing(self, path):
         """ Create a directory listing. """
@@ -135,6 +148,14 @@ class MockWorker(object):
         pass
 
 
+class MockWebsocket(object):
+    def __init__(self):
+        pass
+
+    def send(self, data):
+        return data
+
+
 class ApiConnectionTest(unittest.TestCase):
     def test_blank_api_keys(self):
         """ Test blank api keys to make sure they are set """
@@ -188,12 +209,6 @@ class ApiConnectionTest(unittest.TestCase):
             ApiConnection()
 
 
-class IndexerTest(unittest.TestCase):
-    def test_require_override(self):
-        with self.assertRaises(NotImplementedError):
-            syncengine.Indexer()
-
-
 class LocalIndexerTest(unittest.TestCase):
     def setUp(self):
         # Create a temp dir
@@ -215,8 +230,9 @@ class LocalIndexerTest(unittest.TestCase):
 
     def test_index(self):
         local_indexer = syncengine.LocalIndexer(self.syncFS)
-        for result in local_indexer.results:
-            self.assertTrue(result.path in self.temp_files)
+        local_indexer.index()
+        for path, definition in local_indexer.results.items():
+            self.assertTrue(path in self.temp_files)
 
     def tearDown(self):
         # Recursively delete the temp dir
@@ -227,15 +243,15 @@ class RemoteIndexerTest(unittest.TestCase):
     def test_index(self):
         api = MockAPI()
         remote_indexer = syncengine.RemoteIndexer(api)
-
+        remote_indexer.index()
         expected_paths = [
                 '/file1.txt', 
                 '/file2.txt',
                 '/file3.txt',
                 '/testfolder'
                 ]
-        for result in remote_indexer.results:
-            self.assertTrue(result.path in expected_paths)
+        for path, definition in remote_indexer.results.items():
+            self.assertTrue(path in expected_paths)
 
 
 class SyncEngineEvents(unittest.TestCase):
@@ -367,61 +383,67 @@ class SyncEngineComparisons(unittest.TestCase):
         dummy_dir = '/'
         self.syncEngine = syncengine.SyncEngine(api, dummy_dir)
 
-        self.local_files = [
-                    FileDefinition(path='/file1.txt',
-                                   checksum='fc5e038d38a57032085441e7fe7010b0',
-                                   modified='2013-07-03 21:46:53',
-                                   size=10000,
-                                   isDir=False
-                                   ),
-                    FileDefinition(path='/folder1',
-                                   checksum=None,
-                                   modified='2013-07-03 21:45:53',
-                                   size=None,
-                                   isDir=True),
-                    FileDefinition(path='/folder1/file2.txt',
-                                   checksum='467746e92e5325503b2769c80563c870',
-                                   modified='2013-03-03 21:45:53',
-                                   size=5000,
-                                   isDir=False),
-                    FileDefinition(path='/file3.txt',
-                                   checksum='sdflkjsdfkjw23ijfkljlkjdslkfjjkj',
-                                   modified='2013-07-03 21:40:20',
-                                   size=30,
-                                   isDir=False)
-                ]
+        self.local_files = {}
+        self.local_files['/file1.txt'] = FileDefinition(path='/file1.txt',
+                                checksum='fc5e038d38a57032085441e7fe7010b0',
+                                modified='2013-07-03 21:46:53',
+                                size=10000,
+                                isDir=False)
+        self.local_files['/folder1'] =  FileDefinition(path='/folder1',
+                                checksum=None,
+                                modified='2013-07-03 21:45:53',
+                                size=None,
+                                isDir=True)
+        self.local_files['/folder1/file2.txt'] = FileDefinition(
+                                path='/folder1/file2.txt',
+                                checksum='467746e92e5325503b2769c80563c870',
+                                modified='2013-03-03 21:45:53',
+                                size=5000,
+                                isDir=False)
+        self.local_files['/file3.txt'] = FileDefinition(path='/file3.txt',
+                                checksum='sdflkjsdfkjw23ijfkljlkjdslkfjjkj',
+                                modified='2013-07-03 21:40:20',
+                                size=30,
+                                isDir=False)
 
-        self.remote_files = [
-                    FileDefinition(path='/file1.txt',
-                                   checksum='fc5e038d38a57032085441e7fe7010c4',
-                                   modified='2013-07-03 21:48:53',
-                                   size=12000,
-                                   isDir=False
-                                   ),
-                    FileDefinition(path='/folder1',
-                                   checksum=None,
-                                   modified='2013-07-03 21:45:53',
-                                   size=None,
-                                   isDir=True),
-                    FileDefinition(path='/folder1/file2.txt',
-                                   checksum='467746e92e5325503b2769c80563c875',
-                                   modified='2013-03-03 21:44:53',
-                                   size=5000,
-                                   isDir=False),
-                    FileDefinition(path='/file4.txt',
-                                   checksum='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-                                   modified='2013-03-03 19:44:53',
-                                   size=90,
-                                   isDir=False)
-                ]
+        self.remote_files = {}
+        self.remote_files['/file1.txt'] = FileDefinition(path='/file1.txt',
+                                checksum='fc5e038d38a57032085441e7fe7010c4',
+                                modified='2013-07-03 21:48:53',
+                                size=12000,
+                                isDir=False)
+        self.remote_files['/folder1'] = FileDefinition(path='/folder1',
+                                checksum=None,
+                                modified='2013-07-03 21:45:53',
+                                size=None,
+                                isDir=True)
+        self.remote_files['/folder1/file2.txt'] = FileDefinition(
+                                path='/folder1/file2.txt',
+                                checksum='467746e92e5325503b2769c80563c875',
+                                modified='2013-03-03 21:44:53',
+                                size=5000,
+                                isDir=False)
+        self.remote_files['/file4.txt'] = FileDefinition(path='/file4.txt',
+                                checksum='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+                                modified='2013-03-03 19:44:53',
+                                size=90,
+                                isDir=False)
 
     def test_result_comparison(self):
         self.syncEngine.compare_results(self.remote_files, self.local_files)
 
-        self.assertTrue(self.remote_files[0] in self.syncEngine.downloadQueue.queue)
+        r = self.remote_files['/file1.txt']
+        downqueue = []
+        for item in self.syncEngine.downloadQueue.queue:
+            downqueue.append(item.path)
+        self.assertTrue(r.path in downqueue)
 
+        upqueue = []
+        for item in self.syncEngine.uploadQueue.queue:
+            upqueue.append(item.path)
+        l = self.local_files['/file3.txt']
         # Ensure that file 4 in local_files is put into the upload queue
-        self.assertTrue(self.local_files[3] in self.syncEngine.uploadQueue.queue)
+        self.assertTrue(l.path in upqueue)
 
 
 class WatcherEventsTest(unittest.TestCase):
@@ -509,6 +531,107 @@ class EventInitTest(unittest.TestCase):
         rmode = events.RemoteModifiedEvent('/testfile.txt')
         self.assertTrue(rmode.path == '/testfile.txt')
 
+
+class RealTimeMessagingTest(unittest.TestCase):
+    def test_messages(self):
+        api = MockAPI()
+
+        called = [False, False, False, False]
+        def moved_callback(event):
+            called[0] = True
+        def created_callback(event):
+            called[1] = True
+        def deleted_callback(event):
+            called[2] = True
+        def modified_callback(event):
+            called[3] = True
+
+        realtime = RealtimeMessages(api=api, on_moved=moved_callback,
+                on_created=created_callback, on_deleted=deleted_callback,
+                on_modified=modified_callback)
+
+        moved_data = json.dumps({
+                'uuid': 'testuuid',
+                'type': 'LocalMovedEvent',
+                'path': '/dest.txt',
+                'src': '/src.txt'
+            })
+
+        realtime._on_message(None, moved_data)
+
+        created_data = json.dumps({
+                'uuid': 'testuuid',
+                'type': 'LocalCreatedEvent',
+                'path': '/file.txt',
+                'isDir': False
+            })
+
+        realtime._on_message(None, created_data)
+
+        deleted_data = json.dumps({
+                'uuid': 'testuuid',
+                'type': 'LocalDeletedEvent',
+                'path': '/file.txt'
+            })
+
+        realtime._on_message(None, deleted_data)
+
+        modified_data = json.dumps({
+                'uuid': 'testuuid',
+                'type': 'LocalModifiedEvent',
+                'path': '/file.txt'
+            })
+
+        realtime._on_message(None, modified_data)
+
+        for x in called:
+            self.assertTrue(x is True)
+
+    def test_bad_messages(self):
+        realtime = RealtimeMessages(None)
+
+        missing_uuid = json.dumps({
+                'type': 'LocalModifiedEvent',
+                'path': '/file.txt'
+            })
+        realtime._on_message(None, missing_uuid)
+
+        same_uuid = json.dumps({
+                'uuid': realtime.auth_uuid,
+                'type': 'LocalModifiedEvent',
+                'path': '/file.txt'
+            })
+        realtime._on_message(None, same_uuid)
+
+    def test_closed_state(self):
+        realtime = RealtimeMessages(None)
+        realtime._on_close(None)
+        self.assertTrue(realtime.connected is False)
+        self.assertTrue(realtime.authenticated is False)
+
+    def test_send_to_websocket(self):
+        realtime = RealtimeMessages(None)
+        realtime.ws = MockWebsocket()
+        realtime.auth_uuid = 'test_uuid'
+        realtime.connected = True
+        realtime.authenticated = True
+
+        moved_event = events.LocalMovedEvent(src="/src.txt", path="/dest.txt")
+        update = realtime.update(moved_event)
+        json_data = json.loads(update)
+        self.assertTrue(json_data['event_type'] == "LocalMovedEvent")
+
+        created_event = events.LocalCreatedEvent(path="/newfolder", isDir=True)
+        update = realtime.update(created_event)
+        json_data = json.loads(update)
+        self.assertTrue(json_data['event_type'] == "LocalCreatedEvent")
+
+        # Now set the flag for the client being disconnected
+        realtime.connected = False
+        realtime.update(events.LocalCreatedEvent(path="/newfolder", isDir=True))
+        task = realtime.offline_queue.get()
+        json_data = json.loads(task)
+        self.assertTrue(json_data['event_type'] == "LocalCreatedEvent")
 
 
 if __name__ == '__main__':

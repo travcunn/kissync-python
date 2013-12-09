@@ -1,8 +1,7 @@
 import datetime
+import logging
 import os
 import threading
-
-import fs.path
 
 import common
 from errors import DownloadException
@@ -10,22 +9,29 @@ from errors import FileNameException
 from worker import Worker
 
 
+log = logging.getLogger(__name__)
+
+
 class Downloader(Worker):
     def __init__(self, api, sync_dir):
-        Worker.__init__(self)
-
         self._api = api
         self._sync_dir = sync_dir
         self._timeoffset = common.calculate_time_offset()
 
+        super(Downloader, self).__init__()
+
     def _process_task(self, task):
-        basepath = fs.path.normpath(task.path)
+        basepath = os.path.normpath(task.path)
+        if basepath.startswith("/"):
+            basepath = basepath.strip("/")
         absolute_path = os.path.join(self._sync_dir, basepath)
 
-        task_directory = os.path.dirname(os.path.realpath(absolute_path))
+        task_directory = os.path.dirname(absolute_path)
 
-        # Create the directories necessary to download the file
-        common.createLocalDirs(task_directory)
+        if not os.path.exists(task_directory):
+            # Create the directories necessary to download the file
+            log.debug("Creating the directory: " + task_directory)
+            common.createLocalDirs(task_directory)
 
         if task.isDir is False:
             try:
@@ -86,19 +92,25 @@ class DownloadThread(threading.Thread):
 
     def run(self):
         while True:
+            log.debug("Getting a new task.")
             self._current_task = self._queue.get()
             try:
-                self._downloader.processTask(self._current_task)
+                log.debug("Processing: " + self._current_task.path)
+                self._downloader.process_task(self._current_task)
             except FileNameException:
                 # Files that have invalid names should not be downloaded
+                log.warning("The file to be downloaded had a bad filename.")
                 pass
             except:
+                raise
                 # Put the task back into the queue and try later
+                log.debug("Putting the task in the queue to try later.")
                 self._queue.put(self._current_task)
-
+            log.debug("Task complete.")
             self._queue.task_done()
 
     def cancel(self):
+        log.debug("Task canceled: " + self._current_task.path)
         self._downloader.cancel_task()
         self._queue.task_done()
 

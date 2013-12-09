@@ -1,5 +1,7 @@
 #!/bin/env python
 
+import argparse
+import logging
 import os
 import platform
 import subprocess
@@ -19,12 +21,17 @@ from ui.setupwizard import SetupWizard
 from ui.systemtray import SystemTray
 
 
+logs = [logging.getLogger("requests"), logging.getLogger("oauthlib")]
+for log in logs:
+    log.setLevel(logging.WARNING)
+
+
 version = "0.23"
 
 
 class Main(QtGui.QWidget):
-    def __init__(self, parent=None):
-        super(Main, self).__init__(parent)
+    def __init__(self):
+        super(Main, self).__init__()
 
         # Set the version
         self.version = version
@@ -58,7 +65,7 @@ class Main(QtGui.QWidget):
 
     def start(self):
         """ Called if authentication is successful. """
-        self.synchronizer = SyncThread(self, self.sync_dir)
+        self.synchronizer = SyncThread(self.api, self.sync_dir)
         self.synchronizer.start()
         self.tray.onLogin()
 
@@ -100,17 +107,17 @@ class Main(QtGui.QWidget):
         if not os.path.exists(self.settingsDir):
             os.makedirs(self.settingsDir)
 
-        if not os.path.exists(self.syncDir):
-            os.makedirs(self.syncDir)
+        if not os.path.exists(self.sync_dir):
+            os.makedirs(self.sync_dir)
 
     def openSyncFolder(self):
         """ Opens a file browser depending on the system. """
         if platform.system() == 'Darwin':
-            subprocess.call(['open', '--', self.syncDir])
+            subprocess.call(['open', '--', self.sync_dir])
         elif platform.system() == 'Linux':
-            subprocess.call(['gnome-open', self.syncDir])
+            subprocess.call(['gnome-open', self.sync_dir])
         elif platform.system() == 'Windows':
-            subprocess.call(['explorer', self.syncDir])
+            subprocess.call(['explorer', self.sync_dir])
 
     def closeEvent(self, event):
         event.ignore()
@@ -120,13 +127,21 @@ class Main(QtGui.QWidget):
         try:
             self.tray.hide()
         except:
-            # main.exit() could be called before tray is instanciated
             pass
         #TODO: clean up the exit
         os._exit(1)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='SmartFile Sync')
+    parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+
+    args = parser.parse_args()
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+
+
     me = SingleInstance()
     app = QtGui.QApplication(sys.argv)
 

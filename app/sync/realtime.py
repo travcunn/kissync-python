@@ -1,31 +1,29 @@
 import hashlib
-import os
 from Queue import Queue
-import shutil
 import ssl
 import thread
 import threading
 import time
 import uuid
+
 import websocket
 try:
     import simplejson as json
-except ImportError:
+except ImportError:  # pragma: no cover
     import json
 
-import common
-from definitions import FileDefinition
+import events
 
 
 class RealtimeMessages(threading.Thread):
-    def __init__(self, api, moved_callback=None, created_callback=None,
-                 deleted_callback=None, modified_callback=None):
-        threading.Thread.__init__(self)
+    def __init__(self, api, on_moved=None, on_created=None,
+                 on_deleted=None, on_modified=None):
+        self.api = api
 
-        self.moved_callback = moved_callback
-        self.created_callback = created_callback
-        self.deleted_callback = deleted_callback
-        self.modified_callback = modified_callback
+        self.on_moved = on_moved
+        self.on_created = on_created
+        self.on_deleted = on_deleted
+        self.on_modified = on_modified
 
         self.websocket_address = "wss://www.kissync.com/sync"
 
@@ -39,6 +37,8 @@ class RealtimeMessages(threading.Thread):
 
         self.connected = False
         self.authenticated = False
+
+        super(RealtimeMessages, self).__init__()
 
     def run(self):
         while True:
@@ -56,25 +56,18 @@ class RealtimeMessages(threading.Thread):
                                          on_close=self._on_close,
                                          on_open=self._on_open)
 
-    def _processSendQueue(self, *args):
-        """
-        Send changes that occured when the client was offline to the realtime
-        sync server.
-        """
-        taskInQueue = False
-        while True:
-            while self.connected and self.authenticated:
-                # Check if a task is already loaded
-                if taskInQueue is False:
-                    # This blocks until it gets a task
-                    object = self.offline_queue.get()
-                taskInQueue = True
-                if self.connected is False or self.authenticated is False:
-                    break
-                self.ws.send(object)
-                self.offline_queue.task_done()
-                taskInQueue = False
-            time.sleep(.01)
+    def update(self, event):
+        """ Send an event to the websocket. """
+        send_data = {'event_type': event.__class__.__name__,
+                'path': event.path}
+        if hasattr(event, 'src'):
+            destination = {'src': event.src}
+            send_data.update(destination)
+        if hasattr(event, 'isDir'):
+            isDir = {'isDir': event.isDir}
+            send_data.update(isDir)
+
+        return self._sendChanges(send_data)
 
     def _sendChanges(self, changes):
         """ Prepares data to be sent to the websocket. """
@@ -86,119 +79,63 @@ class RealtimeMessages(threading.Thread):
         # Check if the websocket is available
         if self.connected and self.authenticated:
             # send the json encoded message
-            self.ws.send(data)
+            return self.ws.send(data)
         else:
             # process the message when the websocket is available
-            self.parent.changesQueue.put(data)
+            self.offline_queue.put(data)
 
-    def update(self, event):
-        """ Send an event to the websocket. """
-        send_data = {'event_type': event.path, 'path': event.path}
-        if hasattr(event, 'src'):
-            destination = {'src': event.src}
-            send_data.update(destination)
-
-        self._sendChanges(send_data)
+    def _processSendQueue(self, *args):
+        """
+        Send changes that occured when the client was offline to the realtime
+        sync server.
+        """
+        while True:
+            while self.connected and self.authenticated:
+                # This blocks until it gets a task
+                task = self.offline_queue.get()
+                if self.connected is False or self.authenticated is False:
+                    break
+                self.ws.send(task)
+                self.offline_queue.task_done()
+            time.sleep(.01)
 
     def _on_message(self, ws, message):
+        """ Reads messages from the websocket. """
         json_data = json.loads(message)
 
         if 'type' in json_data:
-            if json_data['uuid'] == self.auth_uuid:
+            try:
+                if json_data['uuid'] == self.auth_uuid:
+                    return
+            except KeyError:
                 return
             message_type = json_data['type']
-            if message_type == 'created_file':
+            if message_type == 'LocalMovedEvent':
+                # Remote moved event
                 path = json_data['path']
-                checksum = "123"  # Provide something not None
-                modified = None
-                size = json_data['size']
-                isDir = False
-                remotefile = FileDefinition(path, checksum, modified,
-                                            size, isDir)
-
-                print "file created on the realtime"
-                print path
-
-                # Ignore this file in the watcher
-                self.parent.ignoreFiles.append(path)
-
-                self.parent.downloadQueue.put(remotefile)
-            elif message_type == 'created_dir':
+                src = json_data['src']
+                moved_event = events.RemoteMovedEvent(src, path)
+                if self.on_moved is not None:
+                    self.on_moved(moved_event)
+            elif message_type == 'LocalCreatedEvent':
+                # Remote created event
                 path = json_data['path']
-                checksum = "123"
-                modified = None
-                size = 0
-                isDir = True
-                remotefile = FileDefinition(path, checksum, modified,
-                                            size, isDir)
-
-                # Ignore this file in the watcher
-                self.parent.ignoreFiles.append(path)
-
-                self.parent.downloadQueue.put(remotefile)
-            elif message_type == 'modified':
+                isDir = json_data['isDir']
+                created_event = events.RemoteCreatedEvent(path, isDir)
+                if self.on_created is not None:
+                    self.on_created(created_event)
+            elif message_type == 'LocalDeletedEvent':
+                # Remote deleted event
                 path = json_data['path']
-                checksum = "123"
-                modified = None
-                size = json_data['size']
-                isDir = False
-                remotefile = FileDefinition(path, checksum, modified,
-                                            size, isDir)
-
-                # Ignore this file in the watcher
-                self.parent.ignoreFiles.append(path)
-
-                if self.parent.syncLoaded:
-                    self.parent.syncDownQueue.put(remotefile)
-                else:
-                    self.parent.downloadQueue.put(remotefile)
-            elif message_type == 'deleted':
-                serverPath = json_data['path']
-                path = common.basePath(serverPath)
-                absolutePath = os.path.join(self.parent._syncDir, path)
-
-                # Ignore this file in the watcher
-                self.parent.ignoreFiles.append(serverPath)
-
-                # Throw delete fu at that file!
-                try:
-                    os.remove(absolutePath)
-                except:
-                    pass
-                try:
-                    # notice: this thing goes ham
-                    shutil.rmtree(absolutePath)
-                except:
-                    pass
-                try:
-                    os.rmdir(absolutePath)
-                except:
-                    pass
-            elif message_type == 'moved':
-                serverPath = json_data['path']
-                path = common.basePath(serverPath)
-                absolutePath = os.path.join(self.parent._syncDir, path)
-
-                destination = json_data['dest']
-                destPath = common.basePath(destination)
-                absoluteDest = os.path.join(self.parent._syncDir,
-                                            destPath)
-                try:
-                    common.createLocalDirs(os.path.dirname(os.path.realpath(absoluteDest)))
-                except:
-                    # the file/folder is not accessible
-                    pass
-                else:
-
-                    # Ignore this file in the watcher
-                    self.parent.ignoreFiles.append(serverPath)
-                    self.parent.ignoreFiles.append(destination)
-
-                    try:
-                        os.rename(absolutePath, absoluteDest)
-                    except:
-                        # again, paths arent accessible, so let the user handle it
-                        pass
+                deleted_event = events.RemoteDeletedEvent(path)
+                if self.on_deleted is not None:
+                    self.on_deleted(deleted_event)
+            elif message_type == 'LocalModifiedEvent':
+                # Remote modified event
+                path = json_data['path']
+                modified_event = events.RemoteModifiedEvent(path)
+                if self.on_modified is not None:
+                    self.on_modified(modified_event)
 
     def _on_error(self, ws, error):
         self.connected = False
@@ -215,22 +152,21 @@ class RealtimeMessages(threading.Thread):
         # Get the user realtime_key from the SmartFile preferences
         # or generate one
         try:
-            realtime_key = self.parent.api.get("/pref/user/sync.realtime-key/")
+            response = self.api.get("/pref/user/sync.realtime-key/")
+            realtime_key = response['value']
         except:
             generated_key = str(uuid.uuid4())
             auth_hash = hashlib.md5()
             auth_hash.update("%s" % (generated_key))
             realtime_key = auth_hash.hexdigest()
-            self.parent.api.put("/pref/user/sync.realtime-key",
-                    value=realtime_key)
-        else:
-            realtime_key = realtime_key['value']
 
-        auth_data = {'authentication': realtime_key,
-                     'uuid': self.auth_uuid}
+            # Store the realtime_key on SmartFile in user preferences
+            self.api.put("/pref/user/sync.realtime-key", value=realtime_key)
+
+        auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
         json_data = json.dumps(auth_data)
 
-        # send the auth data to the server
+        # send the auth data directly to the server
         self.ws.send(json_data)
 
         self.authenticated = True

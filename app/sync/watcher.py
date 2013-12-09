@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 class Watcher(threading.Thread):
     def __init__(self, sync_dir, moved_callback=None, created_callback=None,
                  deleted_callback=None, modified_callback=None):
-        threading.Thread.__init__(self)
         self.sync_dir = sync_dir
 
         self.event_handler = EventHandler(sync_dir=sync_dir,
@@ -25,6 +24,8 @@ class Watcher(threading.Thread):
                 created_callback=created_callback,
                 deleted_callback=deleted_callback,
                 modified_callback=modified_callback)
+
+        super(Watcher, self).__init__()
 
     def run(self):
         self.observer = Observer()
