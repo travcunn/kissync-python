@@ -1,40 +1,44 @@
+import logging
 import os
 import threading
 import time
 
-import fs.path
+from fs.osfs import OSFS
 from smartfile.errors import ResponseError
 
 import common
+from definitions import LocalDefinitionHelper
 from errors import FileNotAvailableException
+from worker import Worker
 
 
-class Uploader(object):
+log = logging.getLogger(__name__)
+
+
+class Uploader(Worker):
     def __init__(self, api, sync_dir):
         self._api = api
         self._sync_dir = sync_dir
         self._timeoffset = common.calculate_time_offset()
+        self.syncFS = OSFS(sync_dir)
 
     def _process_task(self, task):
-        basepath = fs.path.normpath(task.path)
+        task = LocalDefinitionHelper(task.path, self.syncFS).create_definition()
+        basepath = os.path.normpath(task.path)
+        if basepath.startswith("/"):
+            basepath = basepath.strip("/")
         absolute_path = os.path.join(self._sync_dir, basepath)
 
-        # If the object is a file
+        # If the task is a file
         if not os.path.isdir(absolute_path):
+            task_directory = os.path.dirname(basepath)
+            if not task_directory.startswith("/"):
+                task_directory = os.path.join("/", task_directory)
 
-            if task.checksum is None:
-                try:
-                    task.checksum = common.getFileHash(absolute_path)
-                except:
-                    raise FileNotAvailableException
-
-            inDir = os.path.dirname(object.path).replace("\\", "/").rstrip('/')
-            if not inDir.startswith("/"):
-                inDir = os.path.join("/", inDir)
-            apiPath = "/path/data/%s" % inDir
+            apiPath = "/path/data%s" % task_directory
 
             # create the directory to make sure it exists
-            self._api.post('/path/oper/mkdir/', path=inDir)
+            self._api.post('/path/oper/mkdir/', path=task_directory)
             # upload the file
             self._api.post(apiPath, file=file(absolute_path, 'rb'))
             # set the new attributes
@@ -47,8 +51,11 @@ class Uploader(object):
             """
         else:
             # If the task path is a folder
-            create_dir = task.path
-            self._api.post('/path/oper/mkdir/', path=create_dir)
+            task_directory = basepath
+            if not task_directory.startswith("/"):
+                task_directory = os.path.join("/", task_directory)
+
+            self._api.post('/path/oper/mkdir/', path=task_directory)
 
             """
             # Notify the realtime sync of the change
@@ -58,7 +65,7 @@ class Uploader(object):
 
     def _setAttributes(self, task):
         checksum = task.checksum
-        modified = task.modified_local.replace(microsecond=0)
+        modified = task.modified.replace(microsecond=0)
 
         checksum_string = "checksum=%s" % checksum
         modified_string = "modified=%s" % modified
@@ -90,19 +97,35 @@ class Uploader(object):
 
 
 class UploadThread(Uploader, threading.Thread):
-    def __init__(self, queue, api, sync_dir):
+    def __init__(self, queue, api, sync_dir, realtime=False):
         threading.Thread.__init__(self)
         self._uploader = Uploader(api, sync_dir)
         self._queue = queue
-
-        self._current_task = None
+        self._realtime = realtime
 
     def run(self):
         while True:
+            log.debug("Getting a new task.")
+            self._current_task = None
             self._current_task = self._queue.get()
             try:
-                self._uploader.processTask(self._current_task)
+                log.debug("Processing: " + self._current_task.path)
+                self._uploader.process_task(self._current_task)
             except FileNotAvailableException:
                 # The file was not available when uploading it
+                log.warning("File is not yet available.")
                 self._queue.put(self._current_task)
+            else:
+                # Notify the realtime messaging system of the upload
+                if self._realtime:
+                    self._realtime.update(self._current_task)
+            log.debug("Task complete.")
             self._queue.task_done()
+
+    def cancel(self):
+        log.debug("Task cancelled: " + self._current_task.path)
+        self._uploader.cancel_task()
+
+    @property
+    def current_task(self):
+        return self._current_task

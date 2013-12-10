@@ -215,7 +215,7 @@ class LocalIndexerTest(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.syncFS = OSFS(self.temp_dir)
 
-        self.temp_files = []
+        self.temp_files = ['/']
         # Put some files in the temp dir
         for i in range(10):
             basename = i

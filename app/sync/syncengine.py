@@ -6,12 +6,13 @@ import time
 from Queue import LifoQueue
 
 from fs.osfs import OSFS
+import fs.path
 
 from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadThread
 from errors import BadEventException
 import events
-from realtime import RealtimeMessages
+#from realtime import RealtimeMessages
 from upload import UploadThread
 from watcher import Watcher
 
@@ -30,11 +31,8 @@ class SyncThread(threading.Thread):
     def run(self):
         self.sync_engine = SyncEngine(self.api, self.sync_dir)
 
-        # Start the workers to wait for tasks
-        self.sync_engine.startWorkers()
-
-        """
-        # Watch the file system
+        # Watch the local file system
+        #TODO: make sure the uploader and downloader dont set off the watcher
         self.local_watcher = Watcher(sync_dir=self.sync_dir,
                 moved_callback=self.sync_engine.movedEvent,
                 created_callback=self.sync_engine.createdEvent,
@@ -42,6 +40,7 @@ class SyncThread(threading.Thread):
                 modified_callback=self.sync_engine.modifiedEvent)
         self.local_watcher.start()
 
+        """
         # Start the realtime messaging system
         self.realtime = RealtimeMessages(api=self.api,
                 on_moved=self.sync_engine.movedEvent,
@@ -49,7 +48,13 @@ class SyncThread(threading.Thread):
                 on_deleted=self.sync_engine.deletedEvent,
                 on_modified=self.sync_engine.modifiedEvent)
         self.realtime.start()
+
+        # Setup messaging for the sync engine
+        self.sync_engine.setupMessaging(self.realtime)
         """
+
+        # Start the workers to wait for tasks
+        self.sync_engine.startWorkers()
 
         # Synchronize with SmartFile
         self.sync_engine.synchronize()
@@ -65,6 +70,11 @@ class SyncEngine(object):
         self.sync_dir = sync_dir
         self.syncFS = OSFS(sync_dir)
 
+        self.realtime = False
+
+        self.uploadWorkers = []
+        self.downloadWorkers = []
+
         self.local_files = {}
         self.remote_files = {}
 
@@ -75,24 +85,24 @@ class SyncEngine(object):
         # Download task queue
         self.downloadQueue = LifoQueue()
 
+    def setupMessaging(self, realtime):
+        """ For some tasks, messages should be sent to other clients. """
+        self.realtime = realtime
+
     def startWorkers(self):
         """ Initialize the upload and download workers. """
 
         upload = 4  # Specify amount of upload threads
         download = 5  # Specify amount of download threads
 
-        """
         log.debug("Creating " + str(upload) + " upload workers.")
-        self.uploadWorkers = []
         for i in range(upload):
             uploader = UploadThread(self.uploadQueue, self.api,
-                                    self.sync_dir)
+                                    self.sync_dir, self.realtime)
             uploader.start()
             self.uploadWorkers.append(uploader)
-        """
 
         log.debug("Creating " + str(download) + " download workers.")
-        self.downloadWorkers = []
         for i in range(download):
             downloader = DownloadThread(self.downloadQueue, self.api,
                                         self.sync_dir)
@@ -132,6 +142,8 @@ class SyncEngine(object):
 
     def compare_results(self, remote, local):
         """ Compare the local and remote file dictionaries. """
+        #TODO: make sure tasks are not already in the queues.
+        #TODO: Dont put a task in the queue if it is already in it
 
         remote_files = set(remote.keys())
         local_files = set(local.keys())
@@ -252,14 +264,16 @@ class SyncEngine(object):
     def cancelUploadTask(self, path):
         """ Cancels an upload task given a file path. """
         for worker in self.uploadWorkers:
-            if worker.current_task.path == path:
-                worker.cancel()
+            if worker.current_task is not None:
+                if worker.current_task.path == path:
+                    worker.cancel()
 
     def cancelDownloadTask(self, path):
         """ Cancels a download task given a file path. """
         for worker in self.downloadWorkers:
-            if worker.current_task.path == path:
-                worker.cancel()
+            if worker.current_task is not None:
+                if worker.current_task.path == path:
+                    worker.cancel()
 
 
 class LocalIndexer(object):
@@ -272,25 +286,34 @@ class LocalIndexer(object):
         self.results = {}
 
     def index(self):
-        startswith_filter = lambda x: not x.startswith(".")
-        endswith_filter = lambda x: not x.endswith("~")
-        filters = [startswith_filter, endswith_filter]
+        for dir, path in self.syncFS.walk('/'):
+            self._process_path(dir)
+            for name in path:
+                discovered_path = fs.path.join(dir, name)
+                self._process_path(discovered_path)
 
-        for path in self.syncFS.walkfiles():
-            filename = os.path.basename(path)
-            for _filter in filters:
-                if callable(_filter):
-                    if not _filter(filename):
-                        # The discovered file is invalid
-                        break
-            else:
-                # The discovered file is valid
-                # Create a file definition and generate some properties
-                helper = LocalDefinitionHelper(path, self.syncFS)
-                local_file = helper.create_definition()
+    def _process_path(self, path):
+        #startswith_filter = lambda x: not x.startswith(".")
+        #endswith_filter = lambda x: not x.endswith("~")
+        filters = [(lambda x: not x.startswith(".")),
+                   (lambda x: not x.endswith("~")),
+                   (lambda x: not x == '/')]
 
-                # Collect the local file in the indexer
-                self.results[local_file.path] = local_file
+        filename = os.path.basename(path)
+        for _filter in filters:
+            if callable(_filter):
+                # Filter the file name
+                if not _filter(filename) or not _filter(path):
+                    # The discovered file is invalid
+                    break
+        else:
+            # The discovered file is valid
+            # Create a file definition and generate some properties
+            helper = LocalDefinitionHelper(path, self.syncFS)
+            local_file = helper.create_definition()
+
+            # Collect the local file in the indexer
+            self.results[local_file.path] = local_file
 
 
 class RemoteIndexer(object):
@@ -338,7 +361,7 @@ class RemoteIndexer(object):
                     size = int(json_data['size'])
 
                 # Add the folder to the list of files
-                remote_file = FileDefinition(path, checksum, modified, size, 
+                remote_file = FileDefinition(path, checksum, modified, size,
                                              isDir)
 
                 # Collect the remote file in the indexer

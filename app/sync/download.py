@@ -28,12 +28,16 @@ class Downloader(Worker):
 
         task_directory = os.path.dirname(absolute_path)
 
-        if not os.path.exists(task_directory):
-            # Create the directories necessary to download the file
-            log.debug("Creating the directory: " + task_directory)
-            common.createLocalDirs(task_directory)
+        if task.isDir:
+            log.debug("Creating the directory: " + absolute_path)
+            common.createLocalDirs(absolute_path)
+        else:
+            if not os.path.exists(task_directory):
+                # Create the directories necessary to download the file
+                log.debug("Creating the directory: " + task_directory)
+                common.createLocalDirs(task_directory)
 
-        if task.isDir is False:
+        if not task.isDir:
             try:
                 with open(absolute_path, 'wb') as f:
                     response = self._api.get('/path/data', basepath)
@@ -78,9 +82,6 @@ class Downloader(Worker):
         apiPath = "/path/info%s" % task.path
         self._api.post(apiPath, attributes=request_properties)
 
-    def _cancel(self):
-        self.cancelled = True
-
 
 class DownloadThread(threading.Thread):
     def __init__(self, queue, api, sync_dir):
@@ -102,7 +103,6 @@ class DownloadThread(threading.Thread):
                 log.warning("The file to be downloaded had a bad filename.")
                 pass
             except:
-                raise
                 # Put the task back into the queue and try later
                 log.debug("Putting the task in the queue to try later.")
                 self._queue.put(self._current_task)
@@ -110,9 +110,8 @@ class DownloadThread(threading.Thread):
             self._queue.task_done()
 
     def cancel(self):
-        log.debug("Task canceled: " + self._current_task.path)
+        log.debug("Task cancelled: " + self._current_task.path)
         self._downloader.cancel_task()
-        self._queue.task_done()
 
     @property
     def current_task(self):
