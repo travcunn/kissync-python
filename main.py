@@ -20,9 +20,11 @@ from ui.loginwindow import LoginWindow
 from ui.setupwizard import SetupWizard
 from ui.systemtray import SystemTray
 
+"""
 logs = [logging.getLogger("requests"), logging.getLogger("oauthlib")]
 for log in logs:
     log.setLevel(logging.WARNING)
+"""
 
 version = "0.23"
 

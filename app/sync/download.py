@@ -32,6 +32,9 @@ class Downloader(Worker):
 
         task_directory = os.path.dirname(absolute_path)
 
+        print "::::::TASK PATH:::::"
+        print absolute_path
+
         if task.isDir:
             log.debug("Creating the directory: " + absolute_path)
             common.createLocalDirs(absolute_path)

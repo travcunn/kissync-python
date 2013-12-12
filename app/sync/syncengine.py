@@ -33,7 +33,6 @@ class SyncThread(threading.Thread):
         self.sync_engine = SyncEngine(self.api, self.sync_dir)
 
         # Watch the local file system
-        #TODO: make sure the uploader and downloader dont set off the watcher
         self.local_watcher = Watcher(
                 processing=self.sync_engine.isDownloading,
                 sync_dir=self.sync_dir,
@@ -379,7 +378,7 @@ class RemoteIndexer(object):
             except ResponseError as e:
                 # If the error code is 404, ignore the file.
                 if e.status_code == 404:
-                    break
+                    dir_listing = []
             except RequestError, err:
                 if err.detail.startswith('HTTPConnectionPool'):
                     # Connection error. Wait 2 seconds then try again.
