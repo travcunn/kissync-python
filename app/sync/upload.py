@@ -25,18 +25,26 @@ class Uploader(Worker):
     def _process_task(self, task):
         helper = LocalDefinitionHelper(task.path, self._syncFS)
         task = helper.create_definition()
+        # Create a system specific path relative to the sync dir
         basepath = os.path.normpath(task.path)
         if basepath.startswith("/"):
             basepath = basepath.strip("/")
+        if basepath.startswith('\\'):
+            basepath = basepath.lstrip('\\')
+        # Full system path
         absolute_path = os.path.join(self._sync_dir, basepath)
 
         # If the task is a file
         if not os.path.isdir(absolute_path):
-            task_directory = os.path.dirname(basepath)
-            if not task_directory.startswith("/"):
-                task_directory = os.path.join("/", task_directory)
+            basepath = basepath.replace('\\', '/')
+            if not basepath.startswith("/"):
+                basepath = os.path.join("/", basepath)
 
-            apiPath = "/path/data%s" % task_directory
+            task_directory = os.path.dirname(basepath)
+            print "Task Directory:", task_directory
+            print "Base Path:", basepath
+            print "Absolute Path:", absolute_path
+            apiPath = "/path/data%s" % basepath
 
             try:
                 # create the directory to make sure it exists
@@ -44,19 +52,24 @@ class Uploader(Worker):
                 # upload the file
                 self._api.post(apiPath, file=file(absolute_path, 'rb'))
                 # set the new attributes
+            except:
+                raise
+            """
             except ResponseError, err:
                 if err.status_code == 404:
                     # If the file becomes suddenly not available, just ignore
-                    # trying to set its attributes
+                    # trying to set its attributes.
                     pass
                 if err.status_code == 500:
-                    # Ignore server errors since they shouldnt happen anyways
+                    # Ignore server errors for now. The indexer will pick
+                    # this file up later on.
                     pass
             except RequestError, err:
                 if err.detail.startswith('HTTPConnectionPool'):
                     raise MaxTriesException(err)
-
-            self._setAttributes(task)
+            else:
+                self._setAttributes(task)
+            """
         else:
             # If the task path is a folder
             task_directory = basepath

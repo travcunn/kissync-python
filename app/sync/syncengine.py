@@ -34,12 +34,12 @@ class SyncThread(threading.Thread):
 
         # Watch the local file system
         self.local_watcher = Watcher(
-                processing=self.sync_engine.isDownloading,
-                sync_dir=self.sync_dir,
-                moved_callback=self.sync_engine.movedEvent,
-                created_callback=self.sync_engine.createdEvent,
-                deleted_callback=self.sync_engine.deletedEvent,
-                modified_callback=self.sync_engine.modifiedEvent)
+            processing=self.sync_engine.isDownloading,
+            sync_dir=self.sync_dir,
+            moved_callback=self.sync_engine.movedEvent,
+            created_callback=self.sync_engine.createdEvent,
+            deleted_callback=self.sync_engine.deletedEvent,
+            modified_callback=self.sync_engine.modifiedEvent)
         self.local_watcher.start()
 
         """
@@ -156,7 +156,7 @@ class SyncEngine(object):
         remote_only_files = list(remote_files - local_files)
         local_only_files = list(local_files - remote_files)
 
-        # For files that exist in both locations, a creation event is created 
+        # For files that exist in both locations, a creation event is created
         # depending on which file definition is newer
         for match in matching_files:
             if local[match].checksum != remote[match].checksum:
@@ -211,20 +211,24 @@ class SyncEngine(object):
     def createdEvent(self, event):
         if isinstance(event, events.LocalCreatedEvent):
             # Check the upload queue for redundant events
+            shouldInsert = True
             for task in self.uploadQueue.queue:
                 if task.path == event.path:
+                    shouldInsert = False
                     break
-            else:
+            if shouldInsert:
                 if not self.isUploading(event.path):
                     # Put the task in the queue
                     log.info("Putting a task into the upload queue.")
                     self.uploadQueue.put(event)
         elif isinstance(event, events.RemoteCreatedEvent):
             # Check the download queue for redundant events
+            shouldInsert = True
             for task in self.downloadQueue.queue:
                 if task.path == event.path:
+                    shouldInsert = False
                     break
-            else:
+            if shouldInsert:
                 if not self.isDownloading(event.path):
                     # Put the task in the queue
                     log.info("Putting a task into the download queue.")
@@ -299,6 +303,8 @@ class SyncEngine(object):
 
     def isDownloading(self, path):
         """ Returns whether or not a file is being downloaded. """
+        if len(self.downloadWorkers) is 0:
+            return False
         for worker in self.downloadWorkers:
             if worker.current_task is not None:
                 if worker.current_task.path == path:
@@ -308,6 +314,8 @@ class SyncEngine(object):
 
     def isUploading(self, path):
         """ Returns whether or not a file is being uploaded. """
+        if len(self.uploadWorkers) is 0:
+            return False
         for worker in self.uploadWorkers:
             if worker.current_task is not None:
                 if worker.current_task.path == path:
@@ -383,7 +391,10 @@ class RemoteIndexer(object):
                 if err.detail.startswith('HTTPConnectionPool'):
                     # Connection error. Wait 2 seconds then try again.
                     time.sleep(2)
-                    dir_listing = self.api.get(apiPath, children=True)
+                    try:
+                        dir_listing = self.api.get(apiPath, children=True)
+                    except:
+                        dir_listing = []
 
             if "children" not in dir_listing:
                 break

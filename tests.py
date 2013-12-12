@@ -289,10 +289,11 @@ class SyncEngineEvents(unittest.TestCase):
         for event in created_events:
             self.syncEngine.createdEvent(event)
 
-        for item in self.syncEngine.downloadQueue.queue:
-            print item.path
-        # Make sure the redundant task was deleted
-        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
+        # Make sure the redundant task was deleted.
+        # Also make sure '/helloworld.txt' is not put into the queue,
+        # since one of the dummy download workers is already processing it.
+        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 1)
+        self.assertTrue(self.syncEngine.downloadQueue.queue[0].path == "/family.jpg")
 
     def test_bad_created_event(self):
         with self.assertRaises(BadEventException):
@@ -479,7 +480,10 @@ class WatcherEventsTest(unittest.TestCase):
         def modifycallback(event):
             callback_called[3] = event
 
-        handler = EventHandler(sync_dir=self.temp_dir,
+        def processing(path):
+            return False
+
+        handler = EventHandler(processing, sync_dir=self.temp_dir,
                                moved_callback=movecallback,
                                created_callback=createcallback,
                                deleted_callback=deletecallback,

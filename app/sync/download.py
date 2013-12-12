@@ -25,19 +25,21 @@ class Downloader(Worker):
         super(Downloader, self).__init__()
 
     def _process_task(self, task):
+        # Create a system specific path relative to the sync dir
         basepath = os.path.normpath(task.path)
         if basepath.startswith("/"):
             basepath = basepath.strip("/")
+        if basepath.startswith('\\'):
+            basepath = basepath.lstrip('\\')
+        # Full system path
         absolute_path = os.path.join(self._sync_dir, basepath)
 
         task_directory = os.path.dirname(absolute_path)
 
-        print "::::::TASK PATH:::::"
-        print absolute_path
-
         if task.isDir:
-            log.debug("Creating the directory: " + absolute_path)
-            common.createLocalDirs(absolute_path)
+            if not os.path.exists(absolute_path):
+                log.debug("Creating the directory: " + absolute_path)
+                common.createLocalDirs(absolute_path)
         else:
             if not os.path.exists(task_directory):
                 # Create the directories necessary to download the file
@@ -45,6 +47,10 @@ class Downloader(Worker):
                 common.createLocalDirs(task_directory)
 
         if not task.isDir:
+            basepath = basepath.replace('\\', '/')
+            if not basepath.startswith("/"):
+                basepath = os.path.join("/", basepath)
+            print basepath
             try:
                 with open(absolute_path, 'wb') as f:
                     response = self._api.get('/path/data', basepath)
@@ -63,7 +69,7 @@ class Downloader(Worker):
                     raise MaxTriesException
             except Exception as err:
                 if err.status_code == 415:
-                    # Ignore error 415: 
+                    # Ignore error 415:
                     # 'Unsupported media - You may have mixed up file/folder.'
                     pass
                 else:

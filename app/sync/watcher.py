@@ -21,12 +21,12 @@ class Watcher(threading.Thread):
         self.sync_dir = sync_dir
 
         self.event_handler = EventHandler(
-                processing=processing,
-                sync_dir=sync_dir,
-                moved_callback=moved_callback,
-                created_callback=created_callback,
-                deleted_callback=deleted_callback,
-                modified_callback=modified_callback)
+            processing=processing,
+            sync_dir=sync_dir,
+            moved_callback=moved_callback,
+            created_callback=created_callback,
+            deleted_callback=deleted_callback,
+            modified_callback=modified_callback)
 
         super(Watcher, self).__init__()
 
@@ -78,7 +78,7 @@ class EventHandler(FileSystemEventHandler):
         src_stripped = event.src_path.replace(self.sync_dir, '')
         src_path = fs.path.normpath(src_stripped)
 
-        # Check if hte path is being processed by the sync engine
+        # Check if the path is being processed by the sync engine
         if not self.processing(src_path):
             log.info("Local file was created. src_path=" + event.src_path)
             # Check if the path exists
