@@ -9,6 +9,7 @@ from smartfile.errors import RequestError, ResponseError
 import common
 from definitions import LocalDefinitionHelper
 from errors import FileNotAvailableException, MaxTriesException
+from errors import UploadException
 from worker import Worker
 
 
@@ -41,29 +42,23 @@ class Uploader(Worker):
                 basepath = os.path.join("/", basepath)
 
             task_directory = os.path.dirname(basepath)
-            print "Task Directory:", task_directory
-            print "Base Path:", basepath
-            print "Absolute Path:", absolute_path
             apiPath = "/path/data%s" % basepath
 
             try:
                 # create the directory to make sure it exists
                 self._api.post('/path/oper/mkdir/', path=task_directory)
                 # upload the file
-                print "Here is the API path:", apiPath
-                self._api.post("/path/data/hello.txt",
-                        file=file("C:/Users/Travis/Smartfile/hello.txt", 'rb'))
-                #self._api.post(apiPath, file=file(absolute_path, 'rb'))
+                self._api.post(apiPath, file=file(absolute_path, 'rb'))
                 # set the new attributes
-            except:
-                raise
-            """
             except ResponseError, err:
                 if err.status_code == 404:
                     # If the file becomes suddenly not available, just ignore
                     # trying to set its attributes.
                     pass
-                if err.status_code == 500:
+                elif err.status_code == 409:
+                    # Conflict - Can only upload to an existing directory.
+                    raise UploadException(err)
+                elif err.status_code == 500:
                     # Ignore server errors for now. The indexer will pick
                     # this file up later on.
                     pass
@@ -72,7 +67,6 @@ class Uploader(Worker):
                     raise MaxTriesException(err)
             else:
                 self._setAttributes(task)
-            """
         else:
             # If the task path is a folder
             task_directory = basepath
@@ -146,16 +140,22 @@ class UploadThread(Uploader, threading.Thread):
             except FileNotAvailableException:
                 # The file was not available when uploading it
                 log.warning("File is not yet available.")
-                self._queue.put(self._current_task)
+                self.try_task_later()
             except MaxTriesException:
                 log.warning("Connection error occured during the upload.")
-                self._queue.put(self._current_task)
+                self.try_task_later()
+            except UploadException:
+                log.warning("The parent folders were not created properly.")
+                self.try_task_later()
             else:
                 # Notify the realtime messaging system of the upload
                 if self._realtime:
                     self._realtime.update(self._current_task)
             log.debug("Task complete.")
             self._queue.task_done()
+
+    def try_task_later(self):
+        self._queue.put(self._current_task)
 
     def cancel(self):
         log.debug("Task cancelled: " + self._current_task.path)
