@@ -3,8 +3,30 @@ class BaseException(Exception):
     pass
 
 
+class UploadException(BaseException):
+    """ Exception for general upload errors. """
+    def __init__(self, exc, *args, **kwargs):
+        self.exc = exc
+        self.detail = str(exc)
+        super(UploadException, self).__init__(*args, **kwargs)
+
+        def __str__(self):
+            return self.detail
+
+
 class DownloadException(BaseException):
     """ Exception for general download errors. """
+    def __init__(self, exc, *args, **kwargs):
+        self.exc = exc
+        self.detail = str(exc)
+        super(DownloadException, self).__init__(*args, **kwargs)
+
+        def __str__(self):
+            return self.detail
+
+
+class MaxTriesException(BaseException):
+    """ Exception for failed network connection attempts. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)

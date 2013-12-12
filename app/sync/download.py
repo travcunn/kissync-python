@@ -1,11 +1,14 @@
-import datetime
 import logging
 import os
 import threading
 
+from fs.osfs import OSFS
+from smartfile.errors import RequestError
+
 import common
-from errors import DownloadException
-from errors import FileNameException
+from definitions import LocalDefinitionHelper
+from errors import DownloadException, FileNameException
+from errors import FileNotAvailableException, MaxTriesException
 from worker import Worker
 
 
@@ -17,6 +20,7 @@ class Downloader(Worker):
         self._api = api
         self._sync_dir = sync_dir
         self._timeoffset = common.calculate_time_offset()
+        self.syncFS = OSFS(self._sync_dir)
 
         super(Downloader, self).__init__()
 
@@ -50,59 +54,76 @@ class Downloader(Worker):
                     # Depending on the OS, there may be filename restrictions
                     raise FileNameException(err)
                 else:
-                    raise DownloadException(err)
+                    raise FileNotAvailableException(err)
+            except RequestError as err:
+                if err.detail.startswith('HTTPConnectionPool'):
+                    raise MaxTriesException
             except Exception as err:
-                raise DownloadException(err)
-
-            if not self.cancelled:
-                if not hasattr(task, 'checksum'):
-                    self._setAttributes(task)
+                if err.status_code == 415:
+                    # Ignore error 415: 
+                    # 'Unsupported media - You may have mixed up file/folder.'
+                    pass
+                else:
+                    raise DownloadException(err)
+            else:
+                if not self.cancelled:
+                    if not hasattr(task, 'checksum'):
+                        return self._setAttributes(task)
 
             # Notify the worker the task is complete
             self.task_done()
 
+            return None
+
     def _setAttributes(self, task):
         """ Set attributes for the file on the SmartFile API. """
         path = os.path.join(self._sync_dir, task.path)
-        task.checksum = common.getFileHash(path)
-        # Get the local modified time
-        file_time = os.path.getmtime(path)
-        # Generate a timestamp
-        modified_local = datetime.datetime.fromtimestamp(file_time)
-        # Strip off microseconds. We only care about seconds.
-        local_time = modified_local.replace(microsecond=0)
-        # Shift the time accordingly to the time server offset
-        shifted_time = local_time - self._timeoffset
 
-        checksum_string = "checksum=%s" % task.checksum
-        modified_string = "modified=%s" % shifted_time
+        helper = LocalDefinitionHelper(path, self.syncFS)
+        definition = helper.create_definition()
+
+        checksum_string = "checksum=%s" % definition.checksum
+        modified_string = "modified=%s" % definition.modified
 
         request_properties = [checksum_string, modified_string]
 
         apiPath = "/path/info%s" % task.path
-        self._api.post(apiPath, attributes=request_properties)
+
+        try:
+            self._api.post(apiPath, attributes=request_properties)
+        except RequestError, err:
+            if err.detail.startswith('HTTPConnectionPool'):
+                raise MaxTriesException(err)
+
+        return definition
 
 
 class DownloadThread(threading.Thread):
-    def __init__(self, queue, api, sync_dir):
+    def __init__(self, queue, api, sync_dir, local_files):
         threading.Thread.__init__(self)
         self._downloader = Downloader(api, sync_dir)
         self._queue = queue
-
-        self._current_task = None
+        self._local_files = local_files
 
     def run(self):
         while True:
             log.debug("Getting a new task.")
+            self._current_task = None
             self._current_task = self._queue.get()
             try:
                 log.debug("Processing: " + self._current_task.path)
-                self._downloader.process_task(self._current_task)
+                result = self._downloader.process_task(self._current_task)
+                # Update the local files dictionary to reflect the new file
+                if result is not None:
+                    self._local_files[result.path] = result
             except FileNameException:
                 # Files that have invalid names should not be downloaded
                 log.warning("The file to be downloaded had a bad filename.")
                 pass
+            except FileNotAvailableException:
+                log.warning("The local file was not available.")
             except:
+                raise
                 # Put the task back into the queue and try later
                 log.debug("Putting the task in the queue to try later.")
                 self._queue.put(self._current_task)

@@ -4,11 +4,11 @@ import threading
 import time
 
 from fs.osfs import OSFS
-from smartfile.errors import ResponseError
+from smartfile.errors import RequestError, ResponseError
 
 import common
 from definitions import LocalDefinitionHelper
-from errors import FileNotAvailableException
+from errors import FileNotAvailableException, MaxTriesException
 from worker import Worker
 
 
@@ -20,10 +20,11 @@ class Uploader(Worker):
         self._api = api
         self._sync_dir = sync_dir
         self._timeoffset = common.calculate_time_offset()
-        self.syncFS = OSFS(sync_dir)
+        self._syncFS = OSFS(sync_dir)
 
     def _process_task(self, task):
-        task = LocalDefinitionHelper(task.path, self.syncFS).create_definition()
+        helper = LocalDefinitionHelper(task.path, self._syncFS)
+        task = helper.create_definition()
         basepath = os.path.normpath(task.path)
         if basepath.startswith("/"):
             basepath = basepath.strip("/")
@@ -37,18 +38,25 @@ class Uploader(Worker):
 
             apiPath = "/path/data%s" % task_directory
 
-            # create the directory to make sure it exists
-            self._api.post('/path/oper/mkdir/', path=task_directory)
-            # upload the file
-            self._api.post(apiPath, file=file(absolute_path, 'rb'))
-            # set the new attributes
-            self._setAttributes(task)
+            try:
+                # create the directory to make sure it exists
+                self._api.post('/path/oper/mkdir/', path=task_directory)
+                # upload the file
+                self._api.post(apiPath, file=file(absolute_path, 'rb'))
+                # set the new attributes
+            except ResponseError, err:
+                if err.status_code == 404:
+                    # If the file becomes suddenly not available, just ignore
+                    # trying to set its attributes
+                    pass
+                if err.status_code == 500:
+                    # Ignore server errors since they shouldnt happen anyways
+                    pass
+            except RequestError, err:
+                if err.detail.startswith('HTTPConnectionPool'):
+                    raise MaxTriesException(err)
 
-            """
-            # Notify the realtime sync of the change
-            if self.parent.watcherRunning:
-                self.parent.localWatcher.realtime.update(task.path, 'created_file', 0, False)
-            """
+            self._setAttributes(task)
         else:
             # If the task path is a folder
             task_directory = basepath
@@ -57,11 +65,7 @@ class Uploader(Worker):
 
             self._api.post('/path/oper/mkdir/', path=task_directory)
 
-            """
-            # Notify the realtime sync of the change
-            if self.parent.watcherRunning:
-                self.parent.localWatcher.realtime.update(create_dir, 'created_dir', 0, True)
-            """
+        return task
 
     def _setAttributes(self, task):
         checksum = task.checksum
@@ -86,21 +90,31 @@ class Uploader(Worker):
             elif err.status_code == 500:
                 self.__setAttributes(apiPath, checksum_string,
                                      modified_string)
-            else:
-                raise
-        except:
-            raise
 
     def __setAttributes(self, apiPath, checksum_string, modified_string):
         request_properties = [checksum_string, modified_string]
-        self._api.post(apiPath, attributes=request_properties)
+        try:
+            self._api.post(apiPath, attributes=request_properties)
+        except ResponseError, err:
+            if err.status_code == 404:
+                # If the file becomes suddenly not available, just ignore
+                # trying to set its attributes
+                pass
+            if err.status_code == 500:
+                # Ignore server errors since they shouldnt happen anyways
+                pass
+        except RequestError, err:
+            if err.detail.startswith('HTTPConnectionPool'):
+                raise MaxTriesException(err)
 
 
 class UploadThread(Uploader, threading.Thread):
-    def __init__(self, queue, api, sync_dir, realtime=False):
+    def __init__(self, queue, api, sync_dir, remote_files, realtime=False):
         threading.Thread.__init__(self)
         self._uploader = Uploader(api, sync_dir)
         self._queue = queue
+        self._remote_files = remote_files
+
         self._realtime = realtime
 
     def run(self):
@@ -110,10 +124,15 @@ class UploadThread(Uploader, threading.Thread):
             self._current_task = self._queue.get()
             try:
                 log.debug("Processing: " + self._current_task.path)
-                self._uploader.process_task(self._current_task)
+                result = self._uploader.process_task(self._current_task)
+                # Update the remote files dictionary to reflect the new file
+                self._remote_files[result.path] = result
             except FileNotAvailableException:
                 # The file was not available when uploading it
                 log.warning("File is not yet available.")
+                self._queue.put(self._current_task)
+            except MaxTriesException:
+                log.warning("Connection error occured during the upload.")
                 self._queue.put(self._current_task)
             else:
                 # Notify the realtime messaging system of the upload

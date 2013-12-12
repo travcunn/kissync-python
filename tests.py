@@ -289,6 +289,8 @@ class SyncEngineEvents(unittest.TestCase):
         for event in created_events:
             self.syncEngine.createdEvent(event)
 
+        for item in self.syncEngine.downloadQueue.queue:
+            print item.path
         # Make sure the redundant task was deleted
         self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
 

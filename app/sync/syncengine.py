@@ -7,6 +7,7 @@ from Queue import LifoQueue
 
 from fs.osfs import OSFS
 import fs.path
+from smartfile.errors import RequestError, ResponseError
 
 from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadThread
@@ -33,7 +34,9 @@ class SyncThread(threading.Thread):
 
         # Watch the local file system
         #TODO: make sure the uploader and downloader dont set off the watcher
-        self.local_watcher = Watcher(sync_dir=self.sync_dir,
+        self.local_watcher = Watcher(
+                processing=self.sync_engine.isDownloading,
+                sync_dir=self.sync_dir,
                 moved_callback=self.sync_engine.movedEvent,
                 created_callback=self.sync_engine.createdEvent,
                 deleted_callback=self.sync_engine.deletedEvent,
@@ -53,11 +56,8 @@ class SyncThread(threading.Thread):
         self.sync_engine.setupMessaging(self.realtime)
         """
 
-        # Start the workers to wait for tasks
-        self.sync_engine.startWorkers()
-
-        # Synchronize with SmartFile
-        self.sync_engine.synchronize()
+        # Start the sync engine
+        self.sync_engine.start()
 
 
 class SyncEngine(object):
@@ -89,7 +89,7 @@ class SyncEngine(object):
         """ For some tasks, messages should be sent to other clients. """
         self.realtime = realtime
 
-    def startWorkers(self):
+    def start(self):
         """ Initialize the upload and download workers. """
 
         upload = 4  # Specify amount of upload threads
@@ -98,21 +98,25 @@ class SyncEngine(object):
         log.debug("Creating " + str(upload) + " upload workers.")
         for i in range(upload):
             uploader = UploadThread(self.uploadQueue, self.api,
-                                    self.sync_dir, self.realtime)
+                                    self.sync_dir, self.remote_files,
+                                    self.realtime)
             uploader.start()
             self.uploadWorkers.append(uploader)
 
         log.debug("Creating " + str(download) + " download workers.")
         for i in range(download):
             downloader = DownloadThread(self.downloadQueue, self.api,
-                                        self.sync_dir)
+                                        self.sync_dir, self.local_files)
             downloader.start()
             self.downloadWorkers.append(downloader)
+
+        # Synchronize with SmartFile
+        self.synchronize()
 
     def synchronize(self):
         """ Compare local files with the SmartFile servers. """
         # Wait time in between indexing remote
-        wait_time = 1
+        wait_time = 5
 
         remote_indexer = RemoteIndexer(self.api)
         local_indexer = LocalIndexer(self.syncFS)
@@ -127,6 +131,7 @@ class SyncEngine(object):
             local_indexer.results.clear()
             local_indexer.index()
 
+            # WARNING: this takes a lot of requests
             # Set the local and remote file dictionaries
             self.local_files = local_indexer.results
             self.remote_files = remote_indexer.results
@@ -152,22 +157,30 @@ class SyncEngine(object):
         remote_only_files = list(remote_files - local_files)
         local_only_files = list(local_files - remote_files)
 
-        # Put file matches into the upload or download queue depending on
-        # which file definition is newer
+        # For files that exist in both locations, a creation event is created 
+        # depending on which file definition is newer
         for match in matching_files:
             if local[match].checksum != remote[match].checksum:
                 if local[match].modified > remote[match].modified:
-                    self.uploadQueue.put(local[match])
+                    event = events.LocalCreatedEvent(local[match].path,
+                                                     local[match].isDir)
+                    self.createdEvent(event)
                 elif local[match].modified < remote[match].modified:
-                    self.downloadQueue.put(local[match])
+                    event = events.RemoteCreatedEvent(local[match].path,
+                                                      local[match].isDir)
+                    self.createdEvent(event)
 
         # Put remote only files into the download queue
         for remote_file in remote_only_files:
-            self.downloadQueue.put(remote[remote_file])
+            event = events.RemoteCreatedEvent(remote[remote_file].path,
+                                              remote[remote_file].isDir)
+            self.createdEvent(event)
 
         # Put local only files into the upload queue
         for local_file in local_only_files:
-            self.uploadQueue.put(local[local_file])
+            event = events.LocalCreatedEvent(local[local_file].path,
+                                             local[local_file].isDir)
+            self.createdEvent(event)
 
     def movedEvent(self, event):
         if (isinstance(event, events.LocalMovedEvent) or
@@ -201,16 +214,22 @@ class SyncEngine(object):
             # Check the upload queue for redundant events
             for task in self.uploadQueue.queue:
                 if task.path == event.path:
-                    self.uploadQueue.queue.remove(task)
-            # Put the task in the queue
-            self.uploadQueue.put(event)
+                    break
+            else:
+                if not self.isUploading(event.path):
+                    # Put the task in the queue
+                    log.info("Putting a task into the upload queue.")
+                    self.uploadQueue.put(event)
         elif isinstance(event, events.RemoteCreatedEvent):
             # Check the download queue for redundant events
             for task in self.downloadQueue.queue:
                 if task.path == event.path:
-                    self.downloadQueue.queue.remove(task)
-            # Put the task in the queue
-            self.downloadQueue.put(event)
+                    break
+            else:
+                if not self.isDownloading(event.path):
+                    # Put the task in the queue
+                    log.info("Putting a task into the download queue.")
+                    self.downloadQueue.put(event)
         else:
             raise BadEventException("Not a valid event: ",
                     event.__class__.__name__)
@@ -247,16 +266,20 @@ class SyncEngine(object):
             # Check the upload queue for redundant events
             for task in self.uploadQueue.queue:
                 if task.path == event.path:
-                    self.uploadQueue.queue.remove(task)
-            # Put the task in the queue
-            self.uploadQueue.put(event)
+                    break
+            else:
+                if not self.isUploading(event.path):
+                    # Put the task in the queue
+                    self.uploadQueue.put(event)
         elif isinstance(event, events.RemoteModifiedEvent):
             # Check the download queue for redundant events
             for task in self.downloadQueue.queue:
                 if task.path == event.path:
-                    self.downloadQueue.queue.remove(task)
-            # Put the task in the queue
-            self.downloadQueue.put(event)
+                    break
+            else:
+                if not self.isDownloading(event.path):
+                    # Put the task in the queue
+                    self.downloadQueue.put(event)
         else:
             raise BadEventException("Not a valid event: ",
                     event.__class__.__name__)
@@ -274,6 +297,24 @@ class SyncEngine(object):
             if worker.current_task is not None:
                 if worker.current_task.path == path:
                     worker.cancel()
+
+    def isDownloading(self, path):
+        """ Returns whether or not a file is being downloaded. """
+        for worker in self.downloadWorkers:
+            if worker.current_task is not None:
+                if worker.current_task.path == path:
+                    return True
+        else:
+            return False
+
+    def isUploading(self, path):
+        """ Returns whether or not a file is being uploaded. """
+        for worker in self.uploadWorkers:
+            if worker.current_task is not None:
+                if worker.current_task.path == path:
+                    return True
+        else:
+            return False
 
 
 class LocalIndexer(object):
@@ -333,7 +374,17 @@ class RemoteIndexer(object):
             apiPath = '/path/info%s' % remotePath
 
             #TODO: check other errors here later
-            dir_listing = self.api.get(apiPath, children=True)
+            try:
+                dir_listing = self.api.get(apiPath, children=True)
+            except ResponseError as e:
+                # If the error code is 404, ignore the file.
+                if e.status_code == 404:
+                    break
+            except RequestError, err:
+                if err.detail.startswith('HTTPConnectionPool'):
+                    # Connection error. Wait 2 seconds then try again.
+                    time.sleep(2)
+                    dir_listing = self.api.get(apiPath, children=True)
 
             if "children" not in dir_listing:
                 break

@@ -15,11 +15,14 @@ log = logging.getLogger(__name__)
 
 
 class Watcher(threading.Thread):
-    def __init__(self, sync_dir, moved_callback=None, created_callback=None,
-                 deleted_callback=None, modified_callback=None):
+    def __init__(self, processing, sync_dir, moved_callback=None,
+                 created_callback=None, deleted_callback=None,
+                 modified_callback=None):
         self.sync_dir = sync_dir
 
-        self.event_handler = EventHandler(sync_dir=sync_dir,
+        self.event_handler = EventHandler(
+                processing=processing,
+                sync_dir=sync_dir,
                 moved_callback=moved_callback,
                 created_callback=created_callback,
                 deleted_callback=deleted_callback,
@@ -43,9 +46,13 @@ class Watcher(threading.Thread):
 
 
 class EventHandler(FileSystemEventHandler):
-    def __init__(self, sync_dir, moved_callback=None, created_callback=None,
-                 deleted_callback=None, modified_callback=None):
+    def __init__(self, processing, sync_dir, moved_callback=None,
+                 created_callback=None, deleted_callback=None,
+                 modified_callback=None):
         self.sync_dir = sync_dir
+
+        # Function that returns whether or not we should ignore a path
+        self.processing = processing
 
         self.moved_callback = moved_callback
         self.created_callback = created_callback
@@ -54,10 +61,12 @@ class EventHandler(FileSystemEventHandler):
 
     def on_moved(self, event):
         log.info("Local file was moved. src_path=" + event.src_path +
-                ", dest_path=" + event.dest_path)
-        src_path = fs.path.normpath(event.src_path.replace(self.sync_dir, ''))
-        dest_path = fs.path.normpath(event.dest_path.replace(self.sync_dir,
-                                                             ''))
+            ", dest_path=" + event.dest_path)
+        src_stripped = event.src_path.replace(self.sync_dir, '')
+        src_path = fs.path.normpath(src_stripped)
+        dest_stripped = event.dest_path.replace(self.sync_dir, '')
+        dest_path = fs.path.normpath(dest_stripped)
+
         # Check if the path exists
         if os.path.exists(event.dest_path):
             if self.moved_callback is not None:
@@ -66,17 +75,21 @@ class EventHandler(FileSystemEventHandler):
                 self.moved_callback(moved_event)
 
     def on_created(self, event):
-        log.info("Local file was created. src_path=" + event.src_path)
-        src_path = fs.path.normpath(event.src_path.replace(self.sync_dir, ''))
+        src_stripped = event.src_path.replace(self.sync_dir, '')
+        src_path = fs.path.normpath(src_stripped)
 
-        # Check if the path exists
-        if os.path.exists(event.src_path):
-            isDir = event.is_directory
-            created_event = events.LocalCreatedEvent(src_path, isDir=isDir)
+        # Check if hte path is being processed by the sync engine
+        if not self.processing(src_path):
+            log.info("Local file was created. src_path=" + event.src_path)
+            # Check if the path exists
+            if os.path.exists(event.src_path):
+                isDir = event.is_directory
+                created_event = events.LocalCreatedEvent(src_path,
+                                                         isDir=isDir)
 
-            if self.created_callback is not None:
-                log.debug("Sending a LocalCreatedEvent to the callback.")
-                self.created_callback(created_event)
+                if self.created_callback is not None:
+                    log.debug("Sending a LocalCreatedEvent to the callback.")
+                    self.created_callback(created_event)
 
     def on_deleted(self, event):
         log.info("Local file was deleted. src_path=" + event.src_path)
@@ -89,13 +102,16 @@ class EventHandler(FileSystemEventHandler):
             self.deleted_callback(deleted_event)
 
     def on_modified(self, event):
-        log.info("Local file was modified. src_path=" + event.src_path)
-        src_path = fs.path.normpath(event.src_path.replace(self.sync_dir, ''))
+        src_stripped = event.src_path.replace(self.sync_dir, '')
+        src_path = fs.path.normpath(src_stripped)
 
-        # Check if the path exists
-        if os.path.exists(event.src_path) and not event.is_directory:
-            modified_event = events.LocalModifiedEvent(src_path)
+        # Check if the path is being processed by the sync engine
+        if not self.processing(src_path):
+            log.info("Local file was modified. src_path=" + event.src_path)
+            # Check if the path exists
+            if os.path.exists(event.src_path) and not event.is_directory:
+                modified_event = events.LocalModifiedEvent(src_path)
 
-            if self.created_callback is not None:
-                log.debug("Sending a LocalModifiedEvent to the callback.")
-                self.modified_callback(modified_event)
+                if self.created_callback is not None:
+                    log.debug("Sending a LocalModifiedEvent to the callback.")
+                    self.modified_callback(modified_event)

@@ -4,7 +4,7 @@ class Worker(object):
         self.__cancelled = False
 
     def process_task(self, task):
-        self._process_task(task)
+        return self._process_task(task)
 
     def _process_task(self, task):
         """ Override this method to process a task. """
