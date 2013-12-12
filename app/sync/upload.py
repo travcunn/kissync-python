@@ -50,7 +50,10 @@ class Uploader(Worker):
                 # create the directory to make sure it exists
                 self._api.post('/path/oper/mkdir/', path=task_directory)
                 # upload the file
-                self._api.post(apiPath, file=file(absolute_path, 'rb'))
+                print "Here is the API path:", apiPath
+                self._api.post("/path/data/hello.txt",
+                        file=file("C:/Users/Travis/Smartfile/hello.txt", 'rb'))
+                #self._api.post(apiPath, file=file(absolute_path, 'rb'))
                 # set the new attributes
             except:
                 raise
