@@ -41,23 +41,15 @@ class Uploader(Worker):
                 basepath = os.path.join("/", basepath)
 
             task_directory = os.path.dirname(basepath)
-            print "Task Directory:", task_directory
-            print "Base Path:", basepath
-            print "Absolute Path:", absolute_path
             apiPath = "/path/data%s" % basepath
+            apiPathBase = os.path.dirname(apiPath)
 
             try:
                 # create the directory to make sure it exists
                 self._api.post('/path/oper/mkdir/', path=task_directory)
                 # upload the file
-                print "Here is the API path:", apiPath
-                self._api.post("/path/data/hello.txt",
-                        file=file("C:/Users/Travis/Smartfile/hello.txt", 'rb'))
-                #self._api.post(apiPath, file=file(absolute_path, 'rb'))
+                self._api.post(apiPathBase, file=file(absolute_path, 'rb'))
                 # set the new attributes
-            except:
-                raise
-            """
             except ResponseError, err:
                 if err.status_code == 404:
                     # If the file becomes suddenly not available, just ignore
@@ -72,7 +64,6 @@ class Uploader(Worker):
                     raise MaxTriesException(err)
             else:
                 self._setAttributes(task)
-            """
         else:
             # If the task path is a folder
             task_directory = basepath
