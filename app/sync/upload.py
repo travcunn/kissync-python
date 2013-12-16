@@ -9,6 +9,7 @@ from smartfile.errors import RequestError, ResponseError
 import common
 from definitions import LocalDefinitionHelper
 from errors import FileNotAvailableException, MaxTriesException
+from errors import UploadException
 from worker import Worker
 
 
@@ -55,7 +56,10 @@ class Uploader(Worker):
                     # If the file becomes suddenly not available, just ignore
                     # trying to set its attributes.
                     pass
-                if err.status_code == 500:
+                elif err.status_code == 409:
+                    # Conflict - Can only upload to an existing directory.
+                    raise UploadException(err)
+                elif err.status_code == 500:
                     # Ignore server errors for now. The indexer will pick
                     # this file up later on.
                     pass
@@ -137,16 +141,22 @@ class UploadThread(Uploader, threading.Thread):
             except FileNotAvailableException:
                 # The file was not available when uploading it
                 log.warning("File is not yet available.")
-                self._queue.put(self._current_task)
+                self.try_task_later()
             except MaxTriesException:
                 log.warning("Connection error occured during the upload.")
-                self._queue.put(self._current_task)
+                self.try_task_later()
+            except UploadException:
+                log.warning("The parent folders were not created properly.")
+                self.try_task_later()
             else:
                 # Notify the realtime messaging system of the upload
                 if self._realtime:
                     self._realtime.update(self._current_task)
             log.debug("Task complete.")
             self._queue.task_done()
+
+    def try_task_later(self):
+        self._queue.put(self._current_task)
 
     def cancel(self):
         log.debug("Task cancelled: " + self._current_task.path)

@@ -50,7 +50,6 @@ class Downloader(Worker):
             basepath = basepath.replace('\\', '/')
             if not basepath.startswith("/"):
                 basepath = os.path.join("/", basepath)
-            print basepath
             try:
                 with open(absolute_path, 'wb') as f:
                     response = self._api.get('/path/data', basepath)
