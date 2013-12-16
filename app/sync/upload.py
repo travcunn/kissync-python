@@ -73,6 +73,7 @@ class Uploader(Worker):
             task_directory = basepath
             if not task_directory.startswith("/"):
                 task_directory = os.path.join("/", task_directory)
+            task_directory = task_directory.replace('\\', '/')
 
             self._api.post('/path/oper/mkdir/', path=task_directory)
 
