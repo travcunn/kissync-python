@@ -106,7 +106,7 @@ class Downloader(Worker):
         return definition
 
 
-class DownloadThread(threading.Thread):
+class DownloadWorker(threading.Thread):
     def __init__(self, queue, api, sync_dir, local_files):
         threading.Thread.__init__(self)
         self._downloader = Downloader(api, sync_dir)

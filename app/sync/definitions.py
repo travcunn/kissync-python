@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 
 import common
@@ -29,12 +29,22 @@ class LocalDefinitionHelper(object):
             # The file may not be available yet
             checksum = None
         local_modified = os.path.getmtime(self.system_path)
-        timestamp = datetime.datetime.fromtimestamp(local_modified).replace(microsecond=0)
+        time = datetime.fromtimestamp(local_modified)
+        timestamp = time.replace(microsecond=0)
         # The local time may vary from the server so subtract the offset
         time_offset = common.calculate_time_offset()
         modified = timestamp - time_offset
         size = os.path.getsize(self.system_path)
         isDir = os.path.isdir(self.system_path)
 
+        self.path = self.normalize_path(self.path)
+
         return FileDefinition(path=self.path, checksum=checksum,
                               modified=modified, size=size, isDir=isDir)
+
+    def normalize_path(self, path):
+        path = path.replace('\\', '/')
+        if not path.startswith("/"):
+            path = os.path.join("/", 'path')
+
+        return path

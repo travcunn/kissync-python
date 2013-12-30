@@ -10,11 +10,12 @@ import fs.path
 from smartfile.errors import RequestError, ResponseError
 
 from definitions import FileDefinition, LocalDefinitionHelper
-from download import DownloadThread
+from download import DownloadWorker
 from errors import BadEventException
 import events
 #from realtime import RealtimeMessages
-from upload import UploadThread
+from simpletasks import SimpleTaskWorker
+from upload import UploadWorker
 from watcher import Watcher
 
 
@@ -71,6 +72,7 @@ class SyncEngine(object):
 
         self.realtime = False
 
+        self.simpleTaskWorkers = []
         self.uploadWorkers = []
         self.downloadWorkers = []
 
@@ -89,14 +91,23 @@ class SyncEngine(object):
         self.realtime = realtime
 
     def start(self):
-        """ Initialize the upload and download workers. """
+        """ Initialize the workers. """
 
-        upload = 4  # Specify amount of upload threads
-        download = 5  # Specify amount of download threads
+        simple = 2  # Specify amount of simple workers
+        upload = 4  # Specify amount of upload workers
+        download = 5  # Specify amount of download workers
+
+        log.debug("Creating " + str(upload) + " simple task workers.")
+        for i in range(upload):
+            simple = SimpleTaskWorker(self.simpleTasks, self.api,
+                                    self.sync_dir, self.remote_files,
+                                    self.realtime)
+            simple.start()
+            self.simpleTaskWorkers.append(simple)
 
         log.debug("Creating " + str(upload) + " upload workers.")
         for i in range(upload):
-            uploader = UploadThread(self.uploadQueue, self.api,
+            uploader = UploadWorker(self.uploadQueue, self.api,
                                     self.sync_dir, self.remote_files,
                                     self.realtime)
             uploader.start()
@@ -104,7 +115,7 @@ class SyncEngine(object):
 
         log.debug("Creating " + str(download) + " download workers.")
         for i in range(download):
-            downloader = DownloadThread(self.downloadQueue, self.api,
+            downloader = DownloadWorker(self.downloadQueue, self.api,
                                         self.sync_dir, self.local_files)
             downloader.start()
             self.downloadWorkers.append(downloader)
@@ -114,41 +125,31 @@ class SyncEngine(object):
 
     def synchronize(self):
         """ Compare local files with the SmartFile servers. """
-        # Wait time in between indexing remote
-        wait_time = 5
-
         remote_indexer = RemoteIndexer(self.api)
         local_indexer = LocalIndexer(self.syncFS)
-        while True:
-            # Index remote files
-            log.debug("Indexing the files on SmartFile.")
-            remote_indexer.results.clear()
-            remote_indexer.index()
 
-            # Index local files
-            log.debug("Indexing the files on the local system.")
-            local_indexer.results.clear()
-            local_indexer.index()
+        # Index remote files
+        log.debug("Indexing the files on SmartFile.")
+        remote_indexer.results.clear()
+        remote_indexer.index()
 
-            # WARNING: this takes a lot of requests
-            # Set the local and remote file dictionaries
-            self.local_files = local_indexer.results
-            self.remote_files = remote_indexer.results
+        # Index local files
+        log.debug("Indexing the files on the local system.")
+        local_indexer.results.clear()
+        local_indexer.index()
 
-            # Compare the lists and populate task queues
-            log.debug("Comparing the results of remote and local.")
-            self.compare_results(remote=remote_indexer.results,
-                                 local=local_indexer.results)
+        # WARNING: this takes a lot of requests
+        # Set the local and remote file dictionaries
+        self.local_files = local_indexer.results
+        self.remote_files = remote_indexer.results
 
-            # Wait 5 minutes, then check with SmartFile again
-            log.debug("Synchronize sleep for " + str(wait_time * 60))
-            time.sleep(wait_time * 60)
+        # Compare the lists and populate task queues
+        log.debug("Comparing the results of remote and local.")
+        self.compare_results(remote=remote_indexer.results,
+                             local=local_indexer.results)
 
     def compare_results(self, remote, local):
         """ Compare the local and remote file dictionaries. """
-        #TODO: make sure tasks are not already in the queues.
-        #TODO: Dont put a task in the queue if it is already in it
-
         remote_files = set(remote.keys())
         local_files = set(local.keys())
 
@@ -341,11 +342,7 @@ class LocalIndexer(object):
                 self._process_path(discovered_path)
 
     def _process_path(self, path):
-        #startswith_filter = lambda x: not x.startswith(".")
-        #endswith_filter = lambda x: not x.endswith("~")
-        filters = [(lambda x: not x.startswith(".")),
-                   (lambda x: not x.endswith("~")),
-                   (lambda x: not x == '/')]
+        filters = [(lambda x: not x == '/')]
 
         filename = os.path.basename(path)
         for _filter in filters:

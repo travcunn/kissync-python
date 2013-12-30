@@ -7,7 +7,7 @@ from fs.osfs import OSFS
 from smartfile.errors import RequestError, ResponseError
 
 import common
-from definitions import LocalDefinitionHelper
+from definitions import FileDefinition, LocalDefinitionHelper
 from errors import FileNotAvailableException, MaxTriesException
 from errors import UploadException
 from worker import Worker
@@ -24,8 +24,10 @@ class Uploader(Worker):
         self._syncFS = OSFS(sync_dir)
 
     def _process_task(self, task):
-        helper = LocalDefinitionHelper(task.path, self._syncFS)
-        task = helper.create_definition()
+        # Check if the task is already a file definition
+        if not isinstance(task, FileDefinition):
+            helper = LocalDefinitionHelper(task.path, self._syncFS)
+            task = helper.create_definition()
         # Create a system specific path relative to the sync dir
         basepath = os.path.normpath(task.path)
         if basepath.startswith("/"):
@@ -51,6 +53,9 @@ class Uploader(Worker):
                 # upload the file
                 self._api.post(apiPathBase, file=file(absolute_path, 'rb'))
                 # set the new attributes
+            except IOError, err:
+                if err.errno == 2:
+                    raise FileNotAvailableException(err)
             except ResponseError, err:
                 if err.status_code == 404:
                     # If the file becomes suddenly not available, just ignore
@@ -74,8 +79,12 @@ class Uploader(Worker):
             if not task_directory.startswith("/"):
                 task_directory = os.path.join("/", task_directory)
             task_directory = task_directory.replace('\\', '/')
-
-            self._api.post('/path/oper/mkdir/', path=task_directory)
+            try:
+                self._api.post('/path/oper/mkdir/', path=task_directory)
+            except RequestError, err:
+                raise MaxTriesException(err)
+            except Exception, err:
+                raise UploadException(err)
 
         return task
 
@@ -120,7 +129,7 @@ class Uploader(Worker):
                 raise MaxTriesException(err)
 
 
-class UploadThread(Uploader, threading.Thread):
+class UploadWorker(threading.Thread):
     def __init__(self, queue, api, sync_dir, remote_files, realtime=False):
         threading.Thread.__init__(self)
         self._uploader = Uploader(api, sync_dir)
