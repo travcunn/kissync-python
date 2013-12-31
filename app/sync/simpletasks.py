@@ -4,6 +4,7 @@ import shutil
 import threading
 
 from fs.osfs import OSFS
+from smartfile.errors import ResponseError
 
 import common
 import events
@@ -74,7 +75,12 @@ class SimpleTask(Worker):
         Moves a remote path, given a path relative to the sync directory.
         """
         #TODO: test this
-        self._api.post('/path/oper/rename', src=src, dst=dest)
+        try:
+            self._api.post('/path/oper/rename', src=src, dst=dest)
+        except ResponseError, err:
+            # ignore 404 errors, as the containing folder was probably moved
+            if err.status_code == 404:
+                pass
 
     def deleteLocal(self, path):
         """ Deletes a local path, given a system path. """

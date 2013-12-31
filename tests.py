@@ -354,6 +354,22 @@ class SyncEngineEvents(unittest.TestCase):
             self.syncEngine.modifiedEvent("bad event")
 
     def test_local_moved_event(self):
+        mock_upload_worker = MockWorker(events.LocalCreatedEvent('/source.txt',
+                                                                 isDir=False))
+        mock_download_worker = MockWorker(events.LocalCreatedEvent('/source.txt',
+                                                                   isDir=False))
+        self.syncEngine.uploadWorkers.append(mock_upload_worker)
+        self.syncEngine.downloadWorkers.append(mock_download_worker)
+
+        self.syncEngine.uploadQueue.put(events.LocalCreatedEvent('/source.txt',
+                                                                 isDir=False))
+        self.syncEngine.uploadQueue.put(events.LocalCreatedEvent('/source.txt',
+                                                                 isDir=False))
+        self.syncEngine.downloadQueue.put(events.RemoteCreatedEvent('/source.txt',
+                                                                 isDir=False))
+        self.syncEngine.downloadQueue.put(events.RemoteCreatedEvent('/source.txt',
+                                                                 isDir=False))
+
         deleted_events = [
                         events.LocalDeletedEvent('/destination.txt'),
                         events.LocalDeletedEvent('/source.txt')
@@ -370,10 +386,19 @@ class SyncEngineEvents(unittest.TestCase):
         for event in moved_events:
             self.syncEngine.movedEvent(event)
 
+        # Make sure events were moved in the simple tasks queue
         for event in self.syncEngine.simpleTasks.queue:
             if isinstance(event, events.LocalDeletedEvent):
                 # Since the event path is moved, make sure other events are moved
                 self.assertTrue(event.path == '/destination.txt')
+
+        # Make sure events were moved in the download queue
+        for event in self.syncEngine.downloadQueue.queue:
+            self.assertTrue(event.path == '/destination.txt')
+
+        # Make sure events were moved in the upload queue
+        for event in self.syncEngine.uploadQueue.queue:
+            self.assertTrue(event.path == '/destination.txt')
 
     def test_bad_moved_event(self):
         with self.assertRaises(BadEventException):

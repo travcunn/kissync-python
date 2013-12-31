@@ -64,10 +64,6 @@ class Uploader(Worker):
                 elif err.status_code == 409:
                     # Conflict - Can only upload to an existing directory.
                     raise UploadException(err)
-                elif err.status_code == 500:
-                    # Ignore server errors for now. The indexer will pick
-                    # this file up later on.
-                    pass
             except RequestError, err:
                 if err.detail.startswith('HTTPConnectionPool'):
                     raise MaxTriesException(err)

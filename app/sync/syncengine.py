@@ -3,7 +3,7 @@ import logging
 import os
 import threading
 import time
-from Queue import LifoQueue
+from Queue import LifoQueue, Queue
 
 from fs.osfs import OSFS
 import fs.path
@@ -80,7 +80,7 @@ class SyncEngine(object):
         self.remote_files = {}
 
         # Simple task queue
-        self.simpleTasks = LifoQueue()
+        self.simpleTasks = Queue()
         # Upload task queue
         self.uploadQueue = LifoQueue()
         # Download task queue
@@ -185,6 +185,7 @@ class SyncEngine(object):
     def movedEvent(self, event):
         if (isinstance(event, events.LocalMovedEvent) or
                 isinstance(event, events.RemoteMovedEvent)):
+
             moved_tasks = []
             for task in self.simpleTasks.queue:
                 # if the task is not a move task
@@ -203,8 +204,52 @@ class SyncEngine(object):
             # tasks that were moved should be put back into the queue
             for task in moved_tasks:
                 self.simpleTasks.put(task)
-            # Put the task in the queue
+            # Put the task in the simple tasks queue
             self.simpleTasks.put(event)
+
+            # Move any files being currently uploaded
+            moved_upload_tasks = []
+            for worker in self.uploadWorkers:
+                if worker.current_task is not None:
+                    if worker.current_task.path == event.src:
+                        moved_upload_tasks.append(worker.current_task)
+                        worker.cancel()
+            # Put moved upload tasks back into the upload queue
+            for task in moved_upload_tasks:
+                task.path = event.path
+                self.uploadQueue.put(task)
+
+            # Move any files being currently downloaded
+            moved_download_tasks = []
+            for worker in self.downloadWorkers:
+                if worker.current_task is not None:
+                    if worker.current_task.path == event.src:
+                        moved_download_tasks.append(worker.current_task)
+                        worker.cancel()
+            # Put moved download tasks back into the download queue
+            for task in moved_download_tasks:
+                task.path = event.path
+                self.downloadQueue.put(task)
+
+            # Move any file paths in the queues
+            moved_upload_queue_tasks = []
+            for task in self.uploadQueue.queue:
+                if task.path == event.src:
+                    moved_upload_queue_tasks.append(task)
+                    self.uploadQueue.queue.remove(task)
+            moved_download_queue_tasks = []
+            for task in self.downloadQueue.queue:
+                if task.path == event.src:
+                    moved_download_queue_tasks.append(task)
+                    self.downloadQueue.queue.remove(task)
+            # Put moved download tasks back into the download queue
+            for task in moved_download_queue_tasks:
+                task.path = event.path
+                self.downloadQueue.put(task)
+            # Put moved upload tasks back into the upload queue
+            for task in moved_upload_queue_tasks:
+                task.path = event.path
+                self.uploadQueue.put(task)
         else:
             raise BadEventException("Not a valid event: ",
                     event.__class__.__name__)
