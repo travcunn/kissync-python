@@ -127,14 +127,13 @@ class DownloadWorker(threading.Thread):
             except FileNameException:
                 # Files that have invalid names should not be downloaded
                 log.warning("The file to be downloaded had a bad filename.")
-                pass
             except FileNotAvailableException:
                 log.warning("The local file was not available.")
             except:
-                raise
                 # Put the task back into the queue and try later
                 log.debug("Putting the task in the queue to try later.")
                 self._queue.put(self._current_task)
+
             log.debug("Task complete.")
             self._queue.task_done()
 
