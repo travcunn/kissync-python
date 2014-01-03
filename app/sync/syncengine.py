@@ -80,7 +80,7 @@ class SyncEngine(object):
         self.remote_files = {}
 
         # Simple task queue
-        self.simpleTasks = Queue()
+        self.simpleTasks = LifoQueue()
         # Upload task queue
         self.uploadQueue = LifoQueue()
         # Download task queue
