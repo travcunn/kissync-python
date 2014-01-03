@@ -3,7 +3,7 @@ import logging
 import os
 import threading
 import time
-from Queue import LifoQueue, Queue
+from Queue import LifoQueue
 
 from fs.osfs import OSFS
 import fs.path
@@ -13,7 +13,7 @@ from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadWorker
 from errors import BadEventException
 import events
-#from realtime import RealtimeMessages
+from realtime import RealtimeMessages
 from simpletasks import SimpleTaskWorker
 from upload import UploadWorker
 from watcher import Watcher
@@ -43,7 +43,6 @@ class SyncThread(threading.Thread):
             modified_callback=self.sync_engine.modifiedEvent)
         self.local_watcher.start()
 
-        """
         # Start the realtime messaging system
         self.realtime = RealtimeMessages(api=self.api,
                 on_moved=self.sync_engine.movedEvent,
@@ -54,7 +53,6 @@ class SyncThread(threading.Thread):
 
         # Setup messaging for the sync engine
         self.sync_engine.setupMessaging(self.realtime)
-        """
 
         # Start the sync engine
         self.sync_engine.start()
@@ -94,8 +92,8 @@ class SyncEngine(object):
         """ Initialize the workers. """
 
         simple = 2  # Specify amount of simple workers
-        upload = 4  # Specify amount of upload workers
-        download = 5  # Specify amount of download workers
+        upload = 2  # Specify amount of upload workers
+        download = 2  # Specify amount of download workers
 
         log.debug("Creating " + str(upload) + " simple task workers.")
         for i in range(upload):
