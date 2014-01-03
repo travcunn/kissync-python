@@ -10,21 +10,21 @@ Running Kissync
 
 __Prerequisites:__
 
-Kissync requires PySide (cross-platform) for the GUI. On Ubuntu/Debian, this can be installed using the following command:
+Kissync requires PySide (cross-platform) for the GUI. On Debian based systems, this can be installed using the following command:
 
     $ sudo apt-get install python-pyside
+    
+Other Python dependencies can be installed with the following commands:
+
+    $ pip install --timeout=30 -r requirements.txt --use-mirrors
+    $ pip install --timeout=30 -q -e . --use-mirrors
+
 
 __Build and run:__
 
     $ git clone https://github.com/travcunn/kissync-python.git kissync
     $ cd kissync
     $ python main.py
-
-
-If Python complains about dependencies, you can install them with the following commands:
-
-    $ pip install --timeout=30 -r requirements.txt --use-mirrors
-    $ pip install --timeout=30 -q -e . --use-mirrors
 
 
 Building a Windows installer
@@ -83,8 +83,5 @@ Links
 
 [MIT License](https://github.com/kissync/kissync-python/blob/master/LICENSE.MIT)
 
-Special Thanks
-==============
-Special thanks to Taylor Brazelton for testing [@Ryanb58](https://twitter.com/Ryanb58)
 
 [![githalytics.com alpha](https://cruel-carlota.pagodabox.com/83ebee1008a3caf7f74f8a98c5b44cea "githalytics.com")](http://githalytics.com/kissync/kissync-python)
