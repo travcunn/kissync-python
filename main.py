@@ -25,7 +25,7 @@ logs = [logging.getLogger("requests"), logging.getLogger("oauthlib")]
 for log in logs:
     log.setLevel(logging.WARNING)
 
-version = "0.23"
+version = "0.24"
 
 
 class Main(QtGui.QWidget):

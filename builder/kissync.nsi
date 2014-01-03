@@ -3,7 +3,7 @@
 SetCompressor lzma
 
 !define PRODUCT_NAME "SmartFile Sync"
-!define PRODUCT_VERSION "0.23"
+!define PRODUCT_VERSION "0.24"
 !define PRODUCT_SIMPLENAME "SmartFile Sync"
 !define PRODUCT_PUBLISHER "Travis Cunningham"
 !define PRODUCT_WEB_SITE "http://www.kissync.com/"
