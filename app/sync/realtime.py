@@ -160,7 +160,7 @@ class RealtimeMessages(threading.Thread):
             auth_hash.update("%s" % (generated_key))
             realtime_key = auth_hash.hexdigest()
 
-            # Store the realtime_key on SmartFile in user preferences
+            # Store the  generated key on SmartFile in user preferences
             self.api.put("/pref/user/sync.realtime-key", value=realtime_key)
 
         auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
