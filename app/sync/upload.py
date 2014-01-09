@@ -157,6 +157,7 @@ class UploadWorker(threading.Thread):
             else:
                 # Notify the realtime messaging system of the upload
                 if self._realtime:
+                    print "REALTIME UPDATING........."
                     self._realtime.update(self._current_task)
             log.debug("Task complete.")
             self._queue.task_done()
