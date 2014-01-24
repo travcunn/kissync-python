@@ -5,7 +5,7 @@ from distutils.core import setup
 setup(
     name='main.py',
     version="1.0",
-    description='Kissync Desktop Client',
+    description='SmartFile Desktop Client',
     install_requires=[
         'coverage',
         'coveralls',
@@ -20,7 +20,7 @@ setup(
         'watchdog',
         'wsgiref'
     ],
-    author='Travis Cunningham and Taylor Brazelton',
+    author='Travis Cunningham',
     author_email='travcunn@umail.iu.edu',
     license='MIT',
 )
