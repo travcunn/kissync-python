@@ -39,7 +39,7 @@ class AuthBrowser(QtWebKit.QWebView):
             else:
                 #logged in successfully
                 self.parent.hide()
-                self.parent.parent.authenticator.success()
+                self.parent.parent.authenticator.setup.emit('done')
 
         self.timer.stop()
 
