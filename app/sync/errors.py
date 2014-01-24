@@ -1,69 +1,69 @@
-class BaseException(Exception):
+class BaseError(Exception):
     """SmartFile Sync base Exception. """
     pass
 
 
-class UploadException(BaseException):
+class UploadError(BaseError):
     """ Exception for general upload errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(UploadException, self).__init__(*args, **kwargs)
+        super(UploadError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class DownloadException(BaseException):
+class DownloadError(BaseError):
     """ Exception for general download errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(DownloadException, self).__init__(*args, **kwargs)
+        super(DownloadError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class MaxTriesException(BaseException):
+class MaxTriesError(BaseError):
     """ Exception for failed network connection attempts. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(MaxTriesException, self).__init__(*args, **kwargs)
+        super(MaxTriesError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class FileNameException(BaseException):
+class FileNameError(BaseError):
     """ Exception for files with invalid names. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(FileNameException, self).__init__(*args, **kwargs)
+        super(FileNameError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class BadEventException(BaseException):
+class BadEventError(BaseError):
     """ Exception for general download errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(BadEventException, self).__init__(*args, **kwargs)
+        super(BadEventError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class FileNotAvailableException(BaseException):
+class FileNotAvailableError(BaseError):
     """ Exception when files are not yet available for the upload worker. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(FileNotAvailableException, self).__init__(*args, **kwargs)
+        super(FileNotAvailableError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail

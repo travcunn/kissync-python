@@ -57,11 +57,6 @@ class Main(QtGui.QWidget):
         self.authenticator.neterror.connect(self.neterror)
         self.authenticator.start()
 
-        if self.configuration.get('LocalSettings', 'autostart'):
-            common.create_shortcut()
-        else:
-            common.delete_shortcut()
-
     def start(self):
         """ Called if authentication is successful. """
         self.synchronizer = SyncThread(self.api, self.sync_dir)
@@ -125,7 +120,7 @@ class Main(QtGui.QWidget):
     def exit(self):
         try:
             self.tray.hide()
-        except:
+        except KeyboardInterrupt:
             pass
         #TODO: clean up the exit
         os._exit(1)

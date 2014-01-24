@@ -30,15 +30,6 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setContextMenu(self.menu)
         self.show()
 
-        #TODO: Create a method that cycles through loading images for the system tray on sync
-        #self.loadingIcon1 = QtGui.QIcon("icons/menuicon1.png")
-        #self.loadingIcon2 = QtGui.QIcon("icons/menuicon2.png")
-        #self.loadingIcon3 = QtGui.QIcon("icons/menuicon3.png")
-        #self.loadingIcon4 = QtGui.QIcon("icons/menuicon4.png")
-
-        #def loading(self):
-        #self.setIcon(self.loadingIcon1)
-
     def openWebsite(self):
         url = "https://app.smartfile.com"
         webbrowser.open(url,new=2)
@@ -54,6 +45,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         """
         self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
         whoami = self.parent.api.get("/whoami/")
+
         try:
             usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
             bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
@@ -63,6 +55,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
         except:
             canCalculateSpace = False
 
+        """
         if canCalculateSpace:
             spaceLimit = bytesLimit
             if spaceLimit < 1024:
@@ -76,6 +69,7 @@ class SystemTray(QtGui.QSystemTrayIcon):
             else:
                 spaceLimit /= int(math.pow(1024, 3))
                 measurement = "GB"
+        """
 
         #menu after logging into Smartfile
         self.menu = QtGui.QMenu(self.parent)
@@ -92,8 +86,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
         if canCalculateSpace:
             self.menu.addSeparator()
 
-            quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
-            quota.setEnabled(False)
+        #quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
+        #quota.setEnabled(False)
 
         self.menu.addSeparator()
 

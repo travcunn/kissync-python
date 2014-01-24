@@ -8,8 +8,8 @@ from smartfile.errors import RequestError, ResponseError
 
 import common
 from definitions import FileDefinition, LocalDefinitionHelper
-from errors import FileNotAvailableException, MaxTriesException
-from errors import UploadException
+from errors import FileNotAvailableError, MaxTriesError
+from errors import UploadError
 from worker import Worker
 
 
@@ -55,7 +55,7 @@ class Uploader(Worker):
                 # set the new attributes
             except IOError, err:
                 if err.errno == 2:
-                    raise FileNotAvailableException(err)
+                    raise FileNotAvailableError(err)
             except ResponseError, err:
                 if err.status_code == 404:
                     # If the file becomes suddenly not available, just ignore
@@ -63,10 +63,10 @@ class Uploader(Worker):
                     pass
                 elif err.status_code == 409:
                     # Conflict - Can only upload to an existing directory.
-                    raise UploadException(err)
+                    raise UploadError(err)
             except RequestError, err:
                 if err.detail.startswith('HTTPConnectionPool'):
-                    raise MaxTriesException(err)
+                    raise MaxTriesError(err)
             else:
                 self._setAttributes(task)
         else:
@@ -78,9 +78,9 @@ class Uploader(Worker):
             try:
                 self._api.post('/path/oper/mkdir/', path=task_directory)
             except RequestError, err:
-                raise MaxTriesException(err)
+                raise MaxTriesError(err)
             except Exception, err:
-                raise UploadException(err)
+                raise UploadError(err)
 
         return task
 
@@ -122,7 +122,7 @@ class Uploader(Worker):
                 pass
         except RequestError, err:
             if err.detail.startswith('HTTPConnectionPool'):
-                raise MaxTriesException(err)
+                raise MaxTriesError(err)
 
 
 class UploadWorker(threading.Thread):
@@ -144,14 +144,14 @@ class UploadWorker(threading.Thread):
                 result = self._uploader.process_task(self._current_task)
                 # Update the remote files dictionary to reflect the new file
                 self._remote_files[result.path] = result
-            except FileNotAvailableException:
+            except FileNotAvailableError:
                 # The file was not available when uploading it
                 log.warning("File is not yet available.")
                 self.try_task_later()
-            except MaxTriesException:
+            except MaxTriesError:
                 log.warning("Connection error occured during the upload.")
                 self.try_task_later()
-            except UploadException:
+            except UploadError:
                 log.warning("The parent folders were not created properly.")
                 self.try_task_later()
             else:

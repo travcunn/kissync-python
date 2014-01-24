@@ -7,8 +7,8 @@ from smartfile.errors import RequestError
 
 import common
 from definitions import LocalDefinitionHelper
-from errors import DownloadException, FileNameException
-from errors import FileNotAvailableException, MaxTriesException
+from errors import DownloadError, FileNameError
+from errors import FileNotAvailableError, MaxTriesError
 from worker import Worker
 
 
@@ -60,19 +60,19 @@ class Downloader(Worker):
             except IOError as err:
                 if err.errno == 22:
                     # Depending on the OS, there may be filename restrictions
-                    raise FileNameException(err)
+                    raise FileNameError(err)
                 else:
-                    raise FileNotAvailableException(err)
+                    raise FileNotAvailableError(err)
             except RequestError as err:
                 if err.detail.startswith('HTTPConnectionPool'):
-                    raise MaxTriesException
+                    raise MaxTriesError
             except Exception as err:
                 if err.status_code == 415:
                     # Ignore error 415:
                     # 'Unsupported media - You may have mixed up file/folder.'
                     pass
                 else:
-                    raise DownloadException(err)
+                    raise DownloadError(err)
             else:
                 if not self.cancelled:
                     if not hasattr(task, 'checksum'):
@@ -101,7 +101,7 @@ class Downloader(Worker):
             self._api.post(apiPath, attributes=request_properties)
         except RequestError, err:
             if err.detail.startswith('HTTPConnectionPool'):
-                raise MaxTriesException(err)
+                raise MaxTriesError(err)
 
         return definition
 
@@ -124,10 +124,10 @@ class DownloadWorker(threading.Thread):
                 # Update the local files dictionary to reflect the new file
                 if result is not None:
                     self._local_files[result.path] = result
-            except FileNameException:
+            except FileNameError:
                 # Files that have invalid names should not be downloaded
                 log.warning("The file to be downloaded had a bad filename.")
-            except FileNotAvailableException:
+            except FileNotAvailableError:
                 log.warning("The local file was not available.")
             except:
                 # Put the task back into the queue and try later

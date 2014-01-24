@@ -11,7 +11,7 @@ from smartfile.errors import RequestError, ResponseError
 
 from definitions import FileDefinition, LocalDefinitionHelper
 from download import DownloadWorker
-from errors import BadEventException
+from errors import BadEventError
 import events
 from realtime import RealtimeMessages
 from simpletasks import SimpleTaskWorker
@@ -249,7 +249,7 @@ class SyncEngine(object):
                 task.path = event.path
                 self.uploadQueue.put(task)
         else:
-            raise BadEventException("Not a valid event: ",
+            raise BadEventError("Not a valid event: ",
                     event.__class__.__name__)
 
     def createdEvent(self, event):
@@ -278,7 +278,7 @@ class SyncEngine(object):
                     log.info("Putting a task into the download queue.")
                     self.downloadQueue.put(event)
         else:
-            raise BadEventException("Not a valid event: ",
+            raise BadEventError("Not a valid event: ",
                     event.__class__.__name__)
 
     def deletedEvent(self, event):
@@ -305,7 +305,7 @@ class SyncEngine(object):
             # Put the task in the queue
             self.simpleTasks.put(event)
         else:
-            raise BadEventException("Not a valid event: ",
+            raise BadEventError("Not a valid event: ",
                     event.__class__.__name__)
 
     def modifiedEvent(self, event):
@@ -328,7 +328,7 @@ class SyncEngine(object):
                     # Put the task in the queue
                     self.downloadQueue.put(event)
         else:
-            raise BadEventException("Not a valid event: ",
+            raise BadEventError("Not a valid event: ",
                     event.__class__.__name__)
 
     def cancelUploadTask(self, path):

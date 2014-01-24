@@ -18,7 +18,7 @@ from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
 from app.sync.definitions import FileDefinition
-from app.sync.errors import BadEventException
+from app.sync.errors import BadEventError
 import app.sync.events as events
 from app.sync.realtime import RealtimeMessages
 import app.sync.syncengine as syncengine
@@ -296,7 +296,7 @@ class SyncEngineEvents(unittest.TestCase):
         self.assertTrue(self.syncEngine.downloadQueue.queue[0].path == "/family.jpg")
 
     def test_bad_created_event(self):
-        with self.assertRaises(BadEventException):
+        with self.assertRaises(BadEventError):
             self.syncEngine.createdEvent("bad event")
 
 
@@ -318,7 +318,7 @@ class SyncEngineEvents(unittest.TestCase):
         self.assertTrue(self.syncEngine.uploadQueue.qsize() == 0)
 
     def test_bad_deleted_event(self):
-        with self.assertRaises(BadEventException):
+        with self.assertRaises(BadEventError):
             self.syncEngine.deletedEvent("bad event")
 
     def test_local_modified_event(self):
@@ -350,7 +350,7 @@ class SyncEngineEvents(unittest.TestCase):
         self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
 
     def test_bad_modified_event(self):
-        with self.assertRaises(BadEventException):
+        with self.assertRaises(BadEventError):
             self.syncEngine.modifiedEvent("bad event")
 
     def test_local_moved_event(self):
@@ -401,7 +401,7 @@ class SyncEngineEvents(unittest.TestCase):
             self.assertTrue(event.path == '/destination.txt')
 
     def test_bad_moved_event(self):
-        with self.assertRaises(BadEventException):
+        with self.assertRaises(BadEventError):
             self.syncEngine.movedEvent('bad event')
 
 
