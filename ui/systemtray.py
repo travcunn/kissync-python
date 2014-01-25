@@ -43,9 +43,16 @@ class SystemTray(QtGui.QSystemTrayIcon):
         After auth finishes, create the settings window
         and update the system tray to display disk usage quota
         """
-        self.settingsWindow = SettingsWindow(self.parent)  # also initiate the settings window for quick show/hide
-        whoami = self.parent.api.get("/whoami/")
+        try:
+            whoami = self.parent.api.get("/whoami/")
 
+            realname = whoami['user']['name']
+            email = whoami['user']['email']
+        except:
+            realname = ""
+            email = ""
+
+        """
         try:
             usedBytes = int(whoami['site']['quota']['disk_bytes_tally'])
             bytesLimit = int(whoami['site']['quota']['disk_bytes_limit'])
@@ -54,6 +61,12 @@ class SystemTray(QtGui.QSystemTrayIcon):
             canCalculateSpace = True
         except:
             canCalculateSpace = False
+        """
+
+        # initialize settings window
+        self.settingsWindow = SettingsWindow(self.parent, name=realname,
+                                             email=email)
+
 
         """
         if canCalculateSpace:
@@ -83,8 +96,10 @@ class SystemTray(QtGui.QSystemTrayIcon):
         openWebsite = self.menu.addAction("Launch SmartFile Website")
         self.connect(openWebsite, QtCore.SIGNAL("triggered()"), self.openWebsite)
 
+        """
         if canCalculateSpace:
             self.menu.addSeparator()
+        """
 
         #quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
         #quota.setEnabled(False)

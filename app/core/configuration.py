@@ -45,10 +45,6 @@ class Configuration(ConfigParser.RawConfigParser):
         self.configuration.set('LocalSettings', 'notifications', True)
         self.configuration.set('LocalSettings', 'sync-offline', False)
         self.configuration.set('LocalSettings', 'sync-dir', None)
-        self.configuration.add_section('Network')
-        self.configuration.set('Network', 'proxy-enabled', False)
-        self.configuration.set('Network', 'http-proxy-address', None)
-        self.configuration.set('Network', 'https-proxy-address', None)
         self.save()
 
     def get(self, section, key):
