@@ -13,7 +13,7 @@ except ImportError:
     import json
 
 from app.core.common import settingsFile
-from app.core.configuration import Configuration
+from app.core.configuration import Config
 from app.core.errors import AuthException
 from app.core.auth import ApiConnection
 
@@ -197,13 +197,13 @@ class ApiConnectionTest(unittest.TestCase):
         """ Test bad user login credentials """
         if os.path.isfile(settingsFile()):
             os.remove(settingsFile())
-        config = Configuration(settingsFile())
+        config = Config(settingsFile())
 
         bad_token = None
         bad_secret = None
 
-        config.set("Login", "token", bad_token)
-        config.set("Login", "verifier", bad_secret)
+        config.set('login-token', bad_token)
+        config.set('login-verifier', bad_secret)
 
         with self.assertRaises(AuthException):
             ApiConnection()

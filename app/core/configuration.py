@@ -1,64 +1,55 @@
-import ConfigParser
 import os
 
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
-class Configuration(ConfigParser.RawConfigParser):
-    def __init__(self, configFile=None):
-        ConfigParser.RawConfigParser.__init__(self)
-        self.configuration = ConfigParser.RawConfigParser()
-        if configFile is not None:
-            self.configFile = configFile
+
+class Config(object):
+    """ Configuration manager object. Specify a config_file path. """
+    def __init__(self, config_file):
+        self.config_file = config_file
+        self.config_data = {'login-token': None,
+                            'login-verifier': None,
+                            'first-run': True,
+                            'autostart': True,
+                            'network-timeout': 30}
+
+        try:
             self.read()
-        else:
-            try:
-                raise ConfigException()
-            except ConfigException, e:
-                print e
+        except:
+            pass
 
     def read(self):
         """Reads the configuration from the disk"""
         try:
-            with open(self.configFile):
-                pass
-        except:
-            self.setupConfig()
-        else:
-            self.configuration.read(self.configFile)
+            # read json data from the disk
+            with open(self.config_file, 'rb') as f:
+                self.config_data = json.load(f)
+        except IOError, err:
+            # No such file or directory, so save default values
+            if err.errno == 2:
+                self.save()
 
     def save(self):
         """Saves the configuration to the disk"""
-        filename = os.path.basename(self.configFile)
-        if not os.path.exists(self.configFile.strip(filename)):
-            os.makedirs(self.configFile.strip(filename))
-        with open(self.configFile, 'wb') as configurationFile:
-            self.configuration.write(configurationFile)
+        # create the appropriate folder it is missing
+        filename = os.path.basename(self.config_file)
+        if not os.path.exists(self.config_file.strip(filename)):
+            os.makedirs(self.config_file.strip(filename))
 
-    def setupConfig(self):
-        """Initial configuration setup"""
-        self.configuration.add_section('Login')
-        self.configuration.set('Login', 'token', None)
-        self.configuration.set('Login', 'verifier', None)
-        self.configuration.add_section('LocalSettings')
-        self.configuration.set('LocalSettings', 'first-run', True)
-        self.configuration.set('LocalSettings', 'autostart', True)
-        self.configuration.set('LocalSettings', 'network-timeout', 30)
-        self.configuration.set('LocalSettings', 'notifications', True)
-        self.configuration.set('LocalSettings', 'sync-offline', False)
-        self.configuration.set('LocalSettings', 'sync-dir', None)
+        # write json data to the disk
+        with open(self.config_file, 'wb') as f:
+            json.dump(self.config_data, f)
+
+    def get(self, key):
+        """ Returns a value based upon the key. """
+        self.read()
+        return self.config_data[key]
+
+    def set(self, key, value):
+        """ Set an option given a key and a value. """
+        self.read()
+        self.config_data[key] = value
         self.save()
-
-    def get(self, section, key):
-        """Returns a value based upon the section and key"""
-        #weird bug on windows. Instead of storing None, the config stores "None"
-        if self.configuration.get(section, key) == "None":
-            return None
-        return self.configuration.get(section, key)
-
-    def set(self, section, key, value):
-        """Sets a configuration item based upon the section, key, and value"""
-        self.configuration.set(section, key, value)
-        self.save()
-
-
-class ConfigException(Exception):
-    pass

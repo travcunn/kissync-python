@@ -1,7 +1,7 @@
 from PySide import QtCore, QtGui, QtWebKit
 
 import app.core.common as common
-from app.core.configuration import Configuration
+from app.core.configuration import Config
 
 
 class AuthBrowser(QtWebKit.QWebView):
@@ -10,9 +10,12 @@ class AuthBrowser(QtWebKit.QWebView):
         QtWebKit.QWebView.__init__(self)
 
         # create an instance of the configuration
-        self.__configuration = Configuration(common.settingsFile())
+        self.__config = Config(common.settingsFile())
 
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+                           QtGui.QSizePolicy.Expanding)
+        self.setMinimumWidth(500)
+
         self.urlChanged.connect(self.checkUrl)
         self.loadStarted.connect(self._starttimer)
 
@@ -21,25 +24,30 @@ class AuthBrowser(QtWebKit.QWebView):
         page.networkAccessManager().sslErrors.connect(self.sslErrorHandler)
 
         self.timer = QtCore.QTimeLine()
-        self.setMinimumWidth(500)
 
     def checkUrl(self, ok):
-        currentUrl = str(self.url().toString())
+        api = self.parent.parent.api
 
-        #if on kissync.com, pass verifier to smartfile client
-        if currentUrl.startswith("http://www.kissync.com/oauth?verifier="):
+        currentUrl = str(self.url().toString())
+        url = 'http://www.kissync.com/oauth?verifier='
+
+        # if on kissync.com, pass verifier to smartfile client
+        if currentUrl.startswith(url):
             try:
-                verifier = currentUrl.replace("http://www.kissync.com/oauth?verifier=", "")
-                token, verifier = self.parent.parent.api.get_access_token(None, verifier)
-                self.__configuration.set("Login", "token", token)
-                self.__configuration.set("Login", "verifier", verifier)
+                verifier = currentUrl.replace(url, "")
+                token, verifier = api.get_access_token(None, verifier)
+                self.__config.set('login-token', token)
+                self.__config.set('login-verifier', verifier)
             except:
-                #logged in successfully, but something happened with passing the verifier
+                # error getting the verifier from smartfile
                 self.parent.parent.authenticator.networkError()
             else:
                 #logged in successfully
                 self.parent.hide()
-                self.parent.parent.authenticator.done.emit('done')
+                if self.__config.get('first-run'):
+                    self.parent.parent.authenticator.setup.emit('done')
+                else:
+                    self.parent.parent.authenticator.done.emit('done')
 
         self.timer.stop()
 
@@ -47,9 +55,10 @@ class AuthBrowser(QtWebKit.QWebView):
         self.pagetimer()
 
     def pagetimer(self):
-        #starts up a page timer, so after 30 seconds, we can give a network error
+        # throws an error after amount of time defined in config
         self.timer.valueChanged.connect(self.netwatch)
-        self.timer.setDuration(int(self.__configuration.get('LocalSettings', 'network-timeout')) * 1000)
+        timeout = int(self.__config.get('network-timeout') * 1000)
+        self.timer.setDuration(timeout)
         self.timer.start()
 
     def netwatch(self, value):

@@ -42,11 +42,11 @@ class SettingsWindow(QtGui.QWidget):
         """ Saves the settings based on checkboxes. """
         startWithComputer = self.settingsPanel.rightPanel.startWithComputer
         if startWithComputer.isChecked():
-            self.parent.configuration.set('LocalSettings', 'autostart', True)
+            self.parent.configuration.set('autostart', True)
             # Create a startup entry
             common.create_shortcut()
         else:
-            self.parent.configuration.set('LocalSettings', 'autostart', False)
+            self.parent.configuration.set('autostart', False)
             common.delete_shortcut()
 
         self.hide()
@@ -55,7 +55,7 @@ class SettingsWindow(QtGui.QWidget):
     def showSettings(self):
         """ Shows the settings window and brings it into focus. """
         autostart = self.settingsPanel.rightPanel.startWithComputer
-        if self.parent.configuration.get('LocalSettings', 'autostart'):
+        if self.parent.configuration.get('autostart'):
             if not autostart.isChecked():
                 autostart.toggle()
 

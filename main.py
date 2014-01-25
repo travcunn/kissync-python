@@ -13,7 +13,7 @@ from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
 import app.core.common as common
-from app.core.configuration import Configuration
+from app.core.configuration import Config
 from app.sync.syncengine import SyncThread
 
 from ui.loginwindow import LoginWindow
@@ -44,7 +44,7 @@ class Main(QtGui.QWidget):
 
         self.directorySetup() # Make sure proper directories are created
 
-        self.configuration = Configuration(self.settingsFile)
+        self.configuration = Config(self.settingsFile)
 
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI
         self.loginwindow = LoginWindow(self)  # initiate login window UI

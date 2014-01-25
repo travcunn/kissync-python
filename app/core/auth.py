@@ -4,7 +4,7 @@ from smartfile.errors import RequestError, ResponseError
 
 import common
 from errors import AuthException, NetConnectionException
-from configuration import Configuration
+from configuration import Config
 from smartfileclient import OAuthClient
 
 
@@ -24,11 +24,11 @@ class ApiConnection(object):
             self._secret = "9nbVTipa5RazUg2TGKxi9jMKbxnq6k"
 
         # create an instance of the configuration
-        self.__configuration = Configuration(common.settingsFile())
+        self.__configuration = Config(common.settingsFile())
 
         # get the token and verifier from the configuration
-        self._configToken = self.__configuration.get("Login", "token")
-        self._configVerifier = self.__configuration.get("Login", "verifier")
+        self._configToken = self.__configuration.get('login-token')
+        self._configVerifier = self.__configuration.get('login-verifier')
 
         self._isAuthenticated = False
 
@@ -104,7 +104,7 @@ try:
             self.parent = parent
 
             # create an instance of the configuration
-            self.__configuration = Configuration(common.settingsFile())
+            self.__config = Config(common.settingsFile())
 
         def run(self):
             self.api = ApiConnection(success_callback=self.success,
@@ -132,7 +132,7 @@ try:
             When the login is successful, send signal to the appropriate ui
             """
             self.parent.api = api
-            if (self.__configuration.get('LocalSettings', 'first-run')) is True:
+            if self.__config.get('first-run'):
                 self.setup.emit('done')
             else:
                 self.done.emit('done')
