@@ -105,6 +105,7 @@ class SettingsPanel(QtGui.QWidget):
 
         leftPanel = LeftPanel(name=self.parent.name, email=self.parent.email)
         self.rightPanel = RightPanel(self)
+
         grid.addWidget(leftPanel, 1, 0, 1, 1)
         grid.addWidget(self.rightPanel, 1, 1, 1, 1)
 
@@ -141,7 +142,7 @@ class VersionContainer(QtGui.QWidget):
 
         versionLabel = QtGui.QLabel()
         versionLabel.setText("version %s" % (version))
-        versionLabel.setStyleSheet("color: #CCCCCC; font-size: 16px;")
+        versionLabel.setStyleSheet("color: #CCCCCC; font-size: 16px; font-family: Helvetica;")
         layout.addWidget(versionLabel, 0, 0, 1, 1, QtCore.Qt.AlignRight)
 
         self.setLayout(layout)
@@ -173,13 +174,13 @@ class LeftPanel(QtGui.QWidget):
         # Email address label
         nameLabel = QtGui.QLabel()
         nameLabel.setText("%s" % (name))
-        nameLabel.setStyleSheet("color: #303030; font-size: 24px;")
+        nameLabel.setStyleSheet("color: #303030; font-size: 24px; font-family: Helvetica;")
         layout.addWidget(nameLabel, 1, 0, 1, 1, QtCore.Qt.AlignCenter)
 
         # Email address label
         emailLabel = QtGui.QLabel()
         emailLabel.setText("(%s)" % (email))
-        emailLabel.setStyleSheet("color: #888888; font-size:18px;")
+        emailLabel.setStyleSheet("color: #888888; font-size:18px; font-family: Helvetica;")
         layout.addWidget(emailLabel, 2, 0, 1, 1, QtCore.Qt.AlignCenter)
 
         self.setLayout(layout)
@@ -197,7 +198,7 @@ class RightPanel(QtGui.QWidget):
         #layout.addWidget(logo, 0, 0, 1, 1, QtCore.Qt.AlignVCenter)
 
         self.startWithComputer = QtGui.QCheckBox('Start with my computer', self)
-        self.startWithComputer.setStyleSheet("font-size: 22px;")
+        self.startWithComputer.setStyleSheet("font-size: 16px; font-family: Helvetica;")
         #self.startWithComputer.toggle()
 
         layout.addWidget(self.startWithComputer, 0, 0, 1, 1, QtCore.Qt.AlignTop)
