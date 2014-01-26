@@ -2,15 +2,15 @@ SmartFile Desktop Sync
 ==========================
 [![Build Status](https://travis-ci.org/travcunn/kissync-python.png?branch=master)](https://travis-ci.org/travcunn/kissync-python) [![Coverage Status](https://coveralls.io/repos/kissync/kissync-python/badge.png?branch=master)](https://coveralls.io/r/kissync/kissync-python?branch=master) [![Code Quality](https://landscape.io/github/travcunn/kissync-python/master/landscape.png)](https://landscape.io/github/travcunn/kissync-python/master) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/travcunn/kissync-python/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-A cross platfom file synchronization application for SmartFile
+A cross platfom desktop file synchronization application for SmartFile
 
 
-Running Kissync
+Running SmartFile Sync
 ===============
 
 __Prerequisites:__
 
-Kissync requires PySide (cross-platform) for the GUI. On Debian based systems, this can be installed using the following command:
+SmartFile Sync requires PySide (cross-platform) for the GUI. On Debian based systems, this can be installed using the following command:
 
     $ sudo apt-get install python-pyside
     
@@ -46,7 +46,7 @@ In the console, run:
 
 Alternatively, you can open *installer_windows.cmd* from the Windows file explorer.
 
-The installer will named "Kissync.exe" in the directory "installer_windows"
+The installer will named "smartfile-installer.exe" in the directory "installer_windows"
 
 
 Resource Packaging
