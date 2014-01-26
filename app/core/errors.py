@@ -1,36 +1,36 @@
-class BaseException(Exception):
+class BaseError(Exception):
     """SmartFile Auth base Exception. """
     pass
 
 
-class AuthException(BaseException):
+class AuthError(BaseError):
     """ Exception for authentication errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(AuthException, self).__init__(*args, **kwargs)
+        super(AuthError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class NeedsAuthException(BaseException):
+class NeedsAuthError(BaseError):
     """ Exception for network connection errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(NeedsAuthException, self).__init__(*args, **kwargs)
+        super(NeedsAuthError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail
 
 
-class NetConnectionException(BaseException):
+class NetConnectionError(BaseError):
     """ Exception for network connection errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(NetConnectionException, self).__init__(*args, **kwargs)
+        super(NetConnectionError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail

@@ -3,7 +3,7 @@ import logging
 from smartfile.errors import RequestError, ResponseError
 
 import common
-from errors import AuthException, NetConnectionException
+from errors import AuthError, NetConnectionError
 from configuration import Config
 from smartfileclient import OAuthClient
 
@@ -54,7 +54,7 @@ class ApiConnection(object):
                 return self.neterror_callback()
             else:
                 # raise an exception if there is no network connectivity
-                raise NetConnectionException(e)
+                raise NetConnectionError(e)
         except ResponseError as e:
             if e.status_code == 403:
                 log.warning('Bad login credentials.')
@@ -62,7 +62,7 @@ class ApiConnection(object):
                     return self.login_callback(self._api)
                 else:
                     # raise an exception if auth is bad
-                    raise AuthException('Invalid Login: The credentials were invalid.')
+                    raise AuthError('Invalid Login: The credentials were invalid.')
             else:
                 log.warning('ResponseError was raised with HTTP status: ' + e.status_code)
                 # raise an exception if there is an error other than 403
@@ -79,7 +79,7 @@ class ApiConnection(object):
                     self.login_callback(self._api)
                 else:
                     # raise an exception if there is no auth yet
-                    raise AuthException('Login required: Credentials are required to login.')
+                    raise AuthError('Login required: Credentials are required to login.')
 
     def __getattr__(self, name):
         if self._isAuthenticated:

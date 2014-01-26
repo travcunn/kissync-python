@@ -14,7 +14,7 @@ except ImportError:
 
 from app.core.common import settingsFile
 from app.core.configuration import Config
-from app.core.errors import AuthException
+from app.core.errors import AuthError
 from app.core.auth import ApiConnection
 
 from app.sync.definitions import FileDefinition
@@ -164,7 +164,7 @@ class ApiConnectionTest(unittest.TestCase):
         nonblank_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         bad_secret = None
 
-        with self.assertRaises(AuthException):
+        with self.assertRaises(AuthError):
             api = ApiConnection(token=nonblank_token, secret=bad_secret)
             self.assertNotEqual(api._secret, None)
 
@@ -183,14 +183,14 @@ class ApiConnectionTest(unittest.TestCase):
         if os.path.isfile(settingsFile()):
             os.remove(settingsFile())
 
-        with self.assertRaises(AuthException):
+        with self.assertRaises(AuthError):
             ApiConnection()
 
     def test_bad_api_keys(self):
         bad_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         bad_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-        with self.assertRaises(AuthException):
+        with self.assertRaises(AuthError):
             ApiConnection(token=bad_token, secret=bad_secret)
 
     def test_bad_login(self):
@@ -205,7 +205,7 @@ class ApiConnectionTest(unittest.TestCase):
         config.set('login-token', bad_token)
         config.set('login-verifier', bad_secret)
 
-        with self.assertRaises(AuthException):
+        with self.assertRaises(AuthError):
             ApiConnection()
 
 
