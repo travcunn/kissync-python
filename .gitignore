@@ -6,6 +6,8 @@
 .pydevproject
 *.db
 
+installer_windows
+
 #vim swp files
 *.swo
 *.swp
