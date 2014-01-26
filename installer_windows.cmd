@@ -18,7 +18,7 @@ copy dist\_ssl.pyd %BUILDDIR%
 copy dist\API-MS-Win-Core-LocalRegistry-L1-1-0.dll %BUILDDIR%
 copy dist\bz2.pyd %BUILDDIR%
 copy dist\cacert.pem %BUILDDIR%
-copy dist\Kissync.exe %BUILDDIR%
+copy dist\SmartFile.exe %BUILDDIR%
 copy dist\library.zip %BUILDDIR%
 copy dist\MPR.dll %BUILDDIR%
 copy dist\pyexpat.pyd %BUILDDIR%
@@ -44,10 +44,10 @@ copy dist\imageformats\qico4.dll %BUILDDIR%\imageformats
 copy dist\imageformats\qjpeg4.dll %BUILDDIR%\imageformats
 copy "C:\OpenSSL-Win32\libeay32.dll" %BUILDDIR%
 copy "C:\OpenSSL-Win32\ssleay32.dll" %BUILDDIR%
-copy builder\kissync.nsi %BUILDDIR%
+copy builder\smartfile-installer.nsi %BUILDDIR%
 pushd %BUILDDIR%
-%NSIS% kissync.nsi
-del Kissync.exe
+%NSIS% smartfile-installer.nsi
+del SmartFile.exe
 del icon.ico
 del _ctypes.pyd
 del _hashlib.pyd
@@ -83,7 +83,7 @@ del imageformats\qjpeg4.dll
 del libeay32.dll
 del ssleay32.dll
 rmdir /s /q imageformats
-del kissync.nsi
+del smartfile-installer.nsi
 popd
 pushd ../%BUILDDIR%
 rmdir /s /q dist

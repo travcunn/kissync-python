@@ -21,9 +21,9 @@ elif sys.platform == 'win32':
               ]
 
 setup(
-    name = 'Kissync',
-    version = "1.0",
-    description = 'Kissync',
+    name = 'SmartFile',
+    version = "0.24",
+    description = 'SmartFile Desktop Sync',
     author = 'Travis Cunningham',
     author_email='travcunn@umail.iu.edu',
     url = 'http://www.kissync.com',
@@ -53,4 +53,4 @@ setup(
                 }],
 )
 
-os.rename('dist/main.exe','dist/Kissync.exe') 
+os.rename('dist/main.exe','dist/SmartFile.exe') 
