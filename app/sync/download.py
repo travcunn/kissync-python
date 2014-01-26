@@ -39,12 +39,12 @@ class Downloader(Worker):
         if task.isDir:
             if not os.path.exists(absolute_path):
                 log.debug("Creating the directory: " + absolute_path)
-                common.createLocalDirs(absolute_path)
+                common.create_local_dirs(absolute_path)
         else:
             if not os.path.exists(task_directory):
                 # Create the directories necessary to download the file
                 log.debug("Creating the directory: " + task_directory)
-                common.createLocalDirs(task_directory)
+                common.create_local_dirs(task_directory)
 
         if not task.isDir:
             basepath = basepath.replace('\\', '/')
@@ -76,14 +76,14 @@ class Downloader(Worker):
             else:
                 if not self.cancelled:
                     if not hasattr(task, 'checksum'):
-                        return self._setAttributes(task)
+                        return self._set_attributes(task)
 
             # Notify the worker the task is complete
             self.task_done()
 
             return None
 
-    def _setAttributes(self, task):
+    def _set_attributes(self, task):
         """ Set attributes for the file on the SmartFile API. """
         path = os.path.join(self._sync_dir, task.path)
 

@@ -44,14 +44,14 @@ class Uploader(Worker):
                 basepath = os.path.join("/", basepath)
 
             task_directory = os.path.dirname(basepath)
-            apiPath = "/path/data%s" % basepath
-            apiPathBase = os.path.dirname(apiPath)
+            api_path = "/path/data%s" % basepath
+            api_path_base = os.path.dirname(api_path)
 
             try:
                 # create the directory to make sure it exists
                 self._api.post('/path/oper/mkdir/', path=task_directory)
                 # upload the file
-                self._api.post(apiPathBase, file=file(absolute_path, 'rb'))
+                self._api.post(api_path_base, file=file(absolute_path, 'rb'))
                 # set the new attributes
             except IOError, err:
                 if err.errno == 2:
@@ -68,7 +68,7 @@ class Uploader(Worker):
                 if err.detail.startswith('HTTPConnectionPool'):
                     raise MaxTriesError(err)
             else:
-                self._setAttributes(task)
+                self._set_attributes(task)
         else:
             # If the task path is a folder
             task_directory = basepath
@@ -84,7 +84,7 @@ class Uploader(Worker):
 
         return task
 
-    def _setAttributes(self, task):
+    def _set_attributes(self, task):
         checksum = task.checksum
         modified = task.modified.replace(microsecond=0)
 
@@ -93,7 +93,7 @@ class Uploader(Worker):
         apiPath = "/path/info%s" % task.path
 
         try:
-            self.__setAttributes(apiPath, checksum_string, modified_string)
+            self.__set_attributes(apiPath, checksum_string, modified_string)
         except ResponseError, err:
             if err.status_code == 404:
                 """
@@ -102,16 +102,16 @@ class Uploader(Worker):
                 """
                 time.sleep(1)
                 # Now try setting the attributes again
-                self.__setAttributes(apiPath, checksum_string,
-                                     modified_string)
+                self.__set_attributes(apiPath, checksum_string,
+                                      modified_string)
             elif err.status_code == 500:
-                self.__setAttributes(apiPath, checksum_string,
-                                     modified_string)
+                self.__set_attributes(apiPath, checksum_string,
+                                      modified_string)
 
-    def __setAttributes(self, apiPath, checksum_string, modified_string):
+    def __set_attributes(self, api_path, checksum_string, modified_string):
         request_properties = [checksum_string, modified_string]
         try:
-            self._api.post(apiPath, attributes=request_properties)
+            self._api.post(api_path, attributes=request_properties)
         except ResponseError, err:
             if err.status_code == 404:
                 # If the file becomes suddenly not available, just ignore

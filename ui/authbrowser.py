@@ -10,7 +10,7 @@ class AuthBrowser(QtWebKit.QWebView):
         QtWebKit.QWebView.__init__(self)
 
         # create an instance of the configuration
-        self.__config = Config(common.settingsFile())
+        self.__config = Config(common.settings_file_path())
 
         self.setSizePolicy(QtGui.QSizePolicy.Expanding,
                            QtGui.QSizePolicy.Expanding)

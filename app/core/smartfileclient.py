@@ -13,37 +13,40 @@ import common
 
 class SmartFileClient(Client):
     """Overrides Client from the smartfile library"""
-
     def __init__(self, **kwargs):
         super(SmartFileClient, self).__init__(**kwargs)
 
     def get(self, endpoint, id=None, **kwargs):
-        return self._request('get', endpoint, id=id, params=kwargs, verify=common.cert_path())
+        return self._request('get', endpoint, id=id, params=kwargs,
+                             verify=common.cert_path())
 
     def put(self, endpoint, id=None, **kwargs):
-        return self._request('put', endpoint, id=id, data=kwargs, verify=common.cert_path())
+        return self._request('put', endpoint, id=id, data=kwargs,
+                             verify=common.cert_path())
 
     def post(self, endpoint, id=None, **kwargs):
-        return self._request('post', endpoint, id=id, data=kwargs, verify=common.cert_path())
+        return self._request('post', endpoint, id=id, data=kwargs,
+                             verify=common.cert_path())
 
     def delete(self, endpoint, id=None, **kwargs):
-        return self._request('delete', endpoint, id=id, data=kwargs, verify=common.cert_path())
+        return self._request('delete', endpoint, id=id, data=kwargs,
+                             verify=common.cert_path())
 
 
 class OAuthClient(SmartFileClient):
-    def __init__(self, client_token=None, client_secret=None, access_token=None,
-                 access_secret=None, **kwargs):
+    def __init__(self, client_token=None, client_secret=None,
+                 access_token=None, access_secret=None, **kwargs):
         self._client = OAuthToken(client_token, client_secret)
         if not self._client.is_valid():
-            raise APIError('You must provide a client_token and client_secret '
-                           'for OAuth.')
+            raise APIError('You must provide a client_token and '
+                           'client_secret for OAuth.')
         self._access = OAuthToken(access_token, access_secret)
         super(OAuthClient, self).__init__(**kwargs)
 
     def _do_request(self, *args, **kwargs):
         if not self._access.is_valid():
-            raise APIError('You must obtain an access token before making API '
-                           'calls.')
+            raise APIError('You must obtain an access token before making '
+                           'API calls.')
             # Add the OAuth parameters.
         kwargs['auth'] = OAuth1(self._client.token,
                                 client_secret=self._client.secret,
@@ -60,7 +63,8 @@ class OAuthClient(SmartFileClient):
                        client_secret=self._client.secret,
                        callback_uri=callback,
                        signature_method=SIGNATURE_PLAINTEXT)
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'), auth=oauth, verify=common.cert_path())
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/request_token/'),
+                          auth=oauth, verify=common.cert_path())
         credentials = urlparse.parse_qs(r.text)
         self.__request = OAuthToken(credentials.get('oauth_token')[0],
                                     credentials.get('oauth_token_secret')[0])
@@ -93,7 +97,8 @@ class OAuthClient(SmartFileClient):
                        resource_owner_secret=request.secret,
                        verifier=unicode(verifier),
                        signature_method=SIGNATURE_PLAINTEXT)
-        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'), auth=oauth, verify=common.cert_path())
+        r = requests.post(urlparse.urljoin(self.url, 'oauth/access_token/'),
+                          auth=oauth, verify=common.cert_path())
         credentials = urlparse.parse_qs(r.text)
         self._access = OAuthToken(credentials.get('oauth_token')[0],
                                   credentials.get('oauth_token_secret')[0])

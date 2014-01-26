@@ -6,21 +6,21 @@ import common
 
 class FileDefinition(object):
     def __init__(self, path, checksum=None, modified=None,
-            size=None, isDir=None):
+            size=None, is_dir=None):
         self.path = path
         self.checksum = checksum
         self.modified = modified
         self.size = size
-        self.isDir = isDir
+        self.is_dir = is_dir
 
 
 class LocalDefinitionHelper(object):
     """ Helper to create local FileDefinition objects. """
-    def __init__(self, path, syncFS):
+    def __init__(self, path, sync_fs):
         self.path = path
-        self.syncFS = syncFS
+        self.sync_fs = sync_fs
 
-        self.system_path = self.syncFS.getsyspath(path).strip("\\\\?\\")
+        self.system_path = self.sync_fs.getsyspath(path).strip("\\\\?\\")
 
     def create_definition(self):
         try:
@@ -35,12 +35,12 @@ class LocalDefinitionHelper(object):
         time_offset = common.calculate_time_offset()
         modified = timestamp - time_offset
         size = os.path.getsize(self.system_path)
-        isDir = os.path.isdir(self.system_path)
+        is_dir = os.path.isdir(self.system_path)
 
         self.path = self.normalize_path(self.path)
 
         return FileDefinition(path=self.path, checksum=checksum,
-                              modified=modified, size=size, isDir=isDir)
+                              modified=modified, size=size, is_dir=is_dir)
 
     def normalize_path(self, path):
         path = path.replace('\\', '/')

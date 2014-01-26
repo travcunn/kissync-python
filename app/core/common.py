@@ -103,7 +103,7 @@ def version(version_number):
     return tuple(map(int, (version_number.split("."))))
 
 
-def settingsDirectory():
+def settings_dir_path():
     if platform.system() == 'Windows':
         app_dir = os.path.join(
             os.getenv('appdata', os.path.expanduser('~')), 'Smartfile'
@@ -115,7 +115,7 @@ def settingsDirectory():
     return app_dir
 
 
-def settingsFile():
+def settings_file_path():
     if platform.system() == 'Windows':
         settings_file = os.path.join(
             os.getenv('appdata', os.path.expanduser('~')), 'Smartfile', 'config.cfg'

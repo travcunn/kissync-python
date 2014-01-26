@@ -22,7 +22,7 @@ def cache(key):
     return _decorating_wrapper
 
 
-def basePath(path):
+def base_path(path):
     """
     Returns the path of files in the sync folder
     without the leading folder separation character
@@ -34,7 +34,7 @@ def basePath(path):
     return path
 
 
-def createLocalDirs(path):
+def create_local_dirs(path):
     """Tries to create local directories"""
     try:
         os.makedirs(path)
@@ -43,17 +43,17 @@ def createLocalDirs(path):
             raise
 
 
-def getFileHash(filepath):
+def get_file_hash(filepath):
     """
     Returns the MD5 hash of a local file
     """
-    fileToHash = open(filepath, 'rb')
+    file_to_hash = open(filepath, 'rb')
     md5 = hashlib.md5()
     while True:
-        currentLine = fileToHash.readline()
-        if not currentLine:
+        current_line = file_to_hash.readline()
+        if not current_line:
             break
-        md5.update(currentLine)
+        md5.update(current_line)
     return md5.hexdigest()
 
 

@@ -33,7 +33,7 @@ class SimpleTask(Worker):
 
         # The task is a remote deleted event
         if isinstance(task, events.RemoteDeletedEvent):
-            self.deleteLocal(absolute_path)
+            self.delete_local(absolute_path)
 
         # The task is a remote moved event
         elif isinstance(task, events.RemoteMovedEvent):
@@ -46,19 +46,19 @@ class SimpleTask(Worker):
             # Full src system path
             absolute_src_path = os.path.join(self._sync_dir, src_path)
 
-            self.moveLocal(absolute_src_path, absolute_path)
+            self.move_local(absolute_src_path, absolute_path)
 
         # The task is a local deleted event
         elif isinstance(task, events.LocalDeletedEvent):
-            self.deleteRemote(task.path)
+            self.delete_remote(task.path)
 
         # The task is a local moved event
         elif isinstance(task, events.LocalMovedEvent):
-            self.moveRemote(task.src, task.path)
+            self.move_remote(task.src, task.path)
 
         return task
 
-    def moveLocal(self, src, dest):
+    def move_local(self, src, dest):
         """ Moves a local path, given system paths. """
         try:
             # try creating directories for the destination
@@ -70,7 +70,7 @@ class SimpleTask(Worker):
         # move the file or folder
         os.rename(src, dest)
 
-    def moveRemote(self, src, dest):
+    def move_remote(self, src, dest):
         """
         Moves a remote path, given a path relative to the sync directory.
         """
@@ -82,7 +82,7 @@ class SimpleTask(Worker):
             if err.status_code == 404:
                 pass
 
-    def deleteLocal(self, path):
+    def delete_local(self, path):
         """ Deletes a local path, given a system path. """
         # such delete, much wow
         try:
@@ -98,7 +98,7 @@ class SimpleTask(Worker):
         except:
             pass
 
-    def deleteRemote(self, path):
+    def delete_remote(self, path):
         """
         Deletes a remote path, given a path relative to the sync directory.
         """

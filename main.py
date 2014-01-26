@@ -39,8 +39,8 @@ class Main(QtGui.QWidget):
         self.checkForUpdates()
 
         self.sync_dir = os.path.join(os.path.expanduser("~"), "Smartfile")
-        self.settingsDir = common.settingsDirectory()
-        self.settingsFile = common.settingsFile()
+        self.settingsDir = common.settings_dir_path()
+        self.settingsFile = common.settings_file_path()
 
         self.directorySetup() # Make sure proper directories are created
 

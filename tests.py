@@ -12,7 +12,7 @@ try:
 except ImportError:
     import json
 
-from app.core.common import settingsFile
+from app.core.common import settings_file_path
 from app.core.configuration import Config
 from app.core.errors import AuthError
 from app.core.auth import ApiConnection
@@ -38,12 +38,12 @@ class MockAPI(object):
         # Return a directory listing
         if path.startswith("/path/info"):
             path = path.replace("/path/info", "")
-            return self._dirListing(path)
+            return self._dir_listing(path)
 
     def put(self, path, *args, **kwargs):
         pass
 
-    def _dirListing(self, path):
+    def _dir_listing(self, path):
         """ Create a directory listing. """
         file1 = MockAPIFile('file1.txt', isFile=True,
                             checksum='098f6bcd4621d373cade4e832627b4f6',
@@ -54,14 +54,14 @@ class MockAPI(object):
         file3 = MockAPIFile('file3.txt', isFile=True,
                             checksum='16fe50845e10b5fa815dbfa2bc566f1a',
                             modified='2013-07-03 06:01:46', 
-                            hasAttributes=False)
+                            has_attributes=False)
         folder1 = MockAPIFile('testfolder', isFile=False,
                               checksum=None, modified='2013-07-03 02:01:46')
 
         if path == '/':
             files = [file1.properties, file2.properties, file3.properties,
                      folder1.properties]
-            return self._baseDirListing(files)
+            return self._base_dir_listing(files)
         elif path is '/home/test/file1.txt':
             return file1.properties
         elif path is '/home/test/file2.txt':
@@ -71,7 +71,7 @@ class MockAPI(object):
         else:
             return path
 
-    def _baseDirListing(self, children):
+    def _base_dir_listing(self, children):
         """ Create a base directory listing. """
         mock_response = {
             "acl": {
@@ -101,8 +101,8 @@ class MockAPI(object):
 
 class MockAPIFile(object):
     """ Mock the json for a single file returned by the API. """
-    def __init__(self, path, isFile, checksum, modified, hasAttributes=True):
-        if hasAttributes:
+    def __init__(self, path, isFile, checksum, modified, has_attributes=True):
+        if has_attributes:
             attributes = {
                 "checksum": checksum,
                 "modified": modified
@@ -159,8 +159,8 @@ class MockWebsocket(object):
 class ApiConnectionTest(unittest.TestCase):
     def test_blank_api_keys(self):
         """ Test blank api keys to make sure they are set """
-        if os.path.isfile(settingsFile()):
-            os.remove(settingsFile())
+        if os.path.isfile(settings_file_path()):
+            os.remove(settings_file_path())
         nonblank_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         bad_secret = None
 
@@ -180,8 +180,8 @@ class ApiConnectionTest(unittest.TestCase):
                       login_callback=callback)
 
     def test_blank_user_credentials(self):
-        if os.path.isfile(settingsFile()):
-            os.remove(settingsFile())
+        if os.path.isfile(settings_file_path()):
+            os.remove(settings_file_path())
 
         with self.assertRaises(AuthError):
             ApiConnection()
@@ -195,9 +195,9 @@ class ApiConnectionTest(unittest.TestCase):
 
     def test_bad_login(self):
         """ Test bad user login credentials """
-        if os.path.isfile(settingsFile()):
-            os.remove(settingsFile())
-        config = Config(settingsFile())
+        if os.path.isfile(settings_file_path()):
+            os.remove(settings_file_path())
+        config = Config(settings_file_path())
 
         bad_token = None
         bad_secret = None
@@ -213,7 +213,7 @@ class LocalIndexerTest(unittest.TestCase):
     def setUp(self):
         # Create a temp dir
         self.temp_dir = tempfile.mkdtemp()
-        self.syncFS = OSFS(self.temp_dir)
+        self.sync_fs = OSFS(self.temp_dir)
 
         self.temp_files = ['/']
         # Put some files in the temp dir
@@ -229,7 +229,7 @@ class LocalIndexerTest(unittest.TestCase):
             self.temp_files.append(absolute_name)
 
     def test_index(self):
-        local_indexer = syncengine.LocalIndexer(self.syncFS)
+        local_indexer = syncengine.LocalIndexer(self.sync_fs)
         local_indexer.index()
         for path, definition in local_indexer.results.items():
             self.assertTrue(path in self.temp_files)
@@ -258,15 +258,17 @@ class SyncEngineEvents(unittest.TestCase):
     def setUp(self):
         api = MockAPI()
         dummy_dir = '/'
-        self.syncEngine = syncengine.SyncEngine(api, dummy_dir)
+        self.sync_engine = syncengine.SyncEngine(api, dummy_dir)
 
         # create a dummy download worker
-        dummy_remote_event = events.RemoteCreatedEvent('/helloworld.txt', isDir=False)
-        self.syncEngine.downloadWorkers = [MockWorker(dummy_remote_event)]
+        dummy_remote_event = events.RemoteCreatedEvent('/helloworld.txt',
+                                                       isDir=False)
+        self.sync_engine.download_workers = [MockWorker(dummy_remote_event)]
 
         # create a dummy upload worker
-        dummy_local_event = events.LocalCreatedEvent('/helloworld.txt', isDir=False)
-        self.syncEngine.uploadWorkers = [MockWorker(dummy_local_event)]
+        dummy_local_event = events.LocalCreatedEvent('/helloworld.txt',
+                                                     isDir=False)
+        self.sync_engine.upload_workers = [MockWorker(dummy_local_event)]
 
     def test_local_created_events(self):
         created_events = [
@@ -275,35 +277,38 @@ class SyncEngineEvents(unittest.TestCase):
                         events.LocalCreatedEvent('/test.txt', isDir=False)
                 ]
         for event in created_events:
-            self.syncEngine.createdEvent(event)
+            self.sync_engine.created_event(event)
 
         # Make sure the redundant task was deleted
-        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 2)
+        self.assertTrue(self.sync_engine.upload_queue.qsize() == 2)
 
     def test_remote_created_events(self):
         created_events = [
-                        events.RemoteCreatedEvent('/helloworld.txt', isDir=False),
-                        events.RemoteCreatedEvent('/family.jpg', isDir=False),
-                        events.RemoteCreatedEvent('/helloworld.txt', isDir=False)
+                        events.RemoteCreatedEvent('/helloworld.txt',
+                                                  isDir=False),
+                        events.RemoteCreatedEvent('/family.jpg',
+                                                  isDir=False),
+                        events.RemoteCreatedEvent('/helloworld.txt',
+                                                  isDir=False)
                 ]
         for event in created_events:
-            self.syncEngine.createdEvent(event)
+            self.sync_engine.created_event(event)
 
         # Make sure the redundant task was deleted.
         # Also make sure '/helloworld.txt' is not put into the queue,
         # since one of the dummy download workers is already processing it.
-        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 1)
-        self.assertTrue(self.syncEngine.downloadQueue.queue[0].path == "/family.jpg")
+        self.assertTrue(self.sync_engine.download_queue.qsize() == 1)
+        self.assertTrue(self.sync_engine.download_queue.queue[0].path == "/family.jpg")
 
     def test_bad_created_event(self):
         with self.assertRaises(BadEventError):
-            self.syncEngine.createdEvent("bad event")
+            self.sync_engine.created_event("bad event")
 
 
     def test_local_deleted_events(self):
         Task = namedtuple('Task', ['path'])
-        self.syncEngine.uploadQueue.put(Task('/helloworld.txt'))
-        self.syncEngine.downloadQueue.put(Task('/helloworld.txt'))
+        self.sync_engine.upload_queue.put(Task('/helloworld.txt'))
+        self.sync_engine.download_queue.put(Task('/helloworld.txt'))
 
         deleted_events = [
                         events.LocalDeletedEvent('/helloworld.txt'),
@@ -311,63 +316,63 @@ class SyncEngineEvents(unittest.TestCase):
                         events.LocalDeletedEvent('/helloworld.txt')
                 ]
         for event in deleted_events:
-            self.syncEngine.deletedEvent(event)
+            self.sync_engine.deleted_event(event)
 
         # Make sure matching tasks in the queues were deleted
-        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 0)
-        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 0)
+        self.assertTrue(self.sync_engine.download_queue.qsize() == 0)
+        self.assertTrue(self.sync_engine.upload_queue.qsize() == 0)
 
     def test_bad_deleted_event(self):
         with self.assertRaises(BadEventError):
-            self.syncEngine.deletedEvent("bad event")
+            self.sync_engine.deleted_event("bad event")
 
     def test_local_modified_event(self):
         Task = namedtuple('Task', ['path'])
-        self.syncEngine.uploadQueue.put(Task('/modifiedfile.txt'))
+        self.sync_engine.upload_queue.put(Task('/modifiedfile.txt'))
 
         modified_events = [
                         events.LocalModifiedEvent('/modifiedfile.txt'),
                         events.LocalModifiedEvent('/anothermodifiedfile.txt')
                 ]
         for event in modified_events:
-            self.syncEngine.modifiedEvent(event)
+            self.sync_engine.modified_event(event)
 
         # Make sure the redundant task was removed
-        self.assertTrue(self.syncEngine.uploadQueue.qsize() == 2)
+        self.assertTrue(self.sync_engine.upload_queue.qsize() == 2)
 
     def test_remote_modified_event(self):
         Task = namedtuple('Task', ['path'])
-        self.syncEngine.downloadQueue.put(Task('/remotemodified.txt'))
+        self.sync_engine.download_queue.put(Task('/remotemodified.txt'))
 
         modified_events = [
                         events.RemoteModifiedEvent('/remotemodified.txt'),
                         events.RemoteModifiedEvent('/remotefile.txt')
                 ]
         for event in modified_events:
-            self.syncEngine.modifiedEvent(event)
+            self.sync_engine.modified_event(event)
 
         # Maks sure the redundant task was removed
-        self.assertTrue(self.syncEngine.downloadQueue.qsize() == 2)
+        self.assertTrue(self.sync_engine.download_queue.qsize() == 2)
 
     def test_bad_modified_event(self):
         with self.assertRaises(BadEventError):
-            self.syncEngine.modifiedEvent("bad event")
+            self.sync_engine.modified_event("bad event")
 
     def test_local_moved_event(self):
         mock_upload_worker = MockWorker(events.LocalCreatedEvent('/source.txt',
                                                                  isDir=False))
         mock_download_worker = MockWorker(events.LocalCreatedEvent('/source.txt',
                                                                    isDir=False))
-        self.syncEngine.uploadWorkers.append(mock_upload_worker)
-        self.syncEngine.downloadWorkers.append(mock_download_worker)
+        self.sync_engine.upload_workers.append(mock_upload_worker)
+        self.sync_engine.download_workers.append(mock_download_worker)
 
-        self.syncEngine.uploadQueue.put(events.LocalCreatedEvent('/source.txt',
+        self.sync_engine.upload_queue.put(events.LocalCreatedEvent('/source.txt',
                                                                  isDir=False))
-        self.syncEngine.uploadQueue.put(events.LocalCreatedEvent('/source.txt',
+        self.sync_engine.upload_queue.put(events.LocalCreatedEvent('/source.txt',
                                                                  isDir=False))
-        self.syncEngine.downloadQueue.put(events.RemoteCreatedEvent('/source.txt',
+        self.sync_engine.download_queue.put(events.RemoteCreatedEvent('/source.txt',
                                                                  isDir=False))
-        self.syncEngine.downloadQueue.put(events.RemoteCreatedEvent('/source.txt',
+        self.sync_engine.download_queue.put(events.RemoteCreatedEvent('/source.txt',
                                                                  isDir=False))
 
         deleted_events = [
@@ -375,7 +380,7 @@ class SyncEngineEvents(unittest.TestCase):
                         events.LocalDeletedEvent('/source.txt')
                 ]
         for event in deleted_events:
-            self.syncEngine.deletedEvent(event)
+            self.sync_engine.deleted_event(event)
 
         moved_events = [
                         events.LocalMovedEvent('/source.txt',
@@ -384,90 +389,90 @@ class SyncEngineEvents(unittest.TestCase):
                             '/destination.txt')
                 ]
         for event in moved_events:
-            self.syncEngine.movedEvent(event)
+            self.sync_engine.moved_event(event)
 
         # Make sure events were moved in the simple tasks queue
-        for event in self.syncEngine.simpleTasks.queue:
+        for event in self.sync_engine.simple_tasks.queue:
             if isinstance(event, events.LocalDeletedEvent):
                 # Since the event path is moved, make sure other events are moved
                 self.assertTrue(event.path == '/destination.txt')
 
         # Make sure events were moved in the download queue
-        for event in self.syncEngine.downloadQueue.queue:
+        for event in self.sync_engine.download_queue.queue:
             self.assertTrue(event.path == '/destination.txt')
 
         # Make sure events were moved in the upload queue
-        for event in self.syncEngine.uploadQueue.queue:
+        for event in self.sync_engine.upload_queue.queue:
             self.assertTrue(event.path == '/destination.txt')
 
     def test_bad_moved_event(self):
         with self.assertRaises(BadEventError):
-            self.syncEngine.movedEvent('bad event')
+            self.sync_engine.moved_event('bad event')
 
 
 class SyncEngineComparisons(unittest.TestCase):
     def setUp(self):
         api = MockAPI()
         dummy_dir = '/'
-        self.syncEngine = syncengine.SyncEngine(api, dummy_dir)
+        self.sync_engine = syncengine.SyncEngine(api, dummy_dir)
 
         self.local_files = {}
         self.local_files['/file1.txt'] = FileDefinition(path='/file1.txt',
                                 checksum='fc5e038d38a57032085441e7fe7010b0',
                                 modified='2013-07-03 21:46:53',
                                 size=10000,
-                                isDir=False)
+                                is_dir=False)
         self.local_files['/folder1'] =  FileDefinition(path='/folder1',
                                 checksum=None,
                                 modified='2013-07-03 21:45:53',
                                 size=None,
-                                isDir=True)
+                                is_dir=True)
         self.local_files['/folder1/file2.txt'] = FileDefinition(
                                 path='/folder1/file2.txt',
                                 checksum='467746e92e5325503b2769c80563c870',
                                 modified='2013-03-03 21:45:53',
                                 size=5000,
-                                isDir=False)
+                                is_dir=False)
         self.local_files['/file3.txt'] = FileDefinition(path='/file3.txt',
                                 checksum='sdflkjsdfkjw23ijfkljlkjdslkfjjkj',
                                 modified='2013-07-03 21:40:20',
                                 size=30,
-                                isDir=False)
+                                is_dir=False)
 
         self.remote_files = {}
         self.remote_files['/file1.txt'] = FileDefinition(path='/file1.txt',
                                 checksum='fc5e038d38a57032085441e7fe7010c4',
                                 modified='2013-07-03 21:48:53',
                                 size=12000,
-                                isDir=False)
+                                is_dir=False)
         self.remote_files['/folder1'] = FileDefinition(path='/folder1',
                                 checksum=None,
                                 modified='2013-07-03 21:45:53',
                                 size=None,
-                                isDir=True)
+                                is_dir=True)
         self.remote_files['/folder1/file2.txt'] = FileDefinition(
                                 path='/folder1/file2.txt',
                                 checksum='467746e92e5325503b2769c80563c875',
                                 modified='2013-03-03 21:44:53',
                                 size=5000,
-                                isDir=False)
+                                is_dir=False)
         self.remote_files['/file4.txt'] = FileDefinition(path='/file4.txt',
                                 checksum='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
                                 modified='2013-03-03 19:44:53',
                                 size=90,
-                                isDir=False)
+                                is_dir=False)
 
     def test_result_comparison(self):
-        self.syncEngine.compare_results(self.remote_files, self.local_files)
+        self.sync_engine.compare_results(self.remote_files, self.local_files)
 
         r = self.remote_files['/file1.txt']
         downqueue = []
-        for item in self.syncEngine.downloadQueue.queue:
+        for item in self.sync_engine.download_queue.queue:
             downqueue.append(item.path)
         self.assertTrue(r.path in downqueue)
 
         upqueue = []
-        for item in self.syncEngine.uploadQueue.queue:
+        for item in self.sync_engine.upload_queue.queue:
             upqueue.append(item.path)
         l = self.local_files['/file3.txt']
         # Ensure that file 4 in local_files is put into the upload queue
