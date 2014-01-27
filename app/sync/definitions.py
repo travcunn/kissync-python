@@ -6,7 +6,7 @@ import common
 
 class FileDefinition(object):
     def __init__(self, path, checksum=None, modified=None,
-            size=None, is_dir=None):
+                 size=None, is_dir=None):
         self.path = path
         self.checksum = checksum
         self.modified = modified
@@ -24,8 +24,8 @@ class LocalDefinitionHelper(object):
 
     def create_definition(self):
         try:
-            checksum = common.getFileHash(self.system_path)
-        except:
+            checksum = common.get_file_hash(self.system_path)
+        except IOError:
             # The file may not be available yet
             checksum = None
         local_modified = os.path.getmtime(self.system_path)
