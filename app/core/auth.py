@@ -1,6 +1,5 @@
 import logging
 
-from PySide import QtCore
 from smartfile.errors import RequestError, ResponseError
 
 import common
@@ -89,49 +88,60 @@ class ApiConnection(object):
             if self.doLogin():
                 return self._api
 
+try:
+    from PySide import QtCore
 
-class Authenticator(QtCore.QThread):
-    login = QtCore.Signal(object)
-    done = QtCore.Signal(object)
-    setup = QtCore.Signal(object)
-    neterror = QtCore.Signal(object)
+    # Use the PySide authenticator if it is available
 
-    def __init__(self, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.parent = parent
+    class Authenticator(QtCore.QThread):
+        login = QtCore.Signal(object)
+        done = QtCore.Signal(object)
+        setup = QtCore.Signal(object)
+        neterror = QtCore.Signal(object)
 
-        self.api = None
+        def __init__(self, parent=None):
+            QtCore.QThread.__init__(self, parent)
+            self.parent = parent
 
-        # create an instance of the configuration
-        self.__config = Config(common.settings_file_path())
+            self.api = None
 
-    def run(self):
-        self.api = ApiConnection(success_callback=self.success,
-                                 neterror_callback=self.network_error,
-                                 login_callback=self.show_login_window)
+            # create an instance of the configuration
+            self.__config = Config(common.settings_file_path())
 
-    def show_login_window(self, api):
-        """
-        Sends a signal to the Main class to open the login window
-        """
-        try:
+        def run(self):
+            self.api = ApiConnection(success_callback=self.success,
+                                     neterror_callback=self.network_error,
+                                     login_callback=self.show_login_window)
+
+        def show_login_window(self, api):
+            """
+            Sends a signal to the Main class to open the login window
+            """
+            try:
+                self.parent.api = api
+                api.get_request_token("http://www.kissync.com/oauth")
+
+                auth_url = api.get_authorization_url()
+                self.login.emit(QtCore.QUrl(auth_url))
+            except Exception:
+                self.network_error()
+
+        def network_error(self):
+            self.neterror.emit('error')
+
+        def success(self, api):
+            """
+            When the login is successful, send signal to the appropriate ui
+            """
             self.parent.api = api
-            api.get_request_token("http://www.kissync.com/oauth")
+            if self.__config.get('first-run'):
+                self.setup.emit('done')
+            else:
+                self.done.emit('done')
 
-            auth_url = api.get_authorization_url()
-            self.login.emit(QtCore.QUrl(auth_url))
-        except Exception:
-            self.network_error()
 
-    def network_error(self):
-        self.neterror.emit('error')
-
-    def success(self, api):
-        """
-        When the login is successful, send signal to the appropriate ui
-        """
-        self.parent.api = api
-        if self.__config.get('first-run'):
-            self.setup.emit('done')
-        else:
-            self.done.emit('done')
+except ImportError:
+    # Pyside is not available
+    def Authenticator(*args, **kwargs):
+        raise NotImplementedError('PySide is not available. Install it '
+                                  'using your system package manager.')
