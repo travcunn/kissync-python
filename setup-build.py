@@ -50,6 +50,7 @@ setup(
     windows = [{
                 'script': 'main.py',
                 'icon_resources': [(1, "ui/images/icon.ico")],
+                'dest_base': 'main'
                 }],
 )
 
