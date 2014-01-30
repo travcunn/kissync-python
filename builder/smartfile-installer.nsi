@@ -100,6 +100,8 @@ SectionEnd
 
 Section "un.SmartFile" UNINSTALL_SMARTFILE
   SectionIn 1 RO
+  ${nsProcess::KillProcess} "SmartFile.exe" $R4
+  Sleep 3000
   Delete "$INSTDIR\_ctypes.pyd"
   Delete "$INSTDIR\_hashlib.pyd"
   Delete "$INSTDIR\_multiprocessing.pyd"
@@ -133,6 +135,9 @@ Section "un.SmartFile" UNINSTALL_SMARTFILE
   Delete "$INSTDIR\win32wnet.pyd"
   Delete "$INSTDIR\imageformats\qico4.dll"
   Delete "$INSTDIR\imageformats\qjpeg4.dll"
+  Delete "$INSTDIR\libeay32.dll"
+  Delete "$INSTDIR\ssleay32.dll"
+  Delete "$INSTDIR\icon.ico"
   Delete "$INSTDIR\uninst.exe"
   RMDir "$INSTDIR\imageformats"
   RMDir "$INSTDIR"
