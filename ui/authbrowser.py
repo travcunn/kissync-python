@@ -20,7 +20,10 @@ class AuthBrowser(QtWebKit.QWebView):
         self.loadStarted.connect(self._starttimer)
 
         page = self.page()
-        # Warning: This could be dangerous
+        # TODO: Warning: This could be dangerous. I mean, it completely breaks
+        # SSL. Since its not worth wasting time on fixing, do something
+        # fancy with python-requests and try handling the login in the app itself.
+        # You can do it.
         page.networkAccessManager().sslErrors.connect(self.sslErrorHandler)
 
         self.timer = QtCore.QTimeLine()
