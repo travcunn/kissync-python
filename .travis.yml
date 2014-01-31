@@ -1,10 +1,6 @@
 language: python
 python:
   - "2.7"
-before_install:
-  - sudo add-apt-repository ppa:pyside --y
-  - sudo apt-get update
-  - sudo apt-get install python-pyside
 install:
   - pip install --timeout=30 pep8 --use-mirrors
   - pip install --timeout=30 pyflakes --use-mirrors
@@ -12,8 +8,6 @@ install:
   - pip install --timeout=30 -q -e . --use-mirrors
 before_script:
   - make verify
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
 script: 
   make test
 after_success:
