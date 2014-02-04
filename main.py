@@ -13,7 +13,7 @@ from tendo.singleton import SingleInstance
 
 from app.core.auth import Authenticator
 import app.core.common as common
-from app.core.configuration import Config
+from app.core.config import Config
 from app.sync.syncengine import SyncThread
 
 from ui.loginwindow import LoginWindow
@@ -36,7 +36,7 @@ class Main(QtGui.QWidget):
         self.version = version
 
         # Check for updates
-        self.checkForUpdates()
+        self.check_updates()
 
         self.sync_dir = os.path.join(os.path.expanduser("~"), "Smartfile")
         self.settingsDir = common.settings_dir_path()
@@ -77,7 +77,7 @@ class Main(QtGui.QWidget):
                 'There was an error while connecting to SmartFile.', 1)
         self.exit()
 
-    def checkForUpdates(self):
+    def check_updates(self):
         """ Checks the current version with the latest from the server. """
         try:
             if not common.latest_version(version):

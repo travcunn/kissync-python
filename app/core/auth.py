@@ -3,8 +3,8 @@ import logging
 from smartfile.errors import RequestError, ResponseError
 
 import common
-from app.core.errors import AuthError, NetConnectionError
-from app.core.configuration import Config
+from app.core.errors import AuthError, NoAuthError, NetConnectionError
+from app.core.config import Config
 from app.core.smartfileclient import OAuthClient
 
 
@@ -24,29 +24,30 @@ class ApiConnection(object):
             self._secret = "9nbVTipa5RazUg2TGKxi9jMKbxnq6k"
 
         # create an instance of the configuration
-        self.__configuration = Config(common.settings_file_path())
+        self.__config = Config(common.settings_file_path())
 
         # get the token and verifier from the configuration
-        self._config_token = self.__configuration.get('login-token')
-        self._config_verifier = self.__configuration.get('login-verifier')
+        self._config_token = self.__config.get('login-token')
+        self._config_verifier = self.__config.get('login-verifier')
 
         self._authenticated = False
 
         self.do_login()
 
     def do_login(self):
+        """ Try logging in using credentials stored on the disk. """
         try:
             if self._config_token and self._config_verifier is not None:
                 log.debug('Attempting to login using all credentials.')
                 # try connecting to smartfile using existing credentials
-                self._api = OAuthClient(self._token,
-                                        self._secret,
-                                        self._config_token,
-                                        self._config_verifier)
-                self._api.get('/whoami')
+                self.api = OAuthClient(self._token, self._secret,
+                                       self._config_token,
+                                       self._config_verifier)
+                self.api.get('/whoami')
             else:
-                log.debug('Attempting to login using only the token and secret.')
-                self._api = OAuthClient(self._token, self._secret)
+                log.debug('Attempting to login using only the token and'
+                          'secret.')
+                self.api = OAuthClient(self._token, self._secret)
         except RequestError as e:
             self._authenticated = False
             log.warning('Connection error during login.')
@@ -59,34 +60,30 @@ class ApiConnection(object):
             if e.status_code == 403:
                 log.warning('Bad login credentials.')
                 if self.login_callback is not None:
-                    return self.login_callback(self._api)
+                    return self.login_callback(self.api)
                 else:
                     # raise an exception if auth is bad
-                    raise AuthError('Invalid Login: The credentials were invalid.')
+                    raise AuthError('Invalid Login: The credentials were'
+                                    'invalid.')
             else:
-                log.warning('ResponseError was raised with HTTP status: ' + e.status_code)
+                log.warning('ResponseError was raised with HTTP status: ' +
+                            e.status_code)
                 # raise an exception if there is an error other than 403
-                raise
         else:
             if self._config_token and self._config_verifier is not None:
                 log.info('Client successfully authenticated.')
                 self._authenticated = True
                 if self.success_callback is not None:
-                    return self.success_callback(self._api)
+                    return self.success_callback(self.api)
             else:
                 log.info('Credentials not found. Prompting for a login.')
                 if self.login_callback is not None:
-                    self.login_callback(self._api)
+                    self.login_callback(self.api)
                 else:
                     # raise an exception if there is no auth yet
-                    raise AuthError('Login required: Credentials are required to login.')
+                    raise NoAuthError('Login required: Credentials are'
+                                      'required to login.')
 
-    def __getattr__(self, name):
-        if self._authenticated:
-            return self._api
-        else:
-            if self.doLogin():
-                return self._api
 
 try:
     from PySide import QtCore

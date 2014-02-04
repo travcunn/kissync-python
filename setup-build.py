@@ -32,6 +32,7 @@ setup(
         'coverage',
         'coveralls',
         'oauthlib',
+        'keyring',
         'pathtools',
         'python-librsync',
         'requests',

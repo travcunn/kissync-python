@@ -1,6 +1,7 @@
 coverage
 coveralls
 fs
+keyring
 oauthlib
 pathtools
 python-librsync

@@ -13,8 +13,8 @@ except ImportError:
     import json
 
 from app.core.common import settings_file_path
-from app.core.configuration import Config
-from app.core.errors import AuthError
+from app.core.config import Config
+from app.core.errors import AuthError, NoAuthError
 from app.core.auth import ApiConnection
 
 from app.sync.definitions import FileDefinition
@@ -159,19 +159,20 @@ class MockWebsocket(object):
 class ApiConnectionTest(unittest.TestCase):
     def test_blank_api_keys(self):
         """ Test blank api keys to make sure they are set """
-        if os.path.isfile(settings_file_path()):
-            os.remove(settings_file_path())
-        nonblank_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        bad_secret = None
+        config = Config(settings_file_path())
+        config.erase()
 
-        with self.assertRaises(AuthError):
+        nonblank_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        bad_secret = ''
+
+        with self.assertRaises(NoAuthError):
             api = ApiConnection(token=nonblank_token, secret=bad_secret)
             self.assertNotEqual(api._secret, None)
 
     def test_blank_api_keys_callback(self):
         """ Test blank api keys with a callback """
         nonblank_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        bad_secret = None
+        bad_secret = ''
 
         def callback(api):
             self.assertNotEqual(api, None)
@@ -180,32 +181,34 @@ class ApiConnectionTest(unittest.TestCase):
                       login_callback=callback)
 
     def test_blank_user_credentials(self):
-        if os.path.isfile(settings_file_path()):
-            os.remove(settings_file_path())
+        config = Config(settings_file_path())
+        config.erase()
 
-        with self.assertRaises(AuthError):
+        with self.assertRaises(NoAuthError):
             ApiConnection()
 
     def test_bad_api_keys(self):
+        config = Config(settings_file_path())
+        config.erase()
+
         bad_token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         bad_secret = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-        with self.assertRaises(AuthError):
+        with self.assertRaises(NoAuthError):
             ApiConnection(token=bad_token, secret=bad_secret)
 
     def test_bad_login(self):
         """ Test bad user login credentials """
-        if os.path.isfile(settings_file_path()):
-            os.remove(settings_file_path())
         config = Config(settings_file_path())
+        config.erase()
 
-        bad_token = None
-        bad_secret = None
+        bad_token = ''
+        bad_secret = ''
 
         config.set('login-token', bad_token)
         config.set('login-verifier', bad_secret)
 
-        with self.assertRaises(AuthError):
+        with self.assertRaises(NoAuthError):
             ApiConnection()
 
 

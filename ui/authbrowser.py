@@ -1,7 +1,8 @@
+import keyring
 from PySide import QtCore, QtGui, QtWebKit
 
 import app.core.common as common
-from app.core.configuration import Config
+from app.core.config import Config
 
 
 class AuthBrowser(QtWebKit.QWebView):
@@ -16,19 +17,16 @@ class AuthBrowser(QtWebKit.QWebView):
                            QtGui.QSizePolicy.Expanding)
         self.setMinimumWidth(500)
 
-        self.urlChanged.connect(self.checkUrl)
+        self.urlChanged.connect(self.check_url)
         self.loadStarted.connect(self._starttimer)
 
         page = self.page()
-        # TODO: Warning: This could be dangerous. I mean, it completely breaks
-        # SSL. Since its not worth wasting time on fixing, do something
-        # fancy with python-requests and try handling the login in the app itself.
-        # You can do it.
+        # TODO: Warning: This could be dangerous.
         page.networkAccessManager().sslErrors.connect(self.sslErrorHandler)
 
         self.timer = QtCore.QTimeLine()
 
-    def checkUrl(self, ok):
+    def check_url(self, ok):
         api = self.parent.parent.api
 
         currentUrl = str(self.url().toString())
@@ -39,8 +37,7 @@ class AuthBrowser(QtWebKit.QWebView):
             try:
                 verifier = currentUrl.replace(url, "")
                 token, verifier = api.get_access_token(None, verifier)
-                self.__config.set('login-token', token)
-                self.__config.set('login-verifier', verifier)
+                self.save_login_details(token, verifier)
             except:
                 # error getting the verifier from smartfile
                 self.parent.parent.authenticator.networkError()
@@ -53,6 +50,11 @@ class AuthBrowser(QtWebKit.QWebView):
                     self.parent.parent.authenticator.done.emit('done')
 
         self.timer.stop()
+
+    def save_login_details(self, token, verifier):
+        keyring.set_password('smartfile', 'token', token)
+        keyring.set_password('smartfile', 'verifier', verifier)
+        pass
 
     def _starttimer(self):
         self.pagetimer()

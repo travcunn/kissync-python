@@ -1,8 +1,10 @@
 import os
 
+import keyring
 from PySide import QtGui, QtCore
 
 import app.core.common as common
+from app.core.config import Config
 import resources
 
 
@@ -12,6 +14,8 @@ class SettingsWindow(QtGui.QWidget):
         self.parent = parent
         self.name = name
         self.email = email
+
+        self.__config = Config(common.settings_file_path())
 
         self.setWindowTitle('SmartFile Settings')
         self.setWindowIcon(QtGui.QIcon(":/menuicon.png"))
@@ -77,7 +81,7 @@ class SettingsWindow(QtGui.QWidget):
             'Are you sure you want to logout?',
             QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
-            os.remove(common.settingsFile())
+            self.__config.erase()
             os._exit(-1)
 
     def centerOnScreen(self):

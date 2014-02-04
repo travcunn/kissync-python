@@ -14,12 +14,12 @@ class AuthError(BaseError):
             return self.detail
 
 
-class NeedsAuthError(BaseError):
+class NoAuthError(BaseError):
     """ Exception for network connection errors. """
     def __init__(self, exc, *args, **kwargs):
         self.exc = exc
         self.detail = str(exc)
-        super(NeedsAuthError, self).__init__(*args, **kwargs)
+        super(NoAuthError, self).__init__(*args, **kwargs)
 
         def __str__(self):
             return self.detail

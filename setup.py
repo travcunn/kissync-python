@@ -9,6 +9,7 @@ setup(
     install_requires=[
         'coverage',
         'coveralls',
+        'keyring',
         'oauthlib',
         'pathtools',
         'python-dateutil',

@@ -20,13 +20,15 @@ class LoginWindow(QtGui.QWidget):
         self.setStyleSheet("QWidget { font-size: 14pt; }")
 
         exit = QtGui.QAction(self)
-        self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+        self.connect(exit, QtCore.SIGNAL('triggered()'), 
+                     QtCore.SLOT('close()'))
 
         topText = QtGui.QLabel('Login to SmartFile')
         topText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
 
         detailsText = QtGui.QLabel('to get started')
-        detailsText.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        detailsText.setAlignment(QtCore.Qt.AlignHCenter |
+                                 QtCore.Qt.AlignVCenter)
 
         self.htmlView = AuthBrowser(self)
 
@@ -50,7 +52,8 @@ class LoginWindow(QtGui.QWidget):
         self.centerOnScreen()
 
     def networkError(self):
-        QtGui.QMessageBox.question(self, 'SmartFile', "Error connecting to SmartFile")
+        QtGui.QMessageBox.question(self, 'SmartFile',
+                                   'Error connecting to SmartFile')
         self.show()
 
     def invaliderror(self):
@@ -60,10 +63,11 @@ class LoginWindow(QtGui.QWidget):
 
     def centerOnScreen(self):
         resolution = QtGui.QDesktopWidget().screenGeometry()
-        self.move((resolution.width() / 2) - (self.frameSize().width() / 2), (resolution.height() / 2) - (self.frameSize().height() / 2))
+        self.move((resolution.width() / 2) - (self.frameSize().width() / 2),
+                  (resolution.height() / 2) - (self.frameSize().height() / 2))
 
     def closeEvent(self, event):
-        #if the user closes the login window, close the entire app...
+        #if the user closes the login window, close the entire app.
         sys.exit()
 
 
