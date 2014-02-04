@@ -17,7 +17,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
-        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.parent.openSyncFolder)
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), 
+                     self.parent.open_sync_folder)
 
         startingup = self.menu.addAction("Connecting...")
         startingup.setEnabled(False)
@@ -25,20 +26,21 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.menu.addSeparator()
 
         exitAction = self.menu.addAction("Exit")
-        self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.parent.exit)
+        self.connect(exitAction, QtCore.SIGNAL("triggered()"),
+                     self.parent.exit)
 
         self.setContextMenu(self.menu)
         self.show()
 
-    def openWebsite(self):
+    def open_website(self):
         url = "https://app.smartfile.com"
         webbrowser.open(url,new=2)
 
-    def openSettings(self):
+    def open_settings(self):
         """Opens the settings window and brings it into focus"""
-        self.settingsWindow.showSettings()
+        self.settingswindow.show_settings()
 
-    def onLogin(self):
+    def on_login(self):
         """
         After auth finishes, create the settings window
         and update the system tray to display disk usage quota
@@ -64,8 +66,8 @@ class SystemTray(QtGui.QSystemTrayIcon):
         """
 
         # initialize settings window
-        self.settingsWindow = SettingsWindow(self.parent, name=realname,
-                                             email=email)
+        self.settingswindow = SettingsWindow(self.parent, name=realname,
+                                              email=email)
 
 
         """
@@ -91,32 +93,38 @@ class SystemTray(QtGui.QSystemTrayIcon):
         self.setToolTip('SmartFile Sync')
 
         startAction = self.menu.addAction("Open SmartFile Folder")
-        self.connect(startAction, QtCore.SIGNAL("triggered()"), self.parent.openSyncFolder)
+        self.connect(startAction, QtCore.SIGNAL("triggered()"), 
+                     self.parent.open_sync_folder)
 
         openWebsite = self.menu.addAction("Launch SmartFile Website")
-        self.connect(openWebsite, QtCore.SIGNAL("triggered()"), self.openWebsite)
+        self.connect(openWebsite, QtCore.SIGNAL("triggered()"),
+                     self.open_website)
 
         """
         if canCalculateSpace:
             self.menu.addSeparator()
         """
 
-        #quota = self.menu.addAction("%.1f%s of %s%s used" % (percentUsed, "%", spaceLimit, measurement))
+        #quota = self.menu.addAction("%.1f%s of %s%s used" %
+        #                            (percentUsed, "%", spaceLimit,
+        #                             measurement))
         #quota.setEnabled(False)
 
         self.menu.addSeparator()
 
         settingsAction = self.menu.addAction("Settings")
-        self.connect(settingsAction, QtCore.SIGNAL("triggered()"), self.openSettings)
+        self.connect(settingsAction, QtCore.SIGNAL("triggered()"),
+                     self.open_settings)
 
         self.menu.addSeparator()
 
         exitAction = self.menu.addAction("Exit")
-        self.connect(exitAction, QtCore.SIGNAL("triggered()"), self.parent.exit)
+        self.connect(exitAction, QtCore.SIGNAL("triggered()"), 
+                     self.parent.exit)
 
         self.setContextMenu(self.menu)
 
     def notification(self, title, message):
         """Shows a system tray notification"""
-        if self.parent.configuration.get('LocalSettings', 'notifications'):
+        if self.parent.config.get('LocalSettings', 'notifications'):
             self.showMessage(title, message, QtGui.QSystemTrayIcon.NoIcon)

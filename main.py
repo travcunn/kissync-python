@@ -39,12 +39,12 @@ class Main(QtGui.QWidget):
         self.check_updates()
 
         self.sync_dir = os.path.join(os.path.expanduser("~"), "Smartfile")
-        self.settingsDir = common.settings_dir_path()
-        self.settingsFile = common.settings_file_path()
+        self.settings_dir = common.settings_dir_path()
+        self.settings_file = common.settings_file_path()
 
-        self.directorySetup() # Make sure proper directories are created
+        self.directory_setup() # Make sure proper directories are created
 
-        self.configuration = Config(self.settingsFile)
+        self.config = Config(self.settings_file)
 
         self.setupwizard = SetupWizard(self)  # initiate setup wizard UI
         self.loginwindow = LoginWindow(self)  # initiate login window UI
@@ -61,7 +61,7 @@ class Main(QtGui.QWidget):
         """ Called if authentication is successful. """
         self.synchronizer = SyncThread(self.api, self.sync_dir)
         self.synchronizer.start()
-        self.tray.onLogin()
+        self.tray.on_login()
 
     def login(self, qturl):
         """ Opens the login window. """
@@ -81,11 +81,11 @@ class Main(QtGui.QWidget):
         """ Checks the current version with the latest from the server. """
         try:
             if not common.latest_version(version):
-                self.updateNotify()
+                self.update_notify()
         except:
             self.neterror()
 
-    def updateNotify(self):
+    def update_notify(self):
         """ Display a notification when an update is available. """
         updateReply = QtGui.QMessageBox.question(self, 'SmartFile Update',
             'An update is available. Would you like to download now?',
@@ -96,15 +96,15 @@ class Main(QtGui.QWidget):
         if updateReply == QtGui.QMessageBox.Yes:
             webbrowser.open("https://www.kissync.com/download", new=2)
 
-    def directorySetup(self):
+    def directory_setup(self):
         """ Checks for sync and settings folder and creates if needed. """
-        if not os.path.exists(self.settingsDir):
-            os.makedirs(self.settingsDir)
+        if not os.path.exists(self.settings_dir):
+            os.makedirs(self.settings_dir)
 
         if not os.path.exists(self.sync_dir):
             os.makedirs(self.sync_dir)
 
-    def openSyncFolder(self):
+    def open_sync_folder(self):
         """ Opens a file browser depending on the system. """
         if platform.system() == 'Darwin':
             subprocess.call(['open', '--', self.sync_dir])

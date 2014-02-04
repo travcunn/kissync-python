@@ -42,24 +42,24 @@ class SettingsWindow(QtGui.QWidget):
         self.setLayout(maingrid)
         self.centerOnScreen()
 
-    def saveSettings(self):
+    def save_settings(self):
         """ Saves the settings based on checkboxes. """
         startWithComputer = self.settingsPanel.rightPanel.startWithComputer
         if startWithComputer.isChecked():
-            self.parent.configuration.set('autostart', True)
+            self.parent.config.set('autostart', True)
             # Create a startup entry
             common.create_shortcut()
         else:
-            self.parent.configuration.set('autostart', False)
+            self.parent.config.set('autostart', False)
             common.delete_shortcut()
 
         self.hide()
-        self.parent.configuration.save()
+        self.parent.config.save()
 
-    def showSettings(self):
+    def show_settings(self):
         """ Shows the settings window and brings it into focus. """
         autostart = self.settingsPanel.rightPanel.startWithComputer
-        if self.parent.configuration.get('autostart'):
+        if self.parent.config.get('autostart'):
             if not autostart.isChecked():
                 autostart.toggle()
 
@@ -71,12 +71,11 @@ class SettingsWindow(QtGui.QWidget):
         self.show()
         self.raise_()
 
-    def hideSettings(self):
+    def hide_settings(self):
         """ Hide the settings window. """
         self.hide()
 
-    def signOut(self):
-        ###print "Logout button pressed"
+    def sign_out(self):
         reply = QtGui.QMessageBox.question(self, 'Smartfile', 
             'Are you sure you want to logout?',
             QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
@@ -201,11 +200,13 @@ class RightPanel(QtGui.QWidget):
         #logo = Logo()
         #layout.addWidget(logo, 0, 0, 1, 1, QtCore.Qt.AlignVCenter)
 
-        self.startWithComputer = QtGui.QCheckBox('Start with my computer', self)
+        self.startWithComputer = QtGui.QCheckBox('Start with my computer',
+                                                 self)
         self.startWithComputer.setStyleSheet("font-size: 16px; font-family: Helvetica;")
         #self.startWithComputer.toggle()
 
-        layout.addWidget(self.startWithComputer, 0, 0, 1, 1, QtCore.Qt.AlignTop)
+        layout.addWidget(self.startWithComputer, 0, 0, 1, 1,
+                         QtCore.Qt.AlignTop)
 
         self.setLayout(layout)
 
@@ -253,7 +254,7 @@ class ButtonsBar(QtGui.QWidget):
         signoutButton = QtGui.QPushButton("Sign out", self)
         signoutButton.setSizePolicy(QtGui.QSizePolicy.Fixed,
                                     QtGui.QSizePolicy.Fixed)
-        signoutButton.clicked.connect(self.parent.signOut)
+        signoutButton.clicked.connect(self.parent.sign_out)
         grid.addWidget(signoutButton, 0, 1, 1, 1)
 
         grid.addWidget(rightSpacer, 0, 2, 1, 1)
@@ -261,13 +262,13 @@ class ButtonsBar(QtGui.QWidget):
         cancelButton = QtGui.QPushButton("Cancel", self)
         cancelButton.setSizePolicy(QtGui.QSizePolicy.Fixed,
                                 QtGui.QSizePolicy.Fixed)
-        cancelButton.clicked.connect(self.parent.hideSettings)
+        cancelButton.clicked.connect(self.parent.hide_settings)
         grid.addWidget(cancelButton, 0, 4, 1, 1)
 
         saveButton = QtGui.QPushButton("Save", self)
         saveButton.setSizePolicy(QtGui.QSizePolicy.Fixed,
                                 QtGui.QSizePolicy.Fixed)
-        saveButton.clicked.connect(self.parent.saveSettings)
+        saveButton.clicked.connect(self.parent.save_settings)
         grid.addWidget(saveButton, 0, 5, 1, 1)
 
         self.setLayout(grid)

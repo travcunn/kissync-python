@@ -40,15 +40,15 @@ class SetupWizard(QtGui.QWidget):
         painter.drawImage(self.icontarget, self.topimage)
         painter.end()
 
-    def saveSettings(self):
+    def save_settings(self):
         """Saves the settings based upon values in the setup"""
         directory = os.path.join(os.path.expanduser("~"), "Smartfile")
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        self.parent.configuration.set('sync-dir', directory)
+        self.parent.config.set('sync-dir', directory)
 
-        self.parent.configuration.set('first-run', False)
+        self.parent.config.set('first-run', False)
         self.hide()
         self.parent.start()
 
@@ -151,8 +151,8 @@ class ButtonsBar(QtGui.QWidget):
         rightSpacer.setSizePolicy(QtGui.QSizePolicy.Expanding,
                                 QtGui.QSizePolicy.Expanding)
 
-        self.openbutton = OpenFolderButton(onclick=self.parent.parent.openSyncFolder)
-        self.finishbutton = FinishButton(onclick=self.parent.saveSettings)
+        self.openbutton = OpenFolderButton(onclick=self.parent.parent.open_sync_folder)
+        self.finishbutton = FinishButton(onclick=self.parent.save_settings)
 
         grid.addWidget(leftSpacer, 1, 0, 1, 1)
         grid.addWidget(self.openbutton, 1, 1, 1, 1)
