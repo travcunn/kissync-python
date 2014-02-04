@@ -1,5 +1,6 @@
 import os
 
+from fs.errors import ResourceNotFoundError
 import keyring
 try:
     import simplejson as json
@@ -44,26 +45,34 @@ class Config(object):
 
     def get(self, key):
         """ Returns a value based upon the key. """
-        # use the system keyring to lookup user login details
-        if key == 'login-token':
-            return keyring.get_password('smartfile', 'token')
-        elif key == 'login-verifier':
-            return keyring.get_password('smartfile', 'verifier')
-        else:
-            self.read()
-            return self.config_data[key]
+        # attempt to use the system keyring to lookup user login details
+        try:
+            if key == 'login-token':
+                return keyring.get_password('smartfile', 'token')
+            elif key == 'login-verifier':
+                return keyring.get_password('smartfile', 'verifier')
+        except ResourceNotFoundError:
+            pass
+
+        # all config falls back to using the standard config file
+        self.read()
+        return self.config_data[key]
 
     def set(self, key, value):
         """ Set an option given a key and a value. """
         # use the system keyring to save and protect user login details
-        if key == 'login-token':
-            return keyring.set_password('smartfile', 'token', value)
-        elif key == 'login-verifier':
-            return keyring.set_password('smartfile', 'verifier', value)
-        else:
-            self.read()
-            self.config_data[key] = value
-            self.save()
+        try:
+            if key == 'login-token':
+                return keyring.set_password('smartfile', 'token', value)
+            elif key == 'login-verifier':
+                return keyring.set_password('smartfile', 'verifier', value)
+        except ResourceNotFoundError:
+            pass
+
+        # all config falls back to using the standard config file
+        self.read()
+        self.config_data[key] = value
+        self.save()
 
     def erase(self):
         """
