@@ -67,7 +67,7 @@ class ApiConnection(object):
                                     'invalid.')
             else:
                 log.warning('ResponseError was raised with HTTP status: ' +
-                            e.status_code)
+                            str(e.status_code))
                 # raise an exception if there is an error other than 403
         else:
             if self._config_token and self._config_verifier is not None:

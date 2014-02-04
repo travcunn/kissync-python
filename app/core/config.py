@@ -1,7 +1,6 @@
 import os
 
 import keyring
-from keyring.errors import PasswordDeleteError
 try:
     import simplejson as json
 except ImportError:
@@ -77,6 +76,6 @@ class Config(object):
         try:
             keyring.delete_password('smartfile', 'token')
             keyring.delete_password('smartfile', 'verifier')
-        except PasswordDeleteError:
+        except Exception:
             # ignore protected config deletion errors
             pass
