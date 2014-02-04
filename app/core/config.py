@@ -56,7 +56,10 @@ class Config(object):
 
         # all config falls back to using the standard config file
         self.read()
-        return self.config_data[key]
+        if key in self.config_data:
+            return self.config_data[key]
+        else:
+            return None
 
     def set(self, key, value):
         """ Set an option given a key and a value. """
