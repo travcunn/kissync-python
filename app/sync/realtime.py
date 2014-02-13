@@ -27,6 +27,9 @@ class RealtimeMessages(threading.Thread):
 
         self.websocket_address = "wss://www.kissync.com/sync"
 
+        # The default auth data is blank
+        self.auth_data = {}
+
         # Generate a unique authentication UUID for this client
         hash = hashlib.sha1()
         hash.update(str(time.time()))
@@ -72,7 +75,8 @@ class RealtimeMessages(threading.Thread):
     def _sendChanges(self, changes):
         """ Prepares data to be sent to the websocket. """
         # Prepare the dictionary to send
-        send_data = {'uuid': self.auth_uuid}
+        send_data = {}
+        send_data.update(self.auth_data)
         send_data.update(changes)
         data = json.dumps(send_data)
 
@@ -161,10 +165,12 @@ class RealtimeMessages(threading.Thread):
             realtime_key = auth_hash.hexdigest()
 
             # Store the  generated key on SmartFile in user preferences
-            self.api.put("/pref/user/sync.realtime-key", value=realtime_key)
+            self.api.put("/pref/user/sync.realtime-key",
+                         value=realtime_key)
 
-        auth_data = {'authentication': realtime_key, 'uuid': self.auth_uuid}
-        json_data = json.dumps(auth_data)
+        self.auth_data = {'authentication': realtime_key,
+                          'uuid': self.auth_uuid}
+        json_data = json.dumps(self.auth_data)
 
         # send the auth data directly to the server
         self.ws.send(json_data)
