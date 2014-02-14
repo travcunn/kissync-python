@@ -83,6 +83,8 @@ class RealtimeMessages(threading.Thread):
         # Check if the websocket is available
         if self.connected and self.authenticated:
             # send the json encoded message
+            print "sending..."
+            print data
             return self.ws.send(data)
         else:
             # process the message when the websocket is available
@@ -107,13 +109,13 @@ class RealtimeMessages(threading.Thread):
         """ Reads messages from the websocket. """
         json_data = json.loads(message)
 
-        if 'type' in json_data:
+        if 'event_type' in json_data:
             try:
                 if json_data['uuid'] == self.auth_uuid:
                     return
             except KeyError:
                 return
-            message_type = json_data['type']
+            message_type = json_data['event_type']
             if message_type == 'LocalMovedEvent':
                 # Remote moved event
                 path = json_data['path']
@@ -126,6 +128,7 @@ class RealtimeMessages(threading.Thread):
                 path = json_data['path']
                 isDir = json_data['isDir']
                 created_event = events.RemoteCreatedEvent(path, isDir)
+                print "check for created event existance"
                 if self.on_created is not None:
                     self.on_created(created_event)
             elif message_type == 'LocalDeletedEvent':
