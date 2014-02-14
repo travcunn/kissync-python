@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+import time
 
 from fs.osfs import OSFS
 from smartfile.errors import RequestError
@@ -36,17 +37,28 @@ class Downloader(Worker):
 
         task_directory = os.path.dirname(absolute_path)
 
-        if task.isDir:
-            if not os.path.exists(absolute_path):
-                log.debug("Creating the directory: " + absolute_path)
-                common.create_local_dirs(absolute_path)
+        isDir = False
+
+        if hasattr(task, 'isDir'):
+            if task.isDir:
+                isDir = True
+                if not os.path.exists(absolute_path):
+                    log.debug("Creating the directory: " + absolute_path)
+                    common.create_local_dirs(absolute_path)
+            else:
+                isDir = False
+                if not os.path.exists(task_directory):
+                    # Create the directories necessary to download the file
+                    log.debug("Creating the directory: " + task_directory)
+                    common.create_local_dirs(task_directory)
         else:
+            isDir = False
             if not os.path.exists(task_directory):
                 # Create the directories necessary to download the file
                 log.debug("Creating the directory: " + task_directory)
                 common.create_local_dirs(task_directory)
 
-        if not task.isDir:
+        if not isDir:
             basepath = basepath.replace('\\', '/')
             if not basepath.startswith("/"):
                 basepath = os.path.join("/", basepath)
@@ -133,6 +145,8 @@ class DownloadWorker(threading.Thread):
                 # Put the task back into the queue and try later
                 log.debug("Putting the task in the queue to try later.")
                 self._queue.put(self._current_task)
+                # Sleep for a tiny bit
+                time.sleep(0.05)
 
             log.debug("Task complete.")
             self._queue.task_done()

@@ -591,7 +591,7 @@ class RealTimeMessagingTest(unittest.TestCase):
 
         moved_data = json.dumps({
                 'uuid': 'testuuid',
-                'type': 'LocalMovedEvent',
+                'event_type': 'LocalMovedEvent',
                 'path': '/dest.txt',
                 'src': '/src.txt'
             })
@@ -600,7 +600,7 @@ class RealTimeMessagingTest(unittest.TestCase):
 
         created_data = json.dumps({
                 'uuid': 'testuuid',
-                'type': 'LocalCreatedEvent',
+                'event_type': 'LocalCreatedEvent',
                 'path': '/file.txt',
                 'isDir': False
             })
@@ -609,7 +609,7 @@ class RealTimeMessagingTest(unittest.TestCase):
 
         deleted_data = json.dumps({
                 'uuid': 'testuuid',
-                'type': 'LocalDeletedEvent',
+                'event_type': 'LocalDeletedEvent',
                 'path': '/file.txt'
             })
 
@@ -617,7 +617,7 @@ class RealTimeMessagingTest(unittest.TestCase):
 
         modified_data = json.dumps({
                 'uuid': 'testuuid',
-                'type': 'LocalModifiedEvent',
+                'event_type': 'LocalModifiedEvent',
                 'path': '/file.txt'
             })
 
@@ -630,14 +630,14 @@ class RealTimeMessagingTest(unittest.TestCase):
         realtime = RealtimeMessages(None)
 
         missing_uuid = json.dumps({
-                'type': 'LocalModifiedEvent',
+                'event_type': 'LocalModifiedEvent',
                 'path': '/file.txt'
             })
         realtime._on_message(None, missing_uuid)
 
         same_uuid = json.dumps({
                 'uuid': realtime.auth_uuid,
-                'type': 'LocalModifiedEvent',
+                'event_type': 'LocalModifiedEvent',
                 'path': '/file.txt'
             })
         realtime._on_message(None, same_uuid)
