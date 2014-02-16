@@ -71,8 +71,13 @@ class RemoteCreatedEvent(BaseEvent):
 
 
 class RemoteDeletedEvent(BaseEvent):
-    def __init__(self, path):
+    def __init__(self, path, isDir=False):
+        self._isDir = isDir
         super(RemoteDeletedEvent, self).__init__(path)
+
+    @property
+    def isDir(self):
+        return self._isDir
 
 
 class RemoteModifiedEvent(BaseEvent):
