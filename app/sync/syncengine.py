@@ -294,16 +294,16 @@ class SyncEngine(object):
                     self.upload_queue.queue.remove(task)
 
             # If the event is a directory, delete tasks under it
+            #TODO: test this. make sure _parent_folder_match is working here
             if event.isDir:
-                print 'THE DELETED EVENT WAS A DIRECTORY'
                 for task in self.download_queue.queue:
-                    if self._parent_folder_match(task, event.path):
+                    if self._parent_folder_match(task.path, event.path):
                         self.download_queue.queue.remove(task)
                 for task in self.upload_queue.queue:
-                    if self._parent_folder_match(task, event.path):
+                    if self._parent_folder_match(task.path, event.path):
                         self.upload_queue.queue.remove(task)
                 for task in self.simple_tasks.queue:
-                    if self._parent_folder_match(task, event.path):
+                    if self._parent_folder_match(task.path, event.path):
                         self.simple_tasks.queue.remove(task)
 
             # Cancel any upload task on the event path
