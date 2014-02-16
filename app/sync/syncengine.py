@@ -423,6 +423,8 @@ class RemoteIndexer(object):
                 # If the error code is 404, ignore the file.
                 if e.status_code == 404:
                     dir_listing = []
+                else:
+                    dir_listing = []
             except RequestError, err:
                 if err.detail.startswith('HTTPConnectionPool'):
                     # Connection error. Wait 2 seconds then try again.
@@ -431,6 +433,8 @@ class RemoteIndexer(object):
                         dir_listing = self.api.get(api_path, children=True)
                     except:
                         dir_listing = []
+                else:
+                    dir_listing = []
 
             if "children" not in dir_listing:
                 break
