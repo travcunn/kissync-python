@@ -8,7 +8,7 @@ from smartfile.errors import RequestError, ResponseError
 
 import common
 from definitions import FileDefinition, LocalDefinitionHelper
-from errors import FileNotAvailableError, MaxTriesError
+from errors import FileNotAvailableError, FileDeletedError, MaxTriesError
 from errors import UploadError
 from worker import Worker
 
@@ -27,7 +27,10 @@ class Uploader(Worker):
         # Check if the task is already a file definition
         if not isinstance(task, FileDefinition):
             helper = LocalDefinitionHelper(task.path, self._syncFS)
-            task = helper.create_definition()
+            try:
+                task = helper.create_definition()
+            except WindowsError, err:
+                raise FileDeletedError(err)
         # Create a system specific path relative to the sync dir
         basepath = os.path.normpath(task.path)
         if basepath.startswith("/"):
@@ -154,6 +157,8 @@ class UploadWorker(threading.Thread):
             except UploadError:
                 log.warning("The parent folders were not created properly.")
                 self.try_task_later()
+            except FileDeletedError:
+                log.warning("The file was deleted before trying to upload.")
             else:
                 # Notify the realtime messaging system of the upload
                 if self._realtime:

@@ -67,3 +67,14 @@ class FileNotAvailableError(BaseError):
 
         def __str__(self):
             return self.detail
+
+
+class FileDeletedError(BaseError):
+    """ Exception for general download errors. """
+    def __init__(self, exc, *args, **kwargs):
+        self.exc = exc
+        self.detail = str(exc)
+        super(FileDeletedError, self).__init__(*args, **kwargs)
+
+        def __str__(self):
+            return self.detail

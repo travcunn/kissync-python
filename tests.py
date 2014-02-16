@@ -610,7 +610,8 @@ class RealTimeMessagingTest(unittest.TestCase):
         deleted_data = json.dumps({
                 'uuid': 'testuuid',
                 'event_type': 'LocalDeletedEvent',
-                'path': '/file.txt'
+                'path': '/file.txt',
+                'isDir': False
             })
 
         realtime._on_message(None, deleted_data)
