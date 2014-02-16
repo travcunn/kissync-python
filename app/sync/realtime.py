@@ -131,7 +131,8 @@ class RealtimeMessages(threading.Thread):
             elif message_type == 'LocalDeletedEvent':
                 # Remote deleted event
                 path = json_data['path']
-                deleted_event = events.RemoteDeletedEvent(path)
+                isDir = json_data['isDir']
+                deleted_event = events.RemoteDeletedEvent(path, isDir)
                 if self.on_deleted is not None:
                     self.on_deleted(deleted_event)
             elif message_type == 'LocalModifiedEvent':

@@ -293,6 +293,19 @@ class SyncEngine(object):
                 if task.path == event.path:
                     self.upload_queue.queue.remove(task)
 
+            # If the event is a directory, delete tasks under it
+            if event.isDir:
+                print 'THE DELETED EVENT WAS A DIRECTORY'
+                for task in self.download_queue.queue:
+                    if self._parent_folder_match(task, event.path):
+                        self.download_queue.queue.remove(task)
+                for task in self.upload_queue.queue:
+                    if self._parent_folder_match(task, event.path):
+                        self.upload_queue.queue.remove(task)
+                for task in self.simple_tasks.queue:
+                    if self._parent_folder_match(task, event.path):
+                        self.simple_tasks.queue.remove(task)
+
             # Cancel any upload task on the event path
             self.cancel_upload_task(event.path)
             # Cancel any download task on the event path
@@ -303,6 +316,14 @@ class SyncEngine(object):
         else:
             raise BadEventError("Not a valid event: ",
                     event.__class__.__name__)
+
+    def _parent_folder_match(self, path, search_string):
+        """ Check if a search string is a parent for the path. """
+        while path != '/':
+            if path == search_string:
+                return True
+            path = os.path.dirname(path)
+        return False
 
     def modified_event(self, event):
         if isinstance(event, events.LocalModifiedEvent):

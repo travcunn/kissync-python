@@ -95,7 +95,8 @@ class EventHandler(FileSystemEventHandler):
         log.info("Local file was deleted. src_path=" + event.src_path)
         src_path = fs.path.normpath(event.src_path.replace(self.sync_dir, ''))
 
-        deleted_event = events.LocalDeletedEvent(src_path)
+        deleted_event = events.LocalDeletedEvent(src_path,
+                                                 isDir=event.is_directory)
 
         if self.deleted_callback is not None:
             log.debug("Sending a LocalDeletedEvent to the callback.")
