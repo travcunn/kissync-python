@@ -39,36 +39,43 @@ class Downloader(Worker):
 
         isDir = False
 
-        if hasattr(task, 'isDir'):
-            if task.isDir:
-                isDir = True
-                if not os.path.exists(absolute_path):
-                    log.debug("Creating the directory: " + absolute_path)
-                    common.create_local_dirs(absolute_path)
+        # check to see if the task was cancelled
+        if not self.cancelled:
+            if hasattr(task, 'isDir'):
+                if task.isDir:
+                    isDir = True
+                    if not os.path.exists(absolute_path):
+                        log.debug("Creating the directory: " + absolute_path)
+                        common.create_local_dirs(absolute_path)
+                else:
+                    isDir = False
+                    if not os.path.exists(task_directory):
+                        # Create the directories needed to download the file
+                        log.debug("Creating the directory: " + task_directory)
+                        common.create_local_dirs(task_directory)
             else:
                 isDir = False
                 if not os.path.exists(task_directory):
                     # Create the directories necessary to download the file
                     log.debug("Creating the directory: " + task_directory)
                     common.create_local_dirs(task_directory)
-        else:
-            isDir = False
-            if not os.path.exists(task_directory):
-                # Create the directories necessary to download the file
-                log.debug("Creating the directory: " + task_directory)
-                common.create_local_dirs(task_directory)
 
         if not isDir:
             basepath = basepath.replace('\\', '/')
             if not basepath.startswith("/"):
                 basepath = os.path.join("/", basepath)
             try:
-                with open(absolute_path, 'wb') as f:
-                    response = self._api.get('/path/data', basepath)
-                    for chunk in response.iter_content(chunk_size=1024):
-                        if not self.cancelled and chunk:
-                            f.write(chunk)
-                            f.flush()
+                # check if the task was cancelled before trying to download
+                if not self.cancelled:
+                    with open(absolute_path, 'wb') as f:
+                        response = self._api.get('/path/data', basepath)
+                        for chunk in response.iter_content(chunk_size=1024):
+                            if self.cancelled:
+                                # stop downloading if the task was cancelled
+                                break
+                            if chunk:
+                                f.write(chunk)
+                                f.flush()
             except IOError as err:
                 if err.errno == 22:
                     # Depending on the OS, there may be filename restrictions
