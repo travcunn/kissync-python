@@ -36,7 +36,10 @@ __Prerequisites:__
 3. [NSIS 2.46](http://prdownloads.sourceforge.net/nsis/nsis-2.46-setup.exe?download)
 4. [Win32 OpenSSL](http://www.slproweb.com/products/Win32OpenSSL.html)
 
-Nsis requires the NsProcess plugin (http://nsis.sourceforge.net/NsProcess_plugin)
+Nsis requires the following plugins:
+
+1. NsProcess (http://nsis.sourceforge.net/NsProcess_plugin)
+2. AccessControl (http://nsis.sourceforge.net/AccessControl_plug-in)
 
 __Build:__
 
