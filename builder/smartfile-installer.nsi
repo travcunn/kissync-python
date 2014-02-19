@@ -33,6 +33,8 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
+RequestExecutionLevel admin
+
 Section "!SmartFile (Required)" INSTALL_SMARTFILE
   SectionIn 1 RO
   SetOutPath "$INSTDIR"
