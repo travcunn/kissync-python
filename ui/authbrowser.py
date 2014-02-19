@@ -1,4 +1,3 @@
-import keyring
 from PySide import QtCore, QtGui, QtWebKit
 
 import app.core.common as common
@@ -52,9 +51,8 @@ class AuthBrowser(QtWebKit.QWebView):
         self.timer.stop()
 
     def save_login_details(self, token, verifier):
-        keyring.set_password('smartfile', 'token', token)
-        keyring.set_password('smartfile', 'verifier', verifier)
-        pass
+        self.__config.set('login-token', token)
+        self.__config.set('login-verifier', verifier)
 
     def _starttimer(self):
         self.pagetimer()

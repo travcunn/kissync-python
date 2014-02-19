@@ -1,6 +1,5 @@
 import os
 
-import keyring
 from PySide import QtGui, QtCore
 
 import app.core.common as common

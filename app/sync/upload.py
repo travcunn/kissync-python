@@ -149,20 +149,25 @@ class UploadWorker(threading.Thread):
                 self._remote_files[result.path] = result
             except FileNotAvailableError:
                 # The file was not available when uploading it
-                log.warning("File is not yet available.")
+                log.warning("File is not yet available: " +
+                            self._current_task.path)
                 self.try_task_later()
             except MaxTriesError:
-                log.warning("Connection error occured during the upload.")
+                log.warning("Connection error occured while uploading: " +
+                            self._current_task.path)
                 self.try_task_later()
             except UploadError:
-                log.warning("The parent folders were not created properly.")
+                log.warning("Folders were not created properly for: " +
+                            self._current_task.path)
                 self.try_task_later()
             except FileDeletedError:
-                log.warning("The file was deleted before trying to upload.")
+                log.warning("The file was deleted before trying to upload:" +
+                            self._current_task.path)
             else:
                 # Notify the realtime messaging system of the upload
                 if self._realtime:
-                    print "REALTIME UPDATING........."
+                    log.debug("Sending an update message about: " +
+                              self._current_task.path)
                     self._realtime.update(self._current_task)
             log.debug("Task complete.")
             self._queue.task_done()
